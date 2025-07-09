@@ -1,65 +1,165 @@
-# ghostty README
+# Ghostty VSCode Extension
 
-This is the README for your extension "ghostty". After writing up a brief description, we recommend including the following sections.
+A comprehensive VSCode extension that provides rich language support for [Ghostty](https://ghostty.org/) terminal configuration files.
 
 ## Features
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+### Syntax Highlighting
+- Full syntax highlighting for Ghostty configuration files
+- Support for comments, key-value pairs, and special directives
+- Color-coded values including hex colors, keybinds, and enums
 
-For example if there is an image subfolder under your extension project workspace:
+### Intelligent IntelliSense
+- **Auto-completion** for all 160+ Ghostty configuration keys
+- **Context-aware suggestions** for configuration values
+- **Smart keybind completion** with modifier keys and actions
+- **Built-in theme suggestions** with light/dark combinations
+- **Color completion** with hex values and named colors
 
-\!\[feature X\]\(images/feature-x.png\)
+### Rich Documentation
+- **Hover documentation** with detailed descriptions
+- **Examples and valid values** for each configuration key
+- **Platform-specific information** (macOS, Linux, GTK)
+- **Deprecation warnings** for outdated options
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+### Real-time Validation
+- **Error detection** for invalid configuration keys
+- **Value validation** with type checking
+- **Duplicate key warnings**
+- **Platform-specific validation**
 
-## Requirements
+## Supported Files
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+The extension automatically activates for:
+- Files named `config` (standard Ghostty configuration)
+- Files with `.ghostty` extension
 
-## Extension Settings
+## Language Server Features
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+This extension includes a full-featured language server that provides:
 
-For example:
+- **Completion Provider**: Intelligent autocomplete for keys and values
+- **Hover Provider**: Rich documentation on hover
+- **Diagnostics Provider**: Real-time error detection and validation
+- **Configuration Schema**: Complete schema with all Ghostty options
 
-This extension contributes the following settings:
+## Installation
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+1. Install from VSCode Marketplace (when published)
+2. Or install from `.vsix` file:
+   ```bash
+   code --install-extension ghostty-config-x.x.x.vsix
+   ```
 
-## Known Issues
+## Development
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+### Prerequisites
+- Node.js 18+ 
+- VSCode 1.101.0+
 
-## Release Notes
+### Setup
+```bash
+# Clone the repository
+git clone <repository-url>
+cd ghostty-vscode-extension
 
-Users appreciate release notes as you update your extension.
+# Install dependencies
+npm install
 
-### 1.0.0
+# Compile TypeScript
+npm run compile
 
-Initial release of ...
+# Launch Extension Development Host
+npm run dev
+```
 
-### 1.0.1
+### Testing
+1. Press `F5` to open Extension Development Host
+2. Create a test file named `config` or with `.ghostty` extension
+3. Test syntax highlighting, completion, hover, and diagnostics
 
-Fixed issue #.
+### Build
+```bash
+# Compile TypeScript
+npm run compile
 
-### 1.1.0
+# Package extension
+npm run package
+```
 
-Added features X, Y, and Z.
+## Configuration Schema
 
----
+The extension includes a comprehensive schema covering all Ghostty configuration options:
 
-## Working with Markdown
+### Color Settings
+- `background`, `foreground`, `cursor-color`
+- `palette` entries (0-15)
+- `selection-background`, `selection-foreground`
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+### Font Settings
+- `font-family`, `font-size`, `font-weight`
+- `font-style`, `font-variation`
+- `font-codepoint-map`
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+### Window Settings
+- `window-padding-x`, `window-padding-y`
+- `window-decoration`, `window-title`
+- `window-save-state`, `window-new-tab-position`
 
-## For more information
+### Cursor Settings
+- `cursor-style`, `cursor-style-blink`
+- `cursor-invert-fg-bg`, `cursor-opacity`
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+### Terminal Settings
+- `scrollback-limit`, `command`
+- `copy-on-select`, `mouse-hide-while-typing`
+- `confirm-close-surface`, `quit-after-last-window-closed`
 
-**Enjoy!**
+### Keybinds
+- Full modifier key support (`ctrl`, `alt`, `shift`, `super`)
+- Action autocompletion
+- Performable keybind syntax
+- Key sequence support
+
+### Themes
+- Built-in theme suggestions
+- Light/dark theme combinations
+- Custom theme path support
+
+## Architecture
+
+### Project Structure
+```
+├── src/
+│   ├── client/           # VSCode extension client
+│   ├── server/           # Language server implementation
+│   └── shared/           # Shared types and schema
+├── syntaxes/             # TextMate grammar
+├── language-configuration.json
+└── package.json
+```
+
+### Language Server Components
+- **Parser**: Robust INI-style configuration parser
+- **Schema**: Complete Ghostty configuration schema
+- **Completion**: Context-aware completion provider
+- **Hover**: Rich documentation provider
+- **Diagnostics**: Real-time validation and error detection
+
+## Contributing
+
+1. Fork the repository
+2. Create a feature branch
+3. Make your changes
+4. Add tests if applicable
+5. Submit a pull request
+
+## License
+
+MIT License - see LICENSE file for details.
+
+## Acknowledgments
+
+- Built for the [Ghostty](https://ghostty.org/) terminal emulator
+- Uses VSCode Language Server Protocol
+- Syntax highlighting based on TextMate grammar
