@@ -60,8 +60,8 @@ This extension includes a full-featured language server that provides:
 ### Setup
 ```bash
 # Clone the repository
-git clone <repository-url>
-cd ghostty-vscode-extension
+git clone https://github.com/kazuito/ghostty-vscode.git
+cd ghostty-vscode
 
 # Install dependencies
 npm install
@@ -148,7 +148,7 @@ The extension includes a comprehensive schema covering all Ghostty configuration
 
 ## Contributing
 
-1. Fork the repository
+1. Fork the repository at https://github.com/kazuito/ghostty-vscode
 2. Create a feature branch
 3. Make your changes
 4. Add tests if applicable
