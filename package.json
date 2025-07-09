@@ -18,6 +18,7 @@
   "categories": [
     "Programming Languages"
   ],
+  "icon": "icon.png",
   "main": "./out/client/extension.js",
   "scripts": {
     "vscode:prepublish": "npm run compile",
