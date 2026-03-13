@@ -76,9 +76,28 @@ export function registerCompletionProvider(
           valuePrefix = afterEq.trimStart();
         }
 
+        const valuePrefixStart =
+          params.position.character - valuePrefix.length;
+
         const items = values
           .filter((v) => v.startsWith(valuePrefix))
-          .map((v) => ({ label: v, kind: CompletionItemKind.Value }));
+          .map((v) => ({
+            label: v,
+            kind: CompletionItemKind.Value,
+            textEdit: {
+              range: {
+                start: {
+                  line: params.position.line,
+                  character: valuePrefixStart,
+                },
+                end: {
+                  line: params.position.line,
+                  character: params.position.character,
+                },
+              },
+              newText: v,
+            },
+          }));
 
         return { isIncomplete: false, items };
       }
@@ -94,6 +113,7 @@ export function registerCompletionProvider(
       }
 
       const prefix = lineUpToCursor.trim();
+      const prefixStart = lineUpToCursor.length - prefix.length;
 
       const items = ghosttyConfigOptions
         .filter(
@@ -105,7 +125,16 @@ export function registerCompletionProvider(
           label: o.key,
           kind: CompletionItemKind.Property,
           detail: o.desc,
-          insertText: `${o.key} = `,
+          textEdit: {
+            range: {
+              start: { line: params.position.line, character: prefixStart },
+              end: {
+                line: params.position.line,
+                character: params.position.character,
+              },
+            },
+            newText: `${o.key} = `,
+          },
         }));
 
       return { isIncomplete: false, items };
