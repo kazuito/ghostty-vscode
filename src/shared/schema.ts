@@ -7,13 +7,18 @@ const colorValue = z.union([
 
 const hexOrNamedColor = z.union([
   z.string().regex(/^#?[0-9A-Fa-f]{6}$/),
-  z.string(), // named X11 colors
+  z.string().regex(/^\w+$/), // named X11 colors
 ]);
 
 const opacity01 = z.number().min(0).max(1);
 
 // const codepoint = /^U\+[0-9A-Fa-f]{4,6}$/;
 // const codepointRange = /^U\+[0-9A-Fa-f]{4,6}-U\+[0-9A-Fa-f]{4,6}$/;
+
+const durationString = z
+  .string()
+  .min(1)
+  .regex(/^(\d+([ydhms]|[muµn]s))+$/);
 
 const fontVariation = z
   .string()
@@ -25,7 +30,7 @@ const fontCodepointMap = z
   );
 const clipboardCodepointMap = z
   .string()
-  .regex(/^(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)=.+$/);
+  .regex(/^(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)=.*$/);
 const envAssignment = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*=.*/);
 const pathLike = z.string();
 const featureSetting = z.string(); // syntax is intentionally loose in docs
@@ -46,6 +51,19 @@ export const additiveKeys = new Set([
   "config-file",
   "gtk-custom-css",
   "input",
+  "palette",
+  
+  "font-family",
+  "font-family-bold",
+  "font-family-italic",
+  "font-family-bold-italic",
+  "font-feature",
+  "font-variation",
+  "font-variation-bold",
+  "font-variation-italic",
+  "font-variation-bold-italic",
+
+  "env"
 ]);
 
 export const ghosttyConfigOptions = [
@@ -481,10 +499,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "notify-on-command-finish-after",
-    schema: z
-      .string()
-      .min(1)
-      .regex(/(\d+y)?(\d+d)?(\d+h)?(\d+m)?(\d+s)?(\d+ms)?(\d+[uµ]s)?(\d+ns)?/),
+    schema: durationString,
     desc: "Minimum runtime before command-finished notifications trigger.",
   },
 
@@ -599,7 +614,7 @@ export const ghosttyConfigOptions = [
 
   {
     key: "window-decoration",
-    schema: z.boolean(),
+    schema: z.enum(["false", "none", "true", "auto", "client", "server"]),
     desc: "Enables native window decorations.",
   },
   {
@@ -640,7 +655,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "window-save-state",
-    schema: z.boolean(),
+    schema: z.enum(["default", "never", "always"]),
     desc: "Saves and restores window state.",
   },
   {
@@ -650,12 +665,12 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "window-new-tab-position",
-    schema: z.string(),
+    schema: z.enum(["current", "end"]),
     desc: "Placement of newly opened tabs.",
   },
   {
     key: "window-show-tab-bar",
-    schema: z.boolean(),
+    schema: z.enum(["always", "auto", "never"]),
     desc: "Shows the tab bar.",
   },
   {
@@ -671,17 +686,25 @@ export const ghosttyConfigOptions = [
 
   {
     key: "resize-overlay",
-    schema: z.boolean(),
+    schema: z.enum(["always", "never", "after-first"]),
     desc: "Shows an overlay while resizing.",
   },
   {
     key: "resize-overlay-position",
-    schema: z.string(),
+    schema: z.enum([
+      "center",
+      "top-left",
+      "top-center",
+      "top-right",
+      "bottom-left",
+      "bottom-center",
+      "bottom-right",
+    ]),
     desc: "Position of the resize overlay.",
   },
   {
     key: "resize-overlay-duration",
-    schema: z.number().int().nonnegative(),
+    schema: durationString,
     desc: "How long the resize overlay stays visible.",
   },
 
@@ -693,12 +716,12 @@ export const ghosttyConfigOptions = [
 
   {
     key: "clipboard-read",
-    schema: z.boolean(),
+    schema: z.enum(["ask", "allow", "deny"]),
     desc: "Allows reading from the clipboard.",
   },
   {
     key: "clipboard-write",
-    schema: z.boolean(),
+    schema: z.enum(["ask", "allow", "deny"]),
     desc: "Allows writing to the clipboard.",
   },
   {
@@ -734,7 +757,13 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "right-click-action",
-    schema: z.string(),
+    schema: z.enum([
+      "context-menu",
+      "paste",
+      "copy",
+      "copy-or-paste",
+      "ignore",
+    ]),
     desc: "Action performed on right click.",
   },
   {
@@ -767,7 +796,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "quit-after-last-window-closed-delay",
-    schema: z.number().int().nonnegative(),
+    schema: durationString,
     desc: "Delay before quitting after the last window closes.",
   },
 
@@ -778,23 +807,23 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "undo-timeout",
-    schema: z.number().int().nonnegative(),
+    schema: durationString,
     desc: "Timeout for undoable actions.",
   },
 
   {
     key: "quick-terminal-position",
-    schema: z.string(),
+    schema: z.enum(["top", "bottom", "left", "right", "center"]),
     desc: "Position of the quick terminal.",
   },
   {
     key: "quick-terminal-size",
-    schema: z.number(),
+    schema: z.string(),
     desc: "Size of the quick terminal.",
   },
   {
     key: "gtk-quick-terminal-layer",
-    schema: z.string(),
+    schema: z.enum(["overlay", "top", "bottom", "background"]),
     desc: "Layer used by the GTK quick terminal.",
   },
   {
@@ -804,7 +833,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "quick-terminal-screen",
-    schema: z.string(),
+    schema: z.enum(["main", "mouse", "macos-menu-bar"]),
     desc: "Target screen/display for the quick terminal.",
   },
   {
@@ -819,23 +848,46 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "quick-terminal-space-behavior",
-    schema: z.string(),
+    schema: z.enum(["move", "remain"]),
     desc: "Space/desktop behavior of the quick terminal.",
   },
   {
     key: "quick-terminal-keyboard-interactivity",
-    schema: z.boolean(),
+    schema: z.enum(["none", "on-demand", "exclusive"]),
     desc: "Allows keyboard interactivity for the quick terminal.",
   },
 
   {
     key: "shell-integration",
-    schema: z.boolean(),
+    schema: z.enum([
+      "none",
+      "detect",
+      "bash",
+      "elvish",
+      "fish",
+      "nushell",
+      "zsh",
+    ]),
     desc: "Enables shell integration features.",
   },
   {
     key: "shell-integration-features",
-    schema: z.string(),
+    schema: z.enum([
+      "true",
+      "false",
+      "cursor",
+      "sudo",
+      "title",
+      "ssh-env",
+      "ssh-terminfo",
+      "path",
+      "no-cursor",
+      "no-sudo",
+      "no-title",
+      "no-ssh-env",
+      "no-ssh-terminfo",
+      "no-path",
+    ]),
     desc: "Specific shell integration features to enable.",
   },
   {
@@ -845,7 +897,8 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "osc-color-report-format",
-    schema: z.string(),
+    schema: z.enum(["none", "8-bit", "16-bit"]),
+    default: "16-bit",
     desc: "Format used for OSC color reporting.",
   },
   {
@@ -861,13 +914,20 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "custom-shader-animation",
-    schema: z.boolean(),
+    schema: z.enum(["true", "false", "always"]),
     desc: "Enables animation for custom shader rendering.",
   },
 
   {
     key: "bell-features",
-    schema: z.string(),
+    schema: z.enum([
+      "system",
+      "audio",
+      "attention",
+      "no-system",
+      "no-audio",
+      "no-attention",
+    ]),
     desc: "Enabled terminal bell features.",
   },
   {
