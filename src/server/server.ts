@@ -2,6 +2,8 @@ import {
 	CompletionItemKind,
 	type CompletionList,
 	createConnection,
+	Diagnostic,
+	DiagnosticSeverity,
 	type Hover,
 	ProposedFeatures,
 	type TextDocumentPositionParams,
@@ -9,7 +11,7 @@ import {
 	TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import type { ZodTypeAny } from "zod";
+import type { z } from "zod";
 import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 
 const connection = createConnection(ProposedFeatures.all);
@@ -53,7 +55,7 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
 	};
 });
 
-function extractValues(schema: ZodTypeAny): string[] | null {
+function extractValues(schema: z.ZodType): string[] | null {
 	// Zod v4: internal def is at schema._zod.def
 	const def = (schema as unknown as { _zod: { def: Record<string, unknown> } })
 		._zod.def;
@@ -66,7 +68,7 @@ function extractValues(schema: ZodTypeAny): string[] | null {
 			return (def.values as unknown[]).map(String);
 		case "union": {
 			const results: string[] = [];
-			for (const opt of def.options as ZodTypeAny[]) {
+			for (const opt of def.options as z.ZodType[]) {
 				const vals = extractValues(opt);
 				if (vals) results.push(...vals);
 			}
@@ -140,6 +142,68 @@ connection.onCompletion(
 
 		return { isIncomplete: false, items };
 	},
+);
+
+const validKeys = new Set<string>(ghosttyConfigOptions.map((o) => o.key));
+
+function validateDocument(doc: TextDocument): void {
+	const diagnostics: Diagnostic[] = [];
+	const lines = doc.getText().split("\n");
+	const seenKeys = new Map<string, number>(); // key → first-seen line index
+
+	for (let i = 0; i < lines.length; i++) {
+		const line = lines[i];
+		const trimmed = line.trimStart();
+
+		// Skip comments and blank lines
+		if (trimmed.startsWith("#") || trimmed === "") continue;
+
+		const eqIndex = line.indexOf("=");
+		const keyPart = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
+		const key = keyPart.trim();
+		if (!key) continue;
+
+		const keyStart = line.indexOf(key);
+		const keyRange = {
+			start: { line: i, character: keyStart },
+			end: { line: i, character: keyStart + key.length },
+		};
+
+		// Unknown key → warning
+		if (!validKeys.has(key)) {
+			diagnostics.push(
+				Diagnostic.create(
+					keyRange,
+					`Unknown Ghostty config key: '${key}'`,
+					DiagnosticSeverity.Warning,
+				),
+			);
+			continue;
+		}
+
+		// Duplicate key → info (skip additive keys)
+		if (!additiveKeys.has(key)) {
+			if (seenKeys.has(key)) {
+				diagnostics.push(
+					Diagnostic.create(
+						keyRange,
+						`Duplicate key '${key}' (first defined on line ${(seenKeys.get(key) as number) + 1})`,
+						DiagnosticSeverity.Information,
+					),
+				);
+			} else {
+				seenKeys.set(key, i);
+			}
+		}
+	}
+
+	connection.sendDiagnostics({ uri: doc.uri, diagnostics });
+}
+
+documents.onDidOpen((e) => validateDocument(e.document));
+documents.onDidChangeContent((e) => validateDocument(e.document));
+documents.onDidClose((e) =>
+	connection.sendDiagnostics({ uri: e.document.uri, diagnostics: [] }),
 );
 
 documents.listen(connection);
