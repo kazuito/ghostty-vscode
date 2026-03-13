@@ -62,6 +62,7 @@ export const additiveKeys = new Set([
   "font-variation-bold",
   "font-variation-italic",
   "font-variation-bold-italic",
+  "font-codepoint-map",
 
   "env",
 ]);
@@ -898,6 +899,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
       "no-path",
     ]),
     desc: "Specific shell integration features to enable.",
+    comma: true,
   },
   {
     key: "command-palette-entry",
@@ -929,6 +931,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
 
   {
     key: "bell-features",
+    desc: "Enabled terminal bell features.",
     schema: z.enum([
       "system",
       "audio",
@@ -937,7 +940,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
       "no-audio",
       "no-attention",
     ]),
-    desc: "Enabled terminal bell features.",
+    comma: true,
   },
   {
     key: "bell-audio-path",
