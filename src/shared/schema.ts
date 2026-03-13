@@ -244,7 +244,21 @@ export const ghosttyConfigOptions = [
 	},
 	{
 		key: "freetype-load-flags",
-		schema: z.string(),
+		schema: z.union([
+			z.boolean(),
+			z.enum([
+				"hinting",
+				"force-autohint",
+				"monochrome",
+				"autohint",
+				"light",
+				"no-hinting",
+				"no-force-autohint",
+				"no-monochrome",
+				"no-autohint",
+				"no-light",
+			]),
+		]),
 		desc: "FreeType loading/rendering flags.",
 	},
 
@@ -447,17 +461,20 @@ export const ghosttyConfigOptions = [
 	},
 	{
 		key: "notify-on-command-finish",
-		schema: z.boolean(),
+		schema: z.enum(["never", "unfocused", "always"]),
 		desc: "Shows a notification when a command finishes.",
 	},
 	{
 		key: "notify-on-command-finish-action",
-		schema: z.string(),
+		schema: z.enum(["bell", "notify"]),
 		desc: "Action used for command-finished notifications.",
 	},
 	{
 		key: "notify-on-command-finish-after",
-		schema: z.number(),
+		schema: z
+			.string()
+			.min(1)
+			.regex(/(\d+y)?(\d+d)?(\d+h)?(\d+m)?(\d+s)?(\d+ms)?(\d+[uµ]s)?(\d+ns)?/),
 		desc: "Minimum runtime before command-finished notifications trigger.",
 	},
 
