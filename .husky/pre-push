@@ -1,0 +1,3 @@
+pnpm lint
+pnpm compile
+pnpm test

@@ -1,370 +1,129 @@
 {
   "$schema": "https://raw.githubusercontent.com/martinring/tmlanguage/master/tmlanguage.json",
   "name": "Ghostty Config",
+  "scopeName": "source.ghostty",
+  "fileTypes": ["ghostty"],
   "patterns": [
-    {
-      "include": "#comments"
-    },
-    {
-      "include": "#key-value"
-    },
-    {
-      "include": "#config-directive"
-    }
+    { "include": "#comment" },
+    { "include": "#assignment" }
   ],
   "repository": {
-    "comments": {
-      "patterns": [
-        {
-          "name": "comment.line.number-sign.ghostty",
-          "match": "^\\s*#.*$"
-        }
-      ]
+    "comment": {
+      "name": "comment.line.number-sign.ghostty",
+      "match": "^\\s*#.*$"
     },
-    "key-value": {
+    "assignment": {
       "patterns": [
         {
-          "match": "^\\s*([a-zA-Z][a-zA-Z0-9_-]*)\\s*(=)\\s*(.*?)\\s*$",
+          "name": "meta.assignment.ghostty",
+          "match": "^(\\s*)(language|font-family|font-family-bold|font-family-italic|font-family-bold-italic|font-style|font-style-bold|font-style-italic|font-style-bold-italic|font-synthetic-style|font-feature|font-size|font-variation|font-variation-bold|font-variation-italic|font-variation-bold-italic|font-codepoint-map|clipboard-codepoint-map|font-thicken|font-thicken-strength|font-shaping-break|alpha-blending|adjust-cell-width|adjust-cell-height|adjust-font-baseline|adjust-underline-position|adjust-underline-thickness|adjust-strikethrough-position|adjust-strikethrough-thickness|adjust-overline-position|adjust-overline-thickness|adjust-cursor-thickness|adjust-cursor-height|adjust-box-thickness|adjust-icon-height|grapheme-width-method|freetype-load-flags|theme|background|foreground|background-image|background-image-opacity|background-image-position|background-image-fit|background-image-repeat|selection-foreground|selection-background|selection-clear-on-typing|selection-clear-on-copy|selection-word-chars|minimum-contrast|palette|palette-generate|palette-harmonious|cursor-color|cursor-opacity|cursor-style|cursor-style-blink|cursor-text|cursor-click-to-move|mouse-hide-while-typing|scroll-to-bottom|mouse-shift-capture|mouse-reporting|mouse-scroll-multiplier|background-opacity|background-opacity-cells|background-blur|unfocused-split-opacity|unfocused-split-fill|split-divider-color|split-preserve-zoom|search-foreground|search-background|search-selected-foreground|search-selected-background|command|initial-command|notify-on-command-finish|notify-on-command-finish-action|notify-on-command-finish-after|env|input|wait-after-command|abnormal-command-exit-runtime|scrollback-limit|scrollbar|link|link-url|link-previews|maximize|fullscreen|title|class|x11-instance-name|working-directory|keybind|key-remap|window-padding-x|window-padding-y|window-padding-balance|window-padding-color|window-vsync|window-inherit-working-directory|tab-inherit-working-directory|split-inherit-working-directory|window-inherit-font-size|window-decoration|window-title-font-family|window-subtitle|window-theme|window-colorspace|window-height|window-width|window-position-x|window-position-y|window-save-state|window-step-resize|window-new-tab-position|window-show-tab-bar|window-titlebar-background|window-titlebar-foreground|resize-overlay|resize-overlay-position|resize-overlay-duration|focus-follows-mouse|clipboard-read|clipboard-write|clipboard-trim-trailing-spaces|clipboard-paste-protection|clipboard-paste-bracketed-safe|title-report|image-storage-limit|copy-on-select|right-click-action|click-repeat-interval|config-file|config-default-files|confirm-close-surface|quit-after-last-window-closed|quit-after-last-window-closed-delay|initial-window|undo-timeout|quick-terminal-position|quick-terminal-size|gtk-quick-terminal-layer|gtk-quick-terminal-namespace|quick-terminal-screen|quick-terminal-animation-duration|quick-terminal-autohide|quick-terminal-space-behavior|quick-terminal-keyboard-interactivity|shell-integration|shell-integration-features|command-palette-entry|osc-color-report-format|vt-kam-allowed|custom-shader|custom-shader-animation|bell-features|bell-audio-path|bell-audio-volume|app-notifications|macos-non-native-fullscreen|macos-window-buttons|macos-titlebar-style|macos-titlebar-proxy-icon|macos-dock-drop-behavior|macos-option-as-alt|macos-window-shadow|macos-hidden|macos-auto-secure-input|macos-secure-input-indication|macos-applescript|macos-icon|macos-custom-icon|macos-icon-frame|macos-icon-ghost-color|macos-icon-screen-color|macos-shortcuts|linux-cgroup|linux-cgroup-memory-limit|linux-cgroup-processes-limit|linux-cgroup-hard-fail|gtk-opengl-debug|gtk-single-instance|gtk-titlebar|gtk-tabs-location|gtk-titlebar-hide-when-maximized|gtk-toolbar-style|gtk-titlebar-style|gtk-wide-tabs|gtk-custom-css|desktop-notifications|progress-style|bold-color|faint-opacity|term|enquiry-response|async-backend|auto-update|auto-update-channel)(\\s*)(=)(\\s*)(.*)?$",
           "captures": {
-            "1": {
-              "patterns": [
-                {
-                  "include": "#config-keys"
-                }
-              ]
-            },
-            "2": {
-              "name": "keyword.operator.assignment.ghostty"
-            },
-            "3": {
-              "patterns": [
-                {
-                  "include": "#values"
-                }
-              ]
-            }
+            "2": { "name": "support.type.property-name.ghostty" },
+            "4": { "name": "keyword.operator.assignment.ghostty" },
+            "6": { "name": "meta.value.ghostty" }
           }
-        }
-      ]
-    },
-    "config-directive": {
-      "patterns": [
-        {
-          "match": "^\\s*(keybind)\\s*(=)\\s*(clear)\\s*$",
-          "captures": {
-            "1": {
-              "name": "variable.other.property.ghostty"
-            },
-            "2": {
-              "name": "keyword.operator.assignment.ghostty"
-            },
-            "3": {
-              "name": "keyword.control.ghostty"
-            }
-          }
-        }
-      ]
-    },
-    "config-keys": {
-      "patterns": [
-        {
-          "name": "variable.other.property.font.ghostty",
-          "match": "\\b(font-family|font-family-bold|font-family-italic|font-family-bold-italic|font-style|font-style-bold|font-style-italic|font-style-bold-italic|font-synthetic-style|font-feature|font-size|font-variation|font-variation-bold|font-variation-italic|font-variation-bold-italic|font-codepoint-map|font-thicken|font-thicken-strength)\\b"
         },
         {
-          "name": "variable.other.property.color.ghostty",
-          "match": "\\b(background|foreground|selection-foreground|selection-background|selection-invert-fg-bg|minimum-contrast|palette|cursor-color|cursor-invert-fg-bg|cursor-opacity|cursor-text|split-divider-color|unfocused-split-opacity|unfocused-split-fill|window-titlebar-background|window-titlebar-foreground)\\b"
-        },
-        {
-          "name": "variable.other.property.cursor.ghostty",
-          "match": "\\b(cursor-style|cursor-style-blink|cursor-click-to-move)\\b"
-        },
-        {
-          "name": "variable.other.property.mouse.ghostty",
-          "match": "\\b(mouse-hide-while-typing|mouse-shift-capture|mouse-scroll-multiplier|focus-follows-mouse)\\b"
-        },
-        {
-          "name": "variable.other.property.window.ghostty",
-          "match": "\\b(window-padding-x|window-padding-y|window-padding-balance|window-padding-color|window-vsync|window-inherit-working-directory|window-inherit-font-size|window-decoration|window-title-font-family|window-subtitle|window-theme|window-colorspace|window-height|window-width|window-position-x|window-position-y|window-save-state|window-step-resize|window-new-tab-position|maximize|fullscreen|title|class|x11-instance-name)\\b"
-        },
-        {
-          "name": "variable.other.property.background.ghostty",
-          "match": "\\b(background-opacity|background-blur)\\b"
-        },
-        {
-          "name": "variable.other.property.clipboard.ghostty",
-          "match": "\\b(clipboard-read|clipboard-write|clipboard-trim-trailing-spaces|clipboard-paste-protection|clipboard-paste-bracketed-safe|copy-on-select|click-repeat-interval)\\b"
-        },
-        {
-          "name": "variable.other.property.terminal.ghostty",
-          "match": "\\b(command|initial-command|wait-after-command|abnormal-command-exit-runtime|scrollback-limit|working-directory|term|enquiry-response|bold-is-bright|grapheme-width-method|freetype-load-flags|alpha-blending)\\b"
-        },
-        {
-          "name": "variable.other.property.adjustment.ghostty",
-          "match": "\\b(adjust-cell-width|adjust-cell-height|adjust-font-baseline|adjust-underline-position|adjust-underline-thickness|adjust-strikethrough-position|adjust-strikethrough-thickness|adjust-overline-position|adjust-overline-thickness|adjust-cursor-thickness|adjust-cursor-height|adjust-box-thickness)\\b"
-        },
-        {
-          "name": "variable.other.property.keybind.ghostty",
-          "match": "\\b(keybind)\\b"
-        },
-        {
-          "name": "variable.other.property.link.ghostty",
-          "match": "\\b(link|link-url)\\b"
-        },
-        {
-          "name": "variable.other.property.theme.ghostty",
-          "match": "\\b(theme)\\b"
-        },
-        {
-          "name": "variable.other.property.config.ghostty",
-          "match": "\\b(config-file|config-default-files|confirm-close-surface|quit-after-last-window-closed|quit-after-last-window-closed-delay|initial-window)\\b"
-        },
-        {
-          "name": "variable.other.property.resize.ghostty",
-          "match": "\\b(resize-overlay|resize-overlay-position|resize-overlay-duration)\\b"
-        },
-        {
-          "name": "variable.other.property.quick-terminal.ghostty",
-          "match": "\\b(quick-terminal-position|quick-terminal-screen|quick-terminal-animation-duration|quick-terminal-autohide|quick-terminal-space-behavior)\\b"
-        },
-        {
-          "name": "variable.other.property.shell.ghostty",
-          "match": "\\b(shell-integration|shell-integration-features)\\b"
-        },
-        {
-          "name": "variable.other.property.security.ghostty",
-          "match": "\\b(title-report|image-storage-limit|osc-color-report-format|vt-kam-allowed)\\b"
-        },
-        {
-          "name": "variable.other.property.shader.ghostty",
-          "match": "\\b(custom-shader|custom-shader-animation)\\b"
-        },
-        {
-          "name": "variable.other.property.notification.ghostty",
-          "match": "\\b(app-notifications|desktop-notifications)\\b"
-        },
-        {
-          "name": "variable.other.property.macos.ghostty",
-          "match": "\\b(macos-non-native-fullscreen|macos-titlebar-style|macos-titlebar-proxy-icon|macos-option-as-alt|macos-window-shadow|macos-auto-secure-input|macos-secure-input-indication|macos-icon|macos-icon-frame|macos-icon-ghost-color|macos-icon-screen-color)\\b"
-        },
-        {
-          "name": "variable.other.property.linux.ghostty",
-          "match": "\\b(linux-cgroup|linux-cgroup-memory-limit|linux-cgroup-processes-limit|linux-cgroup-hard-fail)\\b"
-        },
-        {
-          "name": "variable.other.property.gtk.ghostty",
-          "match": "\\b(gtk-opengl-debug|gtk-gsk-renderer|gtk-single-instance|gtk-titlebar|gtk-tabs-location|gtk-titlebar-hide-when-maximized|adw-toolbar-style|gtk-wide-tabs|gtk-adwaita|gtk-custom-css)\\b"
-        },
-        {
-          "name": "variable.other.property.update.ghostty",
-          "match": "\\b(auto-update|auto-update-channel)\\b"
-        },
-        {
-          "name": "variable.other.property.ghostty",
-          "match": "\\b[a-zA-Z][a-zA-Z0-9_-]*\\b"
-        }
-      ]
-    },
-    "values": {
-      "patterns": [
-        {
-          "include": "#quoted-string"
-        },
-        {
-          "include": "#keybind-value"
-        },
-        {
-          "include": "#color-value"
-        },
-        {
-          "include": "#boolean-value"
-        },
-        {
-          "include": "#numeric-value"
-        },
-        {
-          "include": "#path-value"
-        },
-        {
-          "include": "#enum-value"
-        },
-        {
-          "include": "#unquoted-value"
+          "begin": "^(\\s*)(language|font-family|font-family-bold|font-family-italic|font-family-bold-italic|font-style|font-style-bold|font-style-italic|font-style-bold-italic|font-synthetic-style|font-feature|font-size|font-variation|font-variation-bold|font-variation-italic|font-variation-bold-italic|font-codepoint-map|clipboard-codepoint-map|font-thicken|font-thicken-strength|font-shaping-break|alpha-blending|adjust-cell-width|adjust-cell-height|adjust-font-baseline|adjust-underline-position|adjust-underline-thickness|adjust-strikethrough-position|adjust-strikethrough-thickness|adjust-overline-position|adjust-overline-thickness|adjust-cursor-thickness|adjust-cursor-height|adjust-box-thickness|adjust-icon-height|grapheme-width-method|freetype-load-flags|theme|background|foreground|background-image|background-image-opacity|background-image-position|background-image-fit|background-image-repeat|selection-foreground|selection-background|selection-clear-on-typing|selection-clear-on-copy|selection-word-chars|minimum-contrast|palette|palette-generate|palette-harmonious|cursor-color|cursor-opacity|cursor-style|cursor-style-blink|cursor-text|cursor-click-to-move|mouse-hide-while-typing|scroll-to-bottom|mouse-shift-capture|mouse-reporting|mouse-scroll-multiplier|background-opacity|background-opacity-cells|background-blur|unfocused-split-opacity|unfocused-split-fill|split-divider-color|split-preserve-zoom|search-foreground|search-background|search-selected-foreground|search-selected-background|command|initial-command|notify-on-command-finish|notify-on-command-finish-action|notify-on-command-finish-after|env|input|wait-after-command|abnormal-command-exit-runtime|scrollback-limit|scrollbar|link|link-url|link-previews|maximize|fullscreen|title|class|x11-instance-name|working-directory|keybind|key-remap|window-padding-x|window-padding-y|window-padding-balance|window-padding-color|window-vsync|window-inherit-working-directory|tab-inherit-working-directory|split-inherit-working-directory|window-inherit-font-size|window-decoration|window-title-font-family|window-subtitle|window-theme|window-colorspace|window-height|window-width|window-position-x|window-position-y|window-save-state|window-step-resize|window-new-tab-position|window-show-tab-bar|window-titlebar-background|window-titlebar-foreground|resize-overlay|resize-overlay-position|resize-overlay-duration|focus-follows-mouse|clipboard-read|clipboard-write|clipboard-trim-trailing-spaces|clipboard-paste-protection|clipboard-paste-bracketed-safe|title-report|image-storage-limit|copy-on-select|right-click-action|click-repeat-interval|config-file|config-default-files|confirm-close-surface|quit-after-last-window-closed|quit-after-last-window-closed-delay|initial-window|undo-timeout|quick-terminal-position|quick-terminal-size|gtk-quick-terminal-layer|gtk-quick-terminal-namespace|quick-terminal-screen|quick-terminal-animation-duration|quick-terminal-autohide|quick-terminal-space-behavior|quick-terminal-keyboard-interactivity|shell-integration|shell-integration-features|command-palette-entry|osc-color-report-format|vt-kam-allowed|custom-shader|custom-shader-animation|bell-features|bell-audio-path|bell-audio-volume|app-notifications|macos-non-native-fullscreen|macos-window-buttons|macos-titlebar-style|macos-titlebar-proxy-icon|macos-dock-drop-behavior|macos-option-as-alt|macos-window-shadow|macos-hidden|macos-auto-secure-input|macos-secure-input-indication|macos-applescript|macos-icon|macos-custom-icon|macos-icon-frame|macos-icon-ghost-color|macos-icon-screen-color|macos-shortcuts|linux-cgroup|linux-cgroup-memory-limit|linux-cgroup-processes-limit|linux-cgroup-hard-fail|gtk-opengl-debug|gtk-single-instance|gtk-titlebar|gtk-tabs-location|gtk-titlebar-hide-when-maximized|gtk-toolbar-style|gtk-titlebar-style|gtk-wide-tabs|gtk-custom-css|desktop-notifications|progress-style|bold-color|faint-opacity|term|enquiry-response|async-backend|auto-update|auto-update-channel)(\\s*)(=)(\\s*)",
+          "beginCaptures": {
+            "2": { "name": "support.type.property-name.ghostty" },
+            "4": { "name": "keyword.operator.assignment.ghostty" }
+          },
+          "end": "$",
+          "name": "meta.assignment.ghostty",
+          "patterns": [
+            { "include": "#quoted-string" },
+            { "include": "#boolean" },
+            { "include": "#enum" },
+            { "include": "#number" },
+            { "include": "#color" },
+            { "include": "#codepoint" },
+            { "include": "#pathish" },
+            { "include": "#bareword" }
+          ]
         }
       ]
     },
     "quoted-string": {
+      "name": "string.quoted.double.ghostty",
+      "begin": "\"",
+      "beginCaptures": {
+        "0": { "name": "punctuation.definition.string.begin.ghostty" }
+      },
+      "end": "\"",
+      "endCaptures": {
+        "0": { "name": "punctuation.definition.string.end.ghostty" }
+      },
       "patterns": [
         {
-          "name": "string.quoted.double.ghostty",
-          "begin": "\"",
-          "end": "\"",
-          "patterns": [
-            {
-              "name": "constant.character.escape.ghostty",
-              "match": "\\\\."
-            }
-          ]
-        },
-        {
-          "name": "string.quoted.single.ghostty",
-          "begin": "'",
-          "end": "'",
-          "patterns": [
-            {
-              "name": "constant.character.escape.ghostty",
-              "match": "\\\\."
-            }
-          ]
+          "name": "constant.character.escape.ghostty",
+          "match": "\\\\."
         }
       ]
     },
-    "keybind-value": {
-      "patterns": [
-        {
-          "match": "\\b(global:|all:|unconsumed:|performable:)?(.*?)=(.*?)$",
-          "captures": {
-            "1": {
-              "name": "keyword.other.prefix.ghostty"
-            },
-            "2": {
-              "patterns": [
-                {
-                  "include": "#keybind-trigger"
-                }
-              ]
-            },
-            "3": {
-              "patterns": [
-                {
-                  "include": "#keybind-action"
-                }
-              ]
-            }
-          }
-        }
-      ]
-    },
-    "keybind-trigger": {
-      "patterns": [
-        {
-          "name": "support.function.modifier.ghostty",
-          "match": "\\b(shift|ctrl|control|alt|opt|option|super|cmd|command)\\b"
-        },
-        {
-          "name": "support.function.key.ghostty",
-          "match": "\\b(physical:)?\\b(up|down|left|right|home|end|page_up|page_down|insert|delete|tab|enter|escape|space|backspace|one|two|three|four|five|six|seven|eight|nine|zero|a|b|c|d|e|f|g|h|i|j|k|l|m|n|o|p|q|r|s|t|u|v|w|x|y|z|f1|f2|f3|f4|f5|f6|f7|f8|f9|f10|f11|f12)\\b"
-        },
-        {
-          "name": "keyword.operator.sequence.ghostty",
-          "match": ">"
-        },
-        {
-          "name": "keyword.operator.plus.ghostty",
-          "match": "\\+"
-        }
-      ]
-    },
-    "keybind-action": {
-      "patterns": [
-        {
-          "name": "support.function.action.ghostty",
-          "match": "\\b(ignore|unbind|new_window|new_tab|close_window|close_tab|reload_config|quit|copy_to_clipboard|paste_from_clipboard|scroll_page_up|scroll_page_down|scroll_to_top|scroll_to_bottom|jump_to_prompt|toggle_fullscreen|toggle_quick_terminal|toggle_window_decorations|toggle_tab_overview|increase_font_size|decrease_font_size|reset_font_size|close_surface|new_split|split_vertical|split_horizontal|goto_split|resize_split|equalize_splits|move_tab|move_tab_to_new_window|next_tab|previous_tab|goto_tab|write_scrollback_file|inspector|text|csi|esc)\\b"
-        },
-        {
-          "name": "string.other.action-param.ghostty",
-          "match": ":(.*?)$"
-        }
-      ]
-    },
-    "color-value": {
-      "patterns": [
-        {
-          "name": "constant.other.color.hex.ghostty",
-          "match": "#[0-9a-fA-F]{3,8}\\b"
-        },
-        {
-          "name": "constant.other.color.hex.ghostty",
-          "match": "\\b[0-9a-fA-F]{6}\\b"
-        },
-        {
-          "name": "constant.other.color.named.ghostty",
-          "match": "\\b(black|red|green|yellow|blue|magenta|cyan|white|gray|grey|darkred|darkgreen|darkyellow|darkblue|darkmagenta|darkcyan|lightgray|lightgrey|lightred|lightgreen|lightyellow|lightblue|lightmagenta|lightcyan|orange|pink|purple|brown|gold|silver|navy|maroon|olive|lime|aqua|teal|fuchsia|transparent|background|extend|extend-always)\\b"
-        }
-      ]
-    },
-    "boolean-value": {
+    "boolean": {
       "patterns": [
         {
           "name": "constant.language.boolean.ghostty",
-          "match": "\\b(true|false|yes|no|on|off)\\b"
+          "match": "\\b(?:true|false)\\b"
         }
       ]
     },
-    "numeric-value": {
+    "enum": {
+      "patterns": [
+        {
+          "name": "constant.language.enum.ghostty",
+          "match": "\\b(?:native|linear|linear-corrected|block|bar|underline|block_hollow|system|always|never|auto|epoll|io_uring|off|check|download|stable|tip|ask|allow|deny|srgb|display-p3|bright)\\b"
+        }
+      ]
+    },
+    "number": {
       "patterns": [
         {
           "name": "constant.numeric.integer.ghostty",
-          "match": "\\b-?[0-9]+\\b"
+          "match": "\\b-?\\d+\\b"
         },
         {
           "name": "constant.numeric.float.ghostty",
-          "match": "\\b-?[0-9]*\\.[0-9]+\\b"
-        },
-        {
-          "name": "constant.numeric.percentage.ghostty",
-          "match": "\\b-?[0-9]+(?:\\.[0-9]+)?%\\b"
+          "match": "\\b-?(?:\\d+\\.\\d+|\\d+\\.|\\.\\d+)\\b"
         }
       ]
     },
-    "path-value": {
+    "color": {
       "patterns": [
         {
-          "name": "string.other.path.ghostty",
-          "match": "\\b(/[^\\s=]*|\\./[^\\s=]*|\\?[^\\s=]*|~[^\\s=]*)\\b"
+          "name": "constant.other.color.hex.ghostty",
+          "match": "\\b#?[0-9A-Fa-f]{6}\\b"
+        },
+        {
+          "name": "constant.other.color.special.ghostty",
+          "match": "\\b(?:cell-foreground|cell-background)\\b"
         }
       ]
     },
-    "enum-value": {
+    "codepoint": {
       "patterns": [
         {
-          "name": "constant.other.enum.cursor.ghostty",
-          "match": "\\b(block|bar|underline|block_hollow)\\b"
-        },
-        {
-          "name": "constant.other.enum.theme.ghostty",
-          "match": "\\b(auto|system|light|dark|ghostty)\\b"
-        },
-        {
-          "name": "constant.other.enum.window.ghostty",
-          "match": "\\b(none|client|server|native|transparent|tabs|hidden|center|top|bottom|left|right|top-left|top-center|top-right|bottom-left|bottom-center|bottom-right|current|end|always|never|after-first|main|mouse|macos-menu-bar|move|remain|visible|flat|raised|raised-border|desktop|single-instance)\\b"
-        },
-        {
-          "name": "constant.other.enum.integration.ghostty",
-          "match": "\\b(detect|bash|elvish|fish|zsh|cursor|sudo|title|no-cursor|no-sudo|no-title)\\b"
-        },
-        {
-          "name": "constant.other.enum.format.ghostty",
-          "match": "\\b(8-bit|16-bit|srgb|display-p3|unicode|legacy|native|linear|linear-corrected|ask|allow|deny|stable|tip|off|check|download)\\b"
-        },
-        {
-          "name": "constant.other.enum.macos.ghostty",
-          "match": "\\b(visible-menu|official|blueprint|chalkboard|microchip|glass|holographic|paper|retro|xray|custom-style|aluminum|beige|plastic|chrome|working-directory|home|inherit)\\b"
-        },
-        {
-          "name": "constant.other.enum.gtk.ghostty",
-          "match": "\\b(default|clipboard-copy|no-clipboard-copy)\\b"
+          "name": "constant.other.unicode.codepoint.ghostty",
+          "match": "\\bU\\+[0-9A-Fa-f]{4,6}(?:-U\\+[0-9A-Fa-f]{4,6})?\\b"
         }
       ]
     },
-    "unquoted-value": {
+    "pathish": {
+      "patterns": [
+        {
+          "name": "string.unquoted.path.ghostty",
+          "match": "(?<!\\S)\\??(?:~|/|\\.|\\.\\.|\\$[A-Za-z_][A-Za-z0-9_]*)(?:[^\\s\"]*)"
+        }
+      ]
+    },
+    "bareword": {
       "patterns": [
         {
           "name": "string.unquoted.ghostty",
-          "match": "[^\\s#]+"
+          "match": "[^\\s#][^#]*?"
         }
       ]
     }
-  },
-  "scopeName": "source.ghostty"
+  }
 }
