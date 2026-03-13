@@ -15,6 +15,7 @@
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
 			],
+			"preLaunchTask": "${defaultBuildTask}"
 		},
 		{
 			"name": "Attach to Server",
@@ -24,7 +25,8 @@
 			"restart": true,
 			"outFiles": [
 				"${workspaceFolder}/out/**/*.js"
-			]
+			],
+			"preLaunchTask": "${defaultBuildTask}"
 		}
 	]
 }
