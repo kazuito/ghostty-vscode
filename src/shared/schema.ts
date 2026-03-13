@@ -1,13 +1,13 @@
 import { z } from "zod";
 
 const colorValue = z.union([
-  z.string().regex(/^#?[0-9A-Fa-f]{6}$/), // hex or #hex
-  z.enum(["cell-foreground", "cell-background"]).or(z.string()), // named X11 colors also allowed
+	z.string().regex(/^#?[0-9A-Fa-f]{6}$/), // hex or #hex
+	z.enum(["cell-foreground", "cell-background"]).or(z.string()), // named X11 colors also allowed
 ]);
 
 const hexOrNamedColor = z.union([
-  z.string().regex(/^#?[0-9A-Fa-f]{6}$/),
-  z.string(), // named X11 colors
+	z.string().regex(/^#?[0-9A-Fa-f]{6}$/),
+	z.string(), // named X11 colors
 ]);
 
 const opacity01 = z.number().min(0).max(1);
@@ -15,13 +15,17 @@ const opacity01 = z.number().min(0).max(1);
 const codepoint = /^U\+[0-9A-Fa-f]{4,6}$/;
 const codepointRange = /^U\+[0-9A-Fa-f]{4,6}-U\+[0-9A-Fa-f]{4,6}$/;
 
-const fontVariation = z.string().regex(/^[A-Za-z0-9]{4}\s*=\s*-?\d+(?:\.\d+)?$/);
-const fontCodepointMap = z.string().regex(
-  /^((U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)(,(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?))*)=.+$/
-);
-const clipboardCodepointMap = z.string().regex(
-  /^(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)=.+$/
-);
+const fontVariation = z
+	.string()
+	.regex(/^[A-Za-z0-9]{4}\s*=\s*-?\d+(?:\.\d+)?$/);
+const fontCodepointMap = z
+	.string()
+	.regex(
+		/^((U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)(,(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?))*)=.+$/,
+	);
+const clipboardCodepointMap = z
+	.string()
+	.regex(/^(U\+[0-9A-Fa-f]{4,6}(?:-U\+[0-9A-Fa-f]{4,6})?)=.+$/);
 const envAssignment = z.string().regex(/^[A-Za-z_][A-Za-z0-9_]*=.*/);
 const pathLike = z.string();
 const featureSetting = z.string(); // syntax is intentionally loose in docs
@@ -32,298 +36,1006 @@ const cssPath = z.string();
 const shaderPath = z.string();
 
 export const ghosttyConfigOptions = [
-  { key: "language", schema: z.string() },
+	{
+		key: "language",
+		schema: z.string(),
+		desc: "UI/display language for Ghostty.",
+	},
 
-  { key: "font-family", schema: z.string() },
-  { key: "font-family-bold", schema: z.string() },
-  { key: "font-family-italic", schema: z.string() },
-  { key: "font-family-bold-italic", schema: z.string() },
+	{
+		key: "font-family",
+		schema: z.string(),
+		desc: "Primary font family for normal text.",
+	},
+	{
+		key: "font-family-bold",
+		schema: z.string(),
+		desc: "Font family for bold text.",
+	},
+	{
+		key: "font-family-italic",
+		schema: z.string(),
+		desc: "Font family for italic text.",
+	},
+	{
+		key: "font-family-bold-italic",
+		schema: z.string(),
+		desc: "Font family for bold italic text.",
+	},
 
-  { key: "font-style", schema: z.union([z.string(), z.literal(false)]) },
-  { key: "font-style-bold", schema: z.union([z.string(), z.literal(false)]) },
-  { key: "font-style-italic", schema: z.union([z.string(), z.literal(false)]) },
-  { key: "font-style-bold-italic", schema: z.union([z.string(), z.literal(false)]) },
+	{
+		key: "font-style",
+		schema: z.union([z.string(), z.literal(false)]),
+		desc: "Preferred style name for the normal font face.",
+	},
+	{
+		key: "font-style-bold",
+		schema: z.union([z.string(), z.literal(false)]),
+		desc: "Preferred style name for the bold font face.",
+	},
+	{
+		key: "font-style-italic",
+		schema: z.union([z.string(), z.literal(false)]),
+		desc: "Preferred style name for the italic font face.",
+	},
+	{
+		key: "font-style-bold-italic",
+		schema: z.union([z.string(), z.literal(false)]),
+		desc: "Preferred style name for the bold italic font face.",
+	},
 
-  {
-    key: "font-synthetic-style",
-    schema: z.union([
-      z.boolean(),
-      z.string().regex(
-        /^(no-(bold|italic|bold-italic)|(bold|italic|bold-italic))(,(no-(bold|italic|bold-italic)|(bold|italic|bold-italic)))*$/
-      ),
-    ]),
-  },
-  { key: "font-feature", schema: featureSetting },
-  { key: "font-size", schema: z.number() },
+	{
+		key: "font-synthetic-style",
+		schema: z.union([
+			z.boolean(),
+			z
+				.string()
+				.regex(
+					/^(no-(bold|italic|bold-italic)|(bold|italic|bold-italic))(,(no-(bold|italic|bold-italic)|(bold|italic|bold-italic)))*$/,
+				),
+		]),
+		desc: "Controls synthetic bold/italic generation when real faces are unavailable.",
+	},
+	{
+		key: "font-feature",
+		schema: featureSetting,
+		desc: "OpenType font feature overrides.",
+	},
+	{ key: "font-size", schema: z.number(), desc: "Base terminal font size." },
 
-  { key: "font-variation", schema: fontVariation },
-  { key: "font-variation-bold", schema: fontVariation },
-  { key: "font-variation-italic", schema: fontVariation },
-  { key: "font-variation-bold-italic", schema: fontVariation },
+	{
+		key: "font-variation",
+		schema: fontVariation,
+		desc: "Variable font axis settings for normal text.",
+	},
+	{
+		key: "font-variation-bold",
+		schema: fontVariation,
+		desc: "Variable font axis settings for bold text.",
+	},
+	{
+		key: "font-variation-italic",
+		schema: fontVariation,
+		desc: "Variable font axis settings for italic text.",
+	},
+	{
+		key: "font-variation-bold-italic",
+		schema: fontVariation,
+		desc: "Variable font axis settings for bold italic text.",
+	},
 
-  { key: "font-codepoint-map", schema: fontCodepointMap },
-  { key: "clipboard-codepoint-map", schema: clipboardCodepointMap },
+	{
+		key: "font-codepoint-map",
+		schema: fontCodepointMap,
+		desc: "Maps Unicode ranges to specific fonts.",
+	},
+	{
+		key: "clipboard-codepoint-map",
+		schema: clipboardCodepointMap,
+		desc: "Maps pasted clipboard codepoints to replacements.",
+	},
 
-  { key: "font-thicken", schema: z.boolean() },
-  { key: "font-thicken-strength", schema: z.number().int().min(0).max(255) },
+	{
+		key: "font-thicken",
+		schema: z.boolean(),
+		desc: "Enables font thickening for rendering.",
+	},
+	{
+		key: "font-thicken-strength",
+		schema: z.number().int().min(0).max(255),
+		desc: "Strength of font thickening effect.",
+	},
 
-  {
-    key: "font-shaping-break",
-    schema: z.string().regex(/^(no-)?cursor(,(no-)?cursor)*$/),
-  },
+	{
+		key: "font-shaping-break",
+		schema: z.string().regex(/^(no-)?cursor(,(no-)?cursor)*$/),
+		desc: "Controls where shaping is broken during text layout.",
+	},
 
-  {
-    key: "alpha-blending",
-    schema: z.enum(["native", "linear", "linear-corrected"]),
-  },
+	{
+		key: "alpha-blending",
+		schema: z.enum(["native", "linear", "linear-corrected"]),
+		desc: "Alpha blending algorithm used for rendering.",
+	},
 
-  { key: "adjust-cell-width", schema: z.number() },
-  { key: "adjust-cell-height", schema: z.number() },
-  { key: "adjust-font-baseline", schema: z.number() },
-  { key: "adjust-underline-position", schema: z.number() },
-  { key: "adjust-underline-thickness", schema: z.number() },
-  { key: "adjust-strikethrough-position", schema: z.number() },
-  { key: "adjust-strikethrough-thickness", schema: z.number() },
-  { key: "adjust-overline-position", schema: z.number() },
-  { key: "adjust-overline-thickness", schema: z.number() },
-  { key: "adjust-cursor-thickness", schema: z.number() },
-  { key: "adjust-cursor-height", schema: z.number() },
-  { key: "adjust-box-thickness", schema: z.number() },
-  { key: "adjust-icon-height", schema: z.number() },
+	{
+		key: "adjust-cell-width",
+		schema: z.number(),
+		desc: "Adjusts terminal cell width.",
+	},
+	{
+		key: "adjust-cell-height",
+		schema: z.number(),
+		desc: "Adjusts terminal cell height.",
+	},
+	{
+		key: "adjust-font-baseline",
+		schema: z.number(),
+		desc: "Adjusts font baseline position.",
+	},
+	{
+		key: "adjust-underline-position",
+		schema: z.number(),
+		desc: "Adjusts underline vertical position.",
+	},
+	{
+		key: "adjust-underline-thickness",
+		schema: z.number(),
+		desc: "Adjusts underline thickness.",
+	},
+	{
+		key: "adjust-strikethrough-position",
+		schema: z.number(),
+		desc: "Adjusts strikethrough vertical position.",
+	},
+	{
+		key: "adjust-strikethrough-thickness",
+		schema: z.number(),
+		desc: "Adjusts strikethrough thickness.",
+	},
+	{
+		key: "adjust-overline-position",
+		schema: z.number(),
+		desc: "Adjusts overline vertical position.",
+	},
+	{
+		key: "adjust-overline-thickness",
+		schema: z.number(),
+		desc: "Adjusts overline thickness.",
+	},
+	{
+		key: "adjust-cursor-thickness",
+		schema: z.number(),
+		desc: "Adjusts bar/underline cursor thickness.",
+	},
+	{
+		key: "adjust-cursor-height",
+		schema: z.number(),
+		desc: "Adjusts cursor height.",
+	},
+	{
+		key: "adjust-box-thickness",
+		schema: z.number(),
+		desc: "Adjusts box drawing line thickness.",
+	},
+	{
+		key: "adjust-icon-height",
+		schema: z.number(),
+		desc: "Adjusts icon glyph height.",
+	},
 
-  { key: "grapheme-width-method", schema: z.string() },
-  { key: "freetype-load-flags", schema: z.string() },
+	{
+		key: "grapheme-width-method",
+		schema: z.string(),
+		desc: "Method used to determine grapheme width.",
+	},
+	{
+		key: "freetype-load-flags",
+		schema: z.string(),
+		desc: "FreeType loading/rendering flags.",
+	},
 
-  { key: "theme", schema: z.string() },
-  { key: "background", schema: hexOrNamedColor },
-  { key: "foreground", schema: hexOrNamedColor },
+	{ key: "theme", schema: z.string(), desc: "Named Ghostty theme to load." },
+	{
+		key: "background",
+		schema: hexOrNamedColor,
+		desc: "Default background color.",
+	},
+	{
+		key: "foreground",
+		schema: hexOrNamedColor,
+		desc: "Default foreground color.",
+	},
 
-  { key: "background-image", schema: pathLike },
-  { key: "background-image-opacity", schema: opacity01 },
-  { key: "background-image-position", schema: z.string() },
-  { key: "background-image-fit", schema: z.string() },
-  { key: "background-image-repeat", schema: z.boolean() },
+	{
+		key: "background-image",
+		schema: pathLike,
+		desc: "Path to a background image.",
+	},
+	{
+		key: "background-image-opacity",
+		schema: opacity01,
+		desc: "Opacity of the background image.",
+	},
+	{
+		key: "background-image-position",
+		schema: z.string(),
+		desc: "Placement of the background image.",
+	},
+	{
+		key: "background-image-fit",
+		schema: z.string(),
+		desc: "Fit mode for the background image.",
+	},
+	{
+		key: "background-image-repeat",
+		schema: z.boolean(),
+		desc: "Whether the background image repeats.",
+	},
 
-  { key: "selection-foreground", schema: hexOrNamedColor },
-  { key: "selection-background", schema: hexOrNamedColor },
-  { key: "selection-clear-on-typing", schema: z.boolean() },
-  { key: "selection-clear-on-copy", schema: z.boolean() },
-  { key: "selection-word-chars", schema: z.string() },
+	{
+		key: "selection-foreground",
+		schema: hexOrNamedColor,
+		desc: "Text color for selected text.",
+	},
+	{
+		key: "selection-background",
+		schema: hexOrNamedColor,
+		desc: "Background color for selected text.",
+	},
+	{
+		key: "selection-clear-on-typing",
+		schema: z.boolean(),
+		desc: "Clears selection when typing.",
+	},
+	{
+		key: "selection-clear-on-copy",
+		schema: z.boolean(),
+		desc: "Clears selection after copying.",
+	},
+	{
+		key: "selection-word-chars",
+		schema: z.string(),
+		desc: "Extra characters treated as part of a word for selection.",
+	},
 
-  { key: "minimum-contrast", schema: z.number() },
-  { key: "palette", schema: z.string() },
-  { key: "palette-generate", schema: z.boolean() },
-  { key: "palette-harmonious", schema: z.boolean() },
+	{
+		key: "minimum-contrast",
+		schema: z.number(),
+		desc: "Minimum text/background contrast target.",
+	},
+	{
+		key: "palette",
+		schema: z.string(),
+		desc: "Terminal color palette override.",
+	},
+	{
+		key: "palette-generate",
+		schema: z.boolean(),
+		desc: "Generates palette values automatically.",
+	},
+	{
+		key: "palette-harmonious",
+		schema: z.boolean(),
+		desc: "Uses a more harmonious generated palette.",
+	},
 
-  { key: "cursor-color", schema: colorValue },
-  { key: "cursor-opacity", schema: opacity01 },
-  {
-    key: "cursor-style",
-    schema: z.enum(["block", "bar", "underline", "block_hollow"]),
-  },
-  { key: "cursor-style-blink", schema: z.boolean().nullable().optional() },
-  { key: "cursor-text", schema: hexOrNamedColor },
-  { key: "cursor-click-to-move", schema: z.boolean() },
+	{ key: "cursor-color", schema: colorValue, desc: "Cursor color." },
+	{ key: "cursor-opacity", schema: opacity01, desc: "Cursor opacity." },
+	{
+		key: "cursor-style",
+		schema: z.enum(["block", "bar", "underline", "block_hollow"]),
+		desc: "Cursor shape.",
+	},
+	{
+		key: "cursor-style-blink",
+		schema: z.boolean().nullable().optional(),
+		desc: "Whether the cursor blinks.",
+	},
+	{
+		key: "cursor-text",
+		schema: hexOrNamedColor,
+		desc: "Text color shown under the cursor.",
+	},
+	{
+		key: "cursor-click-to-move",
+		schema: z.boolean(),
+		desc: "Allows moving cursor via mouse click in supported apps.",
+	},
 
-  { key: "mouse-hide-while-typing", schema: z.boolean() },
-  { key: "scroll-to-bottom", schema: z.boolean() },
-  { key: "mouse-shift-capture", schema: z.boolean() },
-  { key: "mouse-reporting", schema: z.boolean() },
-  { key: "mouse-scroll-multiplier", schema: z.number() },
+	{
+		key: "mouse-hide-while-typing",
+		schema: z.boolean(),
+		desc: "Hides mouse pointer while typing.",
+	},
+	{
+		key: "scroll-to-bottom",
+		schema: z.boolean(),
+		desc: "Auto-scrolls to bottom on output/input events.",
+	},
+	{
+		key: "mouse-shift-capture",
+		schema: z.boolean(),
+		desc: "Lets Shift affect mouse capture behavior.",
+	},
+	{
+		key: "mouse-reporting",
+		schema: z.boolean(),
+		desc: "Enables terminal mouse reporting.",
+	},
+	{
+		key: "mouse-scroll-multiplier",
+		schema: z.number(),
+		desc: "Multiplier applied to mouse wheel scrolling.",
+	},
 
-  { key: "background-opacity", schema: opacity01 },
-  { key: "background-opacity-cells", schema: opacity01 },
-  { key: "background-blur", schema: z.number() },
-  { key: "unfocused-split-opacity", schema: opacity01 },
-  { key: "unfocused-split-fill", schema: hexOrNamedColor },
-  { key: "split-divider-color", schema: hexOrNamedColor },
-  { key: "split-preserve-zoom", schema: z.boolean() },
+	{
+		key: "background-opacity",
+		schema: opacity01,
+		desc: "Overall window background opacity.",
+	},
+	{
+		key: "background-opacity-cells",
+		schema: opacity01,
+		desc: "Opacity for terminal cells themselves.",
+	},
+	{
+		key: "background-blur",
+		schema: z.number(),
+		desc: "Background blur amount, if supported.",
+	},
+	{
+		key: "unfocused-split-opacity",
+		schema: opacity01,
+		desc: "Opacity for unfocused split panes.",
+	},
+	{
+		key: "unfocused-split-fill",
+		schema: hexOrNamedColor,
+		desc: "Fill color for unfocused splits.",
+	},
+	{
+		key: "split-divider-color",
+		schema: hexOrNamedColor,
+		desc: "Color of split dividers.",
+	},
+	{
+		key: "split-preserve-zoom",
+		schema: z.boolean(),
+		desc: "Keeps zoom state when splitting panes.",
+	},
 
-  { key: "search-foreground", schema: hexOrNamedColor },
-  { key: "search-background", schema: hexOrNamedColor },
-  { key: "search-selected-foreground", schema: hexOrNamedColor },
-  { key: "search-selected-background", schema: hexOrNamedColor },
+	{
+		key: "search-foreground",
+		schema: hexOrNamedColor,
+		desc: "Foreground color for search matches.",
+	},
+	{
+		key: "search-background",
+		schema: hexOrNamedColor,
+		desc: "Background color for search matches.",
+	},
+	{
+		key: "search-selected-foreground",
+		schema: hexOrNamedColor,
+		desc: "Foreground color for selected search match.",
+	},
+	{
+		key: "search-selected-background",
+		schema: hexOrNamedColor,
+		desc: "Background color for selected search match.",
+	},
 
-  { key: "command", schema: commandLike },
-  { key: "initial-command", schema: commandLike },
-  { key: "notify-on-command-finish", schema: z.boolean() },
-  { key: "notify-on-command-finish-action", schema: z.string() },
-  { key: "notify-on-command-finish-after", schema: z.number() },
+	{ key: "command", schema: commandLike, desc: "Command or shell to launch." },
+	{
+		key: "initial-command",
+		schema: commandLike,
+		desc: "Command to run for the initial surface only.",
+	},
+	{
+		key: "notify-on-command-finish",
+		schema: z.boolean(),
+		desc: "Shows a notification when a command finishes.",
+	},
+	{
+		key: "notify-on-command-finish-action",
+		schema: z.string(),
+		desc: "Action used for command-finished notifications.",
+	},
+	{
+		key: "notify-on-command-finish-after",
+		schema: z.number(),
+		desc: "Minimum runtime before command-finished notifications trigger.",
+	},
 
-  { key: "env", schema: envAssignment },
-  { key: "input", schema: pathLike },
-  { key: "wait-after-command", schema: z.boolean() },
-  { key: "abnormal-command-exit-runtime", schema: z.number().int().nonnegative() },
-  { key: "scrollback-limit", schema: z.number().int().nonnegative() },
+	{
+		key: "env",
+		schema: envAssignment,
+		desc: "Environment variable assignment.",
+	},
+	{ key: "input", schema: pathLike, desc: "Path to an input file or source." },
+	{
+		key: "wait-after-command",
+		schema: z.boolean(),
+		desc: "Keeps window open after command exits.",
+	},
+	{
+		key: "abnormal-command-exit-runtime",
+		schema: z.number().int().nonnegative(),
+		desc: "Runtime threshold used to judge abnormal command exit behavior.",
+	},
+	{
+		key: "scrollback-limit",
+		schema: z.number().int().nonnegative(),
+		desc: "Maximum scrollback buffer size.",
+	},
 
-  {
-    key: "scrollbar",
-    schema: z.enum(["system", "always", "never"]),
-  },
+	{
+		key: "scrollbar",
+		schema: z.enum(["system", "always", "never"]),
+		desc: "Scrollbar visibility behavior.",
+	},
 
-  { key: "link", schema: z.boolean() },
-  { key: "link-url", schema: z.boolean() },
-  { key: "link-previews", schema: z.boolean() },
+	{ key: "link", schema: z.boolean(), desc: "Enables link detection." },
+	{ key: "link-url", schema: z.boolean(), desc: "Enables URL link detection." },
+	{
+		key: "link-previews",
+		schema: z.boolean(),
+		desc: "Enables previews for detected links.",
+	},
 
-  { key: "maximize", schema: z.boolean() },
-  { key: "fullscreen", schema: z.boolean() },
-  { key: "title", schema: z.string() },
-  { key: "class", schema: z.string() },
-  { key: "x11-instance-name", schema: z.string() },
-  { key: "working-directory", schema: pathLike },
+	{
+		key: "maximize",
+		schema: z.boolean(),
+		desc: "Starts the window maximized.",
+	},
+	{
+		key: "fullscreen",
+		schema: z.boolean(),
+		desc: "Starts the window fullscreen.",
+	},
+	{ key: "title", schema: z.string(), desc: "Default window title." },
+	{ key: "class", schema: z.string(), desc: "Window class/app identifier." },
+	{
+		key: "x11-instance-name",
+		schema: z.string(),
+		desc: "X11 instance name override.",
+	},
+	{
+		key: "working-directory",
+		schema: pathLike,
+		desc: "Initial working directory.",
+	},
 
-  { key: "keybind", schema: keybindLike },
-  { key: "key-remap", schema: keyRemapLike },
+	{ key: "keybind", schema: keybindLike, desc: "Custom key binding rule." },
+	{ key: "key-remap", schema: keyRemapLike, desc: "Keyboard remapping rule." },
 
-  { key: "window-padding-x", schema: z.number() },
-  { key: "window-padding-y", schema: z.number() },
-  { key: "window-padding-balance", schema: z.boolean() },
-  { key: "window-padding-color", schema: hexOrNamedColor },
-  { key: "window-vsync", schema: z.boolean() },
+	{
+		key: "window-padding-x",
+		schema: z.number(),
+		desc: "Horizontal padding inside the window.",
+	},
+	{
+		key: "window-padding-y",
+		schema: z.number(),
+		desc: "Vertical padding inside the window.",
+	},
+	{
+		key: "window-padding-balance",
+		schema: z.boolean(),
+		desc: "Balances padding around the terminal area.",
+	},
+	{
+		key: "window-padding-color",
+		schema: hexOrNamedColor,
+		desc: "Color used for window padding.",
+	},
+	{
+		key: "window-vsync",
+		schema: z.boolean(),
+		desc: "Enables vertical sync for window rendering.",
+	},
 
-  { key: "window-inherit-working-directory", schema: z.boolean() },
-  { key: "tab-inherit-working-directory", schema: z.boolean() },
-  { key: "split-inherit-working-directory", schema: z.boolean() },
-  { key: "window-inherit-font-size", schema: z.boolean() },
+	{
+		key: "window-inherit-working-directory",
+		schema: z.boolean(),
+		desc: "New windows inherit the current working directory.",
+	},
+	{
+		key: "tab-inherit-working-directory",
+		schema: z.boolean(),
+		desc: "New tabs inherit the current working directory.",
+	},
+	{
+		key: "split-inherit-working-directory",
+		schema: z.boolean(),
+		desc: "New splits inherit the current working directory.",
+	},
+	{
+		key: "window-inherit-font-size",
+		schema: z.boolean(),
+		desc: "New windows inherit current font size.",
+	},
 
-  { key: "window-decoration", schema: z.boolean() },
-  { key: "window-title-font-family", schema: z.string() },
-  { key: "window-subtitle", schema: z.string() },
-  { key: "window-theme", schema: z.string() },
-  { key: "window-colorspace", schema: z.string() },
-  { key: "window-height", schema: z.number().int() },
-  { key: "window-width", schema: z.number().int() },
-  { key: "window-position-x", schema: z.number().int() },
-  { key: "window-position-y", schema: z.number().int() },
-  { key: "window-save-state", schema: z.boolean() },
-  { key: "window-step-resize", schema: z.boolean() },
-  { key: "window-new-tab-position", schema: z.string() },
-  { key: "window-show-tab-bar", schema: z.boolean() },
-  { key: "window-titlebar-background", schema: hexOrNamedColor },
-  { key: "window-titlebar-foreground", schema: hexOrNamedColor },
+	{
+		key: "window-decoration",
+		schema: z.boolean(),
+		desc: "Enables native window decorations.",
+	},
+	{
+		key: "window-title-font-family",
+		schema: z.string(),
+		desc: "Font family used for titlebar text where supported.",
+	},
+	{ key: "window-subtitle", schema: z.string(), desc: "Window subtitle text." },
+	{
+		key: "window-theme",
+		schema: z.string(),
+		desc: "Window chrome/theme style.",
+	},
+	{
+		key: "window-colorspace",
+		schema: z.string(),
+		desc: "Colorspace used for window rendering.",
+	},
+	{
+		key: "window-height",
+		schema: z.number().int(),
+		desc: "Initial window height.",
+	},
+	{
+		key: "window-width",
+		schema: z.number().int(),
+		desc: "Initial window width.",
+	},
+	{
+		key: "window-position-x",
+		schema: z.number().int(),
+		desc: "Initial window X position.",
+	},
+	{
+		key: "window-position-y",
+		schema: z.number().int(),
+		desc: "Initial window Y position.",
+	},
+	{
+		key: "window-save-state",
+		schema: z.boolean(),
+		desc: "Saves and restores window state.",
+	},
+	{
+		key: "window-step-resize",
+		schema: z.boolean(),
+		desc: "Resizes in terminal cell increments.",
+	},
+	{
+		key: "window-new-tab-position",
+		schema: z.string(),
+		desc: "Placement of newly opened tabs.",
+	},
+	{
+		key: "window-show-tab-bar",
+		schema: z.boolean(),
+		desc: "Shows the tab bar.",
+	},
+	{
+		key: "window-titlebar-background",
+		schema: hexOrNamedColor,
+		desc: "Titlebar background color.",
+	},
+	{
+		key: "window-titlebar-foreground",
+		schema: hexOrNamedColor,
+		desc: "Titlebar foreground color.",
+	},
 
-  { key: "resize-overlay", schema: z.boolean() },
-  { key: "resize-overlay-position", schema: z.string() },
-  { key: "resize-overlay-duration", schema: z.number().int().nonnegative() },
+	{
+		key: "resize-overlay",
+		schema: z.boolean(),
+		desc: "Shows an overlay while resizing.",
+	},
+	{
+		key: "resize-overlay-position",
+		schema: z.string(),
+		desc: "Position of the resize overlay.",
+	},
+	{
+		key: "resize-overlay-duration",
+		schema: z.number().int().nonnegative(),
+		desc: "How long the resize overlay stays visible.",
+	},
 
-  { key: "focus-follows-mouse", schema: z.boolean() },
+	{
+		key: "focus-follows-mouse",
+		schema: z.boolean(),
+		desc: "Moves focus based on mouse position.",
+	},
 
-  { key: "clipboard-read", schema: z.boolean() },
-  { key: "clipboard-write", schema: z.boolean() },
-  { key: "clipboard-trim-trailing-spaces", schema: z.boolean() },
-  { key: "clipboard-paste-protection", schema: z.boolean() },
-  { key: "clipboard-paste-bracketed-safe", schema: z.boolean() },
+	{
+		key: "clipboard-read",
+		schema: z.boolean(),
+		desc: "Allows reading from the clipboard.",
+	},
+	{
+		key: "clipboard-write",
+		schema: z.boolean(),
+		desc: "Allows writing to the clipboard.",
+	},
+	{
+		key: "clipboard-trim-trailing-spaces",
+		schema: z.boolean(),
+		desc: "Trims trailing spaces on clipboard copy.",
+	},
+	{
+		key: "clipboard-paste-protection",
+		schema: z.boolean(),
+		desc: "Enables paste protection checks.",
+	},
+	{
+		key: "clipboard-paste-bracketed-safe",
+		schema: z.boolean(),
+		desc: "Treats bracketed paste as safe.",
+	},
 
-  { key: "title-report", schema: z.boolean() },
-  { key: "image-storage-limit", schema: z.number().int().nonnegative() },
-  { key: "copy-on-select", schema: z.boolean() },
-  { key: "right-click-action", schema: z.string() },
-  { key: "click-repeat-interval", schema: z.number().int().nonnegative() },
+	{
+		key: "title-report",
+		schema: z.boolean(),
+		desc: "Allows applications to query/report title state.",
+	},
+	{
+		key: "image-storage-limit",
+		schema: z.number().int().nonnegative(),
+		desc: "Limit for terminal image storage/cache.",
+	},
+	{
+		key: "copy-on-select",
+		schema: z.boolean(),
+		desc: "Copies selection automatically.",
+	},
+	{
+		key: "right-click-action",
+		schema: z.string(),
+		desc: "Action performed on right click.",
+	},
+	{
+		key: "click-repeat-interval",
+		schema: z.number().int().nonnegative(),
+		desc: "Interval used for repeated click actions.",
+	},
 
-  { key: "config-file", schema: pathLike },
-  { key: "config-default-files", schema: z.boolean() },
+	{
+		key: "config-file",
+		schema: pathLike,
+		desc: "Additional config file path.",
+	},
+	{
+		key: "config-default-files",
+		schema: z.boolean(),
+		desc: "Whether default config file locations are loaded.",
+	},
 
-  {
-    key: "confirm-close-surface",
-    schema: z.union([z.boolean(), z.literal("always")]),
-  },
+	{
+		key: "confirm-close-surface",
+		schema: z.union([z.boolean(), z.literal("always")]),
+		desc: "Whether to confirm before closing a surface.",
+	},
 
-  { key: "quit-after-last-window-closed", schema: z.boolean() },
-  { key: "quit-after-last-window-closed-delay", schema: z.number().int().nonnegative() },
+	{
+		key: "quit-after-last-window-closed",
+		schema: z.boolean(),
+		desc: "Quits app after the last window closes.",
+	},
+	{
+		key: "quit-after-last-window-closed-delay",
+		schema: z.number().int().nonnegative(),
+		desc: "Delay before quitting after the last window closes.",
+	},
 
-  { key: "initial-window", schema: z.boolean() },
-  { key: "undo-timeout", schema: z.number().int().nonnegative() },
+	{
+		key: "initial-window",
+		schema: z.boolean(),
+		desc: "Controls creation/behavior of the initial window.",
+	},
+	{
+		key: "undo-timeout",
+		schema: z.number().int().nonnegative(),
+		desc: "Timeout for undoable actions.",
+	},
 
-  { key: "quick-terminal-position", schema: z.string() },
-  { key: "quick-terminal-size", schema: z.number() },
-  { key: "gtk-quick-terminal-layer", schema: z.string() },
-  { key: "gtk-quick-terminal-namespace", schema: z.string() },
-  { key: "quick-terminal-screen", schema: z.string() },
-  { key: "quick-terminal-animation-duration", schema: z.number().int().nonnegative() },
-  { key: "quick-terminal-autohide", schema: z.boolean() },
-  { key: "quick-terminal-space-behavior", schema: z.string() },
-  { key: "quick-terminal-keyboard-interactivity", schema: z.boolean() },
+	{
+		key: "quick-terminal-position",
+		schema: z.string(),
+		desc: "Position of the quick terminal.",
+	},
+	{
+		key: "quick-terminal-size",
+		schema: z.number(),
+		desc: "Size of the quick terminal.",
+	},
+	{
+		key: "gtk-quick-terminal-layer",
+		schema: z.string(),
+		desc: "Layer used by the GTK quick terminal.",
+	},
+	{
+		key: "gtk-quick-terminal-namespace",
+		schema: z.string(),
+		desc: "Namespace used by the GTK quick terminal.",
+	},
+	{
+		key: "quick-terminal-screen",
+		schema: z.string(),
+		desc: "Target screen/display for the quick terminal.",
+	},
+	{
+		key: "quick-terminal-animation-duration",
+		schema: z.number().int().nonnegative(),
+		desc: "Animation duration for quick terminal show/hide.",
+	},
+	{
+		key: "quick-terminal-autohide",
+		schema: z.boolean(),
+		desc: "Automatically hides the quick terminal when focus is lost.",
+	},
+	{
+		key: "quick-terminal-space-behavior",
+		schema: z.string(),
+		desc: "Space/desktop behavior of the quick terminal.",
+	},
+	{
+		key: "quick-terminal-keyboard-interactivity",
+		schema: z.boolean(),
+		desc: "Allows keyboard interactivity for the quick terminal.",
+	},
 
-  { key: "shell-integration", schema: z.boolean() },
-  { key: "shell-integration-features", schema: z.string() },
-  { key: "command-palette-entry", schema: z.string() },
-  { key: "osc-color-report-format", schema: z.string() },
-  { key: "vt-kam-allowed", schema: z.boolean() },
+	{
+		key: "shell-integration",
+		schema: z.boolean(),
+		desc: "Enables shell integration features.",
+	},
+	{
+		key: "shell-integration-features",
+		schema: z.string(),
+		desc: "Specific shell integration features to enable.",
+	},
+	{
+		key: "command-palette-entry",
+		schema: z.string(),
+		desc: "Adds a custom command palette entry.",
+	},
+	{
+		key: "osc-color-report-format",
+		schema: z.string(),
+		desc: "Format used for OSC color reporting.",
+	},
+	{
+		key: "vt-kam-allowed",
+		schema: z.boolean(),
+		desc: "Allows VT keyboard action mode behavior.",
+	},
 
-  { key: "custom-shader", schema: shaderPath },
-  { key: "custom-shader-animation", schema: z.boolean() },
+	{
+		key: "custom-shader",
+		schema: shaderPath,
+		desc: "Path to a custom shader file.",
+	},
+	{
+		key: "custom-shader-animation",
+		schema: z.boolean(),
+		desc: "Enables animation for custom shader rendering.",
+	},
 
-  { key: "bell-features", schema: z.string() },
-  { key: "bell-audio-path", schema: pathLike },
-  { key: "bell-audio-volume", schema: z.number() },
+	{
+		key: "bell-features",
+		schema: z.string(),
+		desc: "Enabled terminal bell features.",
+	},
+	{
+		key: "bell-audio-path",
+		schema: pathLike,
+		desc: "Path to an audio file for bell sound.",
+	},
+	{
+		key: "bell-audio-volume",
+		schema: z.number(),
+		desc: "Volume of bell audio playback.",
+	},
 
-  { key: "app-notifications", schema: z.boolean() },
+	{
+		key: "app-notifications",
+		schema: z.boolean(),
+		desc: "Allows app-level notifications.",
+	},
 
-  { key: "macos-non-native-fullscreen", schema: z.boolean() },
-  { key: "macos-window-buttons", schema: z.string() },
-  { key: "macos-titlebar-style", schema: z.string() },
-  { key: "macos-titlebar-proxy-icon", schema: z.boolean() },
-  { key: "macos-dock-drop-behavior", schema: z.string() },
-  { key: "macos-option-as-alt", schema: z.string() },
-  { key: "macos-window-shadow", schema: z.boolean() },
-  { key: "macos-hidden", schema: z.boolean() },
-  { key: "macos-auto-secure-input", schema: z.boolean() },
-  { key: "macos-secure-input-indication", schema: z.boolean() },
-  { key: "macos-applescript", schema: z.boolean() },
-  { key: "macos-icon", schema: z.string() },
-  { key: "macos-custom-icon", schema: pathLike },
-  { key: "macos-icon-frame", schema: hexOrNamedColor },
-  { key: "macos-icon-ghost-color", schema: hexOrNamedColor },
-  {
-    key: "macos-icon-screen-color",
-    schema: z.string().regex(
-      /^([^,]+)(,[^,]+){0,63}$/
-    ), // up to 64 comma-separated colors
-  },
-  {
-    key: "macos-shortcuts",
-    schema: z.enum(["ask", "allow", "deny"]),
-  },
+	{
+		key: "macos-non-native-fullscreen",
+		schema: z.boolean(),
+		desc: "Uses non-native fullscreen behavior on macOS.",
+	},
+	{
+		key: "macos-window-buttons",
+		schema: z.string(),
+		desc: "Controls macOS traffic-light window buttons.",
+	},
+	{
+		key: "macos-titlebar-style",
+		schema: z.string(),
+		desc: "macOS titlebar appearance/style.",
+	},
+	{
+		key: "macos-titlebar-proxy-icon",
+		schema: z.boolean(),
+		desc: "Shows the macOS proxy icon in the titlebar.",
+	},
+	{
+		key: "macos-dock-drop-behavior",
+		schema: z.string(),
+		desc: "Behavior for files dropped onto the Dock icon.",
+	},
+	{
+		key: "macos-option-as-alt",
+		schema: z.string(),
+		desc: "How macOS Option key maps to Alt behavior.",
+	},
+	{
+		key: "macos-window-shadow",
+		schema: z.boolean(),
+		desc: "Enables macOS window shadow.",
+	},
+	{
+		key: "macos-hidden",
+		schema: z.boolean(),
+		desc: "Starts the app hidden on macOS.",
+	},
+	{
+		key: "macos-auto-secure-input",
+		schema: z.boolean(),
+		desc: "Automatically enables secure input on macOS.",
+	},
+	{
+		key: "macos-secure-input-indication",
+		schema: z.boolean(),
+		desc: "Shows indication when secure input is enabled.",
+	},
+	{
+		key: "macos-applescript",
+		schema: z.boolean(),
+		desc: "Enables AppleScript support/integration.",
+	},
+	{
+		key: "macos-icon",
+		schema: z.string(),
+		desc: "Built-in macOS app icon variant.",
+	},
+	{
+		key: "macos-custom-icon",
+		schema: pathLike,
+		desc: "Path to a custom macOS app icon.",
+	},
+	{
+		key: "macos-icon-frame",
+		schema: hexOrNamedColor,
+		desc: "Frame color for generated macOS icon.",
+	},
+	{
+		key: "macos-icon-ghost-color",
+		schema: hexOrNamedColor,
+		desc: "Ghost/logo color for generated macOS icon.",
+	},
+	{
+		key: "macos-icon-screen-color",
+		schema: z.string().regex(/^([^,]+)(,[^,]+){0,63}$/), // up to 64 comma-separated colors
+		desc: "One or more screen colors for the generated macOS icon.",
+	},
+	{
+		key: "macos-shortcuts",
+		schema: z.enum(["ask", "allow", "deny"]),
+		desc: "Permission policy for macOS shortcuts integration.",
+	},
 
-  { key: "linux-cgroup", schema: z.boolean() },
-  { key: "linux-cgroup-memory-limit", schema: z.number().int().nonnegative() },
-  { key: "linux-cgroup-processes-limit", schema: z.number().int().nonnegative() },
-  { key: "linux-cgroup-hard-fail", schema: z.boolean() },
+	{
+		key: "linux-cgroup",
+		schema: z.boolean(),
+		desc: "Enables Linux cgroup support.",
+	},
+	{
+		key: "linux-cgroup-memory-limit",
+		schema: z.number().int().nonnegative(),
+		desc: "Memory limit for Linux cgroup.",
+	},
+	{
+		key: "linux-cgroup-processes-limit",
+		schema: z.number().int().nonnegative(),
+		desc: "Process count limit for Linux cgroup.",
+	},
+	{
+		key: "linux-cgroup-hard-fail",
+		schema: z.boolean(),
+		desc: "Fails hard when Linux cgroup setup fails.",
+	},
 
-  { key: "gtk-opengl-debug", schema: z.boolean() },
-  { key: "gtk-single-instance", schema: z.boolean() },
-  { key: "gtk-titlebar", schema: z.boolean() },
-  { key: "gtk-tabs-location", schema: z.string() },
-  { key: "gtk-titlebar-hide-when-maximized", schema: z.boolean() },
-  { key: "gtk-toolbar-style", schema: z.string() },
-  { key: "gtk-titlebar-style", schema: z.string() },
-  { key: "gtk-wide-tabs", schema: z.boolean() },
-  { key: "gtk-custom-css", schema: cssPath },
+	{
+		key: "gtk-opengl-debug",
+		schema: z.boolean(),
+		desc: "Enables GTK OpenGL debugging.",
+	},
+	{
+		key: "gtk-single-instance",
+		schema: z.boolean(),
+		desc: "Uses single-instance behavior for GTK builds.",
+	},
+	{
+		key: "gtk-titlebar",
+		schema: z.boolean(),
+		desc: "Uses GTK titlebar integration.",
+	},
+	{
+		key: "gtk-tabs-location",
+		schema: z.string(),
+		desc: "Location of GTK tabs.",
+	},
+	{
+		key: "gtk-titlebar-hide-when-maximized",
+		schema: z.boolean(),
+		desc: "Hides GTK titlebar when maximized.",
+	},
+	{
+		key: "gtk-toolbar-style",
+		schema: z.string(),
+		desc: "GTK toolbar appearance/style.",
+	},
+	{
+		key: "gtk-titlebar-style",
+		schema: z.string(),
+		desc: "GTK titlebar appearance/style.",
+	},
+	{ key: "gtk-wide-tabs", schema: z.boolean(), desc: "Uses wide GTK tabs." },
+	{ key: "gtk-custom-css", schema: cssPath, desc: "Path to custom GTK CSS." },
 
-  { key: "desktop-notifications", schema: z.boolean() },
-  { key: "progress-style", schema: z.boolean() },
+	{
+		key: "desktop-notifications",
+		schema: z.boolean(),
+		desc: "Enables desktop notifications.",
+	},
+	{
+		key: "progress-style",
+		schema: z.boolean(),
+		desc: "Enables progress style/integration support.",
+	},
 
-  {
-    key: "bold-color",
-    schema: z.union([hexOrNamedColor, z.literal("bright")]),
-  },
+	{
+		key: "bold-color",
+		schema: z.union([hexOrNamedColor, z.literal("bright")]),
+		desc: "Color used for bold text.",
+	},
 
-  { key: "faint-opacity", schema: opacity01 },
-  { key: "term", schema: z.string() },
-  { key: "enquiry-response", schema: z.string() },
+	{
+		key: "faint-opacity",
+		schema: opacity01,
+		desc: "Opacity used for faint text.",
+	},
+	{ key: "term", schema: z.string(), desc: "TERM environment variable value." },
+	{
+		key: "enquiry-response",
+		schema: z.string(),
+		desc: "Response sent for terminal ENQ requests.",
+	},
 
-  {
-    key: "async-backend",
-    schema: z.enum(["auto", "epoll", "io_uring"]),
-  },
+	{
+		key: "async-backend",
+		schema: z.enum(["auto", "epoll", "io_uring"]),
+		desc: "Async I/O backend to use.",
+	},
 
-  {
-    key: "auto-update",
-    schema: z.enum(["off", "check", "download"]),
-  },
+	{
+		key: "auto-update",
+		schema: z.enum(["off", "check", "download"]),
+		desc: "Auto-update behavior.",
+	},
 
-  {
-    key: "auto-update-channel",
-    schema: z.enum(["stable", "tip"]),
-  },
+	{
+		key: "auto-update-channel",
+		schema: z.enum(["stable", "tip"]),
+		desc: "Update channel to follow.",
+	},
 ] as const;
