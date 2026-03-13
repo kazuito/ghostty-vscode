@@ -63,7 +63,19 @@ export function registerCompletionProvider(
         const values = extractValues(option.schema);
         if (!values) return null;
 
-        const valuePrefix = lineUpToCursor.slice(eqIndex + 1).trimStart();
+        const afterEq = lineUpToCursor.slice(eqIndex + 1);
+
+        // For comma-separated keys, complete only the segment after the last comma
+        let valuePrefix: string;
+        if (option.comma) {
+          const lastComma = afterEq.lastIndexOf(",");
+          valuePrefix = lastComma >= 0
+            ? afterEq.slice(lastComma + 1).trimStart()
+            : afterEq.trimStart();
+        } else {
+          valuePrefix = afterEq.trimStart();
+        }
+
         const items = values
           .filter((v) => v.startsWith(valuePrefix))
           .map((v) => ({ label: v, kind: CompletionItemKind.Value }));

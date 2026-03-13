@@ -66,7 +66,15 @@ export const additiveKeys = new Set([
   "env",
 ]);
 
-export const ghosttyConfigOptions = [
+type ConfigEntry = {
+  key: string;
+  schema: z.ZodType;
+  desc: string;
+  default?: unknown;
+  comma?: boolean; // whether to allow comma-separated lists of values
+};
+
+export const ghosttyConfigOptions: ConfigEntry[] = [
   {
     key: "language",
     schema: z.string(),
@@ -494,8 +502,9 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "notify-on-command-finish-action",
-    schema: z.enum(["bell", "notify"]),
+    schema: z.enum(["bell", "notify", "no-bell", "no-notify"]),
     desc: "Action used for command-finished notifications.",
+    comma: true,
   },
   {
     key: "notify-on-command-finish-after",

@@ -9,7 +9,7 @@ import type { z } from "zod";
 import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 
 const validKeys = new Set<string>(ghosttyConfigOptions.map((o) => o.key));
-const optionMap = new Map(ghosttyConfigOptions.map((o) => [o.key, o.schema]));
+const optionMap = new Map(ghosttyConfigOptions.map((o) => [o.key, o]));
 
 function getZodDef(schema: z.ZodType): Record<string, unknown> {
   return (schema as unknown as { _zod: { def: Record<string, unknown> } })._zod
@@ -163,27 +163,42 @@ function validateDocument(connection: Connection, doc: TextDocument): void {
     if (eqIndex >= 0) {
       const rawValue = line.slice(eqIndex + 1).trim();
       if (rawValue !== "") {
-        const schema = optionMap.get(
+        const entry = optionMap.get(
           key as Parameters<typeof optionMap.get>[0],
         );
-        if (schema) {
-          const unquoted =
-            rawValue.startsWith('"') && rawValue.endsWith('"') && rawValue.length >= 2
-              ? rawValue.slice(1, -1)
-              : rawValue;
-          const error = validateValue(schema, unquoted);
-          if (error) {
+        if (entry) {
+          const parts: { token: string; offset: number }[] = [];
+          if (entry.comma) {
+            // Split on commas (with optional surrounding spaces), track each token's position
+            let searchFrom = eqIndex + 1;
+            for (const token of rawValue.split(/\s*,\s*/)) {
+              const tokenStart = line.indexOf(token, searchFrom);
+              parts.push({ token, offset: tokenStart });
+              searchFrom = tokenStart + token.length;
+            }
+          } else {
             const valueStart = line.indexOf(rawValue, eqIndex + 1);
-            diagnostics.push(
-              Diagnostic.create(
-                {
-                  start: { line: i, character: valueStart },
-                  end: { line: i, character: valueStart + rawValue.length },
-                },
-                error,
-                DiagnosticSeverity.Error,
-              ),
-            );
+            parts.push({ token: rawValue, offset: valueStart });
+          }
+
+          for (const { token, offset } of parts) {
+            const unquoted =
+              token.startsWith('"') && token.endsWith('"') && token.length >= 2
+                ? token.slice(1, -1)
+                : token;
+            const error = validateValue(entry.schema, unquoted);
+            if (error) {
+              diagnostics.push(
+                Diagnostic.create(
+                  {
+                    start: { line: i, character: offset },
+                    end: { line: i, character: offset + token.length },
+                  },
+                  error,
+                  DiagnosticSeverity.Error,
+                ),
+              );
+            }
           }
         }
       }
