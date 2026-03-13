@@ -69,15 +69,15 @@ export function registerCompletionProvider(
         let valuePrefix: string;
         if (option.comma) {
           const lastComma = afterEq.lastIndexOf(",");
-          valuePrefix = lastComma >= 0
-            ? afterEq.slice(lastComma + 1).trimStart()
-            : afterEq.trimStart();
+          valuePrefix =
+            lastComma >= 0
+              ? afterEq.slice(lastComma + 1).trimStart()
+              : afterEq.trimStart();
         } else {
           valuePrefix = afterEq.trimStart();
         }
 
-        const valuePrefixStart =
-          params.position.character - valuePrefix.length;
+        const valuePrefixStart = params.position.character - valuePrefix.length;
 
         const items = values
           .filter((v) => v.startsWith(valuePrefix))

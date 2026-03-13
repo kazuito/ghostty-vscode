@@ -163,9 +163,7 @@ function validateDocument(connection: Connection, doc: TextDocument): void {
     if (eqIndex >= 0) {
       const rawValue = line.slice(eqIndex + 1).trim();
       if (rawValue !== "") {
-        const entry = optionMap.get(
-          key as Parameters<typeof optionMap.get>[0],
-        );
+        const entry = optionMap.get(key as Parameters<typeof optionMap.get>[0]);
         if (entry) {
           const parts: { token: string; offset: number }[] = [];
           if (entry.comma) {
