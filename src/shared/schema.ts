@@ -12,8 +12,8 @@ const hexOrNamedColor = z.union([
 
 const opacity01 = z.number().min(0).max(1);
 
-const codepoint = /^U\+[0-9A-Fa-f]{4,6}$/;
-const codepointRange = /^U\+[0-9A-Fa-f]{4,6}-U\+[0-9A-Fa-f]{4,6}$/;
+// const codepoint = /^U\+[0-9A-Fa-f]{4,6}$/;
+// const codepointRange = /^U\+[0-9A-Fa-f]{4,6}-U\+[0-9A-Fa-f]{4,6}$/;
 
 const fontVariation = z
   .string()
