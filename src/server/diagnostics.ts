@@ -162,18 +162,7 @@ function validateDocument(connection: Connection, doc: TextDocument): void {
     // Value validation → error
     if (eqIndex >= 0) {
       const rawValue = line.slice(eqIndex + 1).trim();
-      if (rawValue === "") {
-        diagnostics.push(
-          Diagnostic.create(
-            {
-              start: { line: i, character: eqIndex + 1 },
-              end: { line: i, character: line.length },
-            },
-            "Expected a value",
-            DiagnosticSeverity.Error,
-          ),
-        );
-      } else {
+      if (rawValue !== "") {
         const schema = optionMap.get(
           key as Parameters<typeof optionMap.get>[0],
         );

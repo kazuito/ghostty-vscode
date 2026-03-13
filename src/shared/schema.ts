@@ -52,7 +52,7 @@ export const additiveKeys = new Set([
   "gtk-custom-css",
   "input",
   "palette",
-  
+
   "font-family",
   "font-family-bold",
   "font-family-italic",
@@ -63,7 +63,7 @@ export const additiveKeys = new Set([
   "font-variation-italic",
   "font-variation-bold-italic",
 
-  "env"
+  "env",
 ]);
 
 export const ghosttyConfigOptions = [
@@ -768,7 +768,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "click-repeat-interval",
-    schema: z.number().int().nonnegative(),
+    schema: durationString,
     desc: "Interval used for repeated click actions.",
   },
 
@@ -838,7 +838,7 @@ export const ghosttyConfigOptions = [
   },
   {
     key: "quick-terminal-animation-duration",
-    schema: z.number().int().nonnegative(),
+    schema: durationString,
     desc: "Animation duration for quick terminal show/hide.",
   },
   {
