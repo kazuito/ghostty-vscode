@@ -239,7 +239,7 @@ export const ghosttyConfigOptions = [
 
 	{
 		key: "grapheme-width-method",
-		schema: z.string(),
+		schema: z.enum(["legacy", "unicode"]),
 		desc: "Method used to determine grapheme width.",
 	},
 	{
@@ -286,12 +286,22 @@ export const ghosttyConfigOptions = [
 	},
 	{
 		key: "background-image-position",
-		schema: z.string(),
+		schema: z.enum([
+			"top-left",
+			"top-center",
+			"top-right",
+			"center-left",
+			"center",
+			"center-right",
+			"bottom-left",
+			"bottom-center",
+			"bottom-right",
+		]),
 		desc: "Placement of the background image.",
 	},
 	{
 		key: "background-image-fit",
-		schema: z.string(),
+		schema: z.enum(["contain", "cover", "stretch", "none"]),
 		desc: "Fit mode for the background image.",
 	},
 	{
