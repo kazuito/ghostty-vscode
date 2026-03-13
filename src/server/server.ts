@@ -1,4 +1,6 @@
 import {
+	CompletionItemKind,
+	type CompletionList,
 	createConnection,
 	type Hover,
 	ProposedFeatures,
@@ -7,7 +9,7 @@ import {
 	TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { ghosttyConfigOptions } from "../shared/schema";
+import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);
@@ -16,6 +18,7 @@ connection.onInitialize(() => ({
 	capabilities: {
 		textDocumentSync: TextDocumentSyncKind.Incremental,
 		hoverProvider: true,
+		completionProvider: { triggerCharacters: [] },
 	},
 }));
 
@@ -47,6 +50,46 @@ connection.onHover((params: TextDocumentPositionParams): Hover | null => {
 			value: `**${option.key}**\n\n${option.desc}\n\n[Documentation](https://ghostty.org/docs/config/reference#${option.key})`,
 		},
 	};
+});
+
+connection.onCompletion((params: TextDocumentPositionParams): CompletionList | null => {
+	const doc = documents.get(params.textDocument.uri);
+	if (!doc) return null;
+
+	// Only complete on lines that have no '=' yet (i.e. user is typing the key)
+	const line = doc.getText({
+		start: { line: params.position.line, character: 0 },
+		end: { line: params.position.line, character: params.position.character },
+	});
+	if (line.includes("=")) return null;
+
+	// Skip comment lines
+	if (line.trimStart().startsWith("#")) return null;
+
+	// Collect keys already used in the document (one per line before '=')
+	const usedKeys = new Set<string>();
+	const allText = doc.getText();
+	for (const l of allText.split("\n")) {
+		const t = l.trimStart();
+		if (t.startsWith("#") || t === "") continue;
+		const eq = l.indexOf("=");
+		const k = (eq >= 0 ? l.slice(0, eq) : l).trim();
+		if (k) usedKeys.add(k);
+	}
+
+	const prefix = line.trim();
+
+	const items = ghosttyConfigOptions
+		.filter((o) => additiveKeys.has(o.key) || !usedKeys.has(o.key) || o.key === prefix)
+		.filter((o) => o.key.startsWith(prefix))
+		.map((o) => ({
+			label: o.key,
+			kind: CompletionItemKind.Property,
+			detail: o.desc,
+			insertText: `${o.key} = `,
+		}));
+
+	return { isIncomplete: false, items };
 });
 
 documents.listen(connection);

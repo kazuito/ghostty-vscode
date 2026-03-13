@@ -35,6 +35,19 @@ const commandLike = z.string();
 const cssPath = z.string();
 const shaderPath = z.string();
 
+/**
+ * Keys that can appear multiple times in a single config file (additive/list semantics).
+ * These are never filtered out of completions even when already present in the document.
+ */
+export const additiveKeys = new Set([
+	"keybind",
+	"command-palette-entry",
+	"custom-shader",
+	"config-file",
+	"gtk-custom-css",
+	"input",
+]);
+
 export const ghosttyConfigOptions = [
 	{
 		key: "language",
