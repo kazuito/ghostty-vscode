@@ -24,8 +24,8 @@
 		"vscode:prepublish": "npm run compile",
 		"compile": "tsc -p ./",
 		"watch": "tsc -watch -p ./",
-		"lint": "biome lint",
-		"format": "biome format --write",
+		"lint": "biome lint src",
+		"format": "biome format --write src",
 		"test": "node ./out/test/runTest.js",
 		"typecheck": "tsc --noEmit",
 		"prepare": "husky"
