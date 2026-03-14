@@ -21,7 +21,7 @@
   "icon": "icon.png",
   "main": "./out/client/extension.js",
   "scripts": {
-    "vscode:prepublish": "npm run compile",
+    "vscode:prepublish": "pnpm compile",
     "compile": "tsc -p ./",
     "watch": "tsc -watch -p ./",
     "lint": "biome lint",

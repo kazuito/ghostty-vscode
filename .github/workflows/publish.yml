@@ -1,0 +1,48 @@
+name: Publish
+
+on:
+  push:
+    tags: ["v[0-9]+.[0-9]+.[0-9]+"]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: pnpm/action-setup@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+
+      - run: pnpm install --frozen-lockfile
+
+      - name: Lint & Type check
+        run: pnpm lint && pnpm typecheck
+
+      - name: Compile
+        run: pnpm compile
+
+      - name: Package
+        run: pnpm dlx @vscode/vsce package --out ghostty.vsix
+
+      - name: Publish to VS Code Marketplace
+        run: pnpm dlx @vscode/vsce publish --packagePath ghostty.vsix
+        env:
+          VSCE_PAT: ${{ secrets.VSCE_PAT }}
+
+      - name: Publish to Open VSX
+        run: pnpm dlx ovsx publish ghostty.vsix
+        env:
+          OVSX_PAT: ${{ secrets.OVSX_PAT }}
+
+      - name: Create GitHub Release
+        run: gh release create "${{ github.ref_name }}" ghostty.vsix --title "${{ github.ref_name }}" --generate-notes
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
