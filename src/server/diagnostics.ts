@@ -74,19 +74,25 @@ export function parseGhosttyOutput(
     const line = lines[lineNum];
     if (!line) continue;
 
-    // Reconstruct value range so code actions can target the right text
+    // Reconstruct the diagnostic range.
+    // Unknown-field errors implicate the key; value errors implicate the value.
     const eqIndex = line.indexOf("=");
+    const isUnknownField = message === "unknown field";
     let start: number;
     let end: number;
-    if (eqIndex >= 0) {
+    if (!isUnknownField && eqIndex >= 0) {
+      // Point at the value (after '=')
       const trimmedValue = line.slice(eqIndex + 1).trim();
       start = trimmedValue
         ? line.indexOf(trimmedValue, eqIndex + 1)
         : eqIndex + 1;
       end = trimmedValue ? start + trimmedValue.length : start;
     } else {
+      // Point at the key (before '=' or the whole token if no '=')
       const key = (match[2] ?? "").trim();
-      start = Math.max(0, line.indexOf(key));
+      const keyInLine = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
+      const keyIdx = keyInLine.indexOf(key);
+      start = Math.max(0, keyIdx >= 0 ? keyIdx : line.indexOf(key));
       end = start + key.length;
     }
 
