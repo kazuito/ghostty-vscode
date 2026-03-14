@@ -3,10 +3,7 @@
   "name": "Ghostty Config",
   "scopeName": "source.ghostty",
   "fileTypes": ["ghostty"],
-  "patterns": [
-    { "include": "#comment" },
-    { "include": "#assignment" }
-  ],
+  "patterns": [{ "include": "#comment" }, { "include": "#assignment" }],
   "repository": {
     "comment": {
       "name": "comment.line.number-sign.ghostty",
