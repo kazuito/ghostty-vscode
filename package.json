@@ -4,6 +4,7 @@
   "description": "Support for Ghostty configurations.",
   "version": "0.0.1",
   "publisher": "kazuito",
+	"license": "MIT",
   "repository": {
     "type": "git",
     "url": "https://github.com/kazuito/ghostty-vscode.git"
