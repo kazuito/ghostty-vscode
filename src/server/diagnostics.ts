@@ -153,6 +153,7 @@ async function validateDocumentAsync(
   doc: TextDocument,
   token: { cancelled: boolean },
   inProcessDiags: Diagnostic[],
+  lastCliDiags: Map<string, Diagnostic[]>,
 ): Promise<void> {
   const raw = await connection.workspace.getConfiguration({
     scopeUri: doc.uri,
@@ -165,6 +166,7 @@ async function validateDocumentAsync(
 
   const lines = doc.getText().split("\n");
   const cliDiags = parseGhosttyOutput(output, lines);
+  lastCliDiags.set(doc.uri, cliDiags);
 
   connection.sendDiagnostics({
     uri: doc.uri,
@@ -178,13 +180,20 @@ export function registerDiagnosticsProvider(
 ): void {
   const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
   const validationTokens = new Map<string, { cancelled: boolean }>();
+  // Last CLI diagnostics per URI — kept so they can be shown immediately on
+  // the next keystroke rather than disappearing until the subprocess finishes.
+  const lastCliDiags = new Map<string, Diagnostic[]>();
 
   function scheduleValidation(doc: TextDocument): void {
     const uri = doc.uri;
 
-    // 1. Fire in-process diagnostics immediately
+    // 1. Fire in-process diagnostics immediately, blending in the previous
+    //    CLI results so existing error decorations don't flash away.
     const inProcessDiags = validateInProcess(doc);
-    connection.sendDiagnostics({ uri, diagnostics: inProcessDiags });
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: [...inProcessDiags, ...(lastCliDiags.get(uri) ?? [])],
+    });
 
     // 2. Cancel pending debounce + invalidate previous async token
     clearTimeout(debounceTimers.get(uri));
@@ -198,7 +207,13 @@ export function registerDiagnosticsProvider(
       uri,
       setTimeout(() => {
         debounceTimers.delete(uri);
-        void validateDocumentAsync(connection, doc, token, inProcessDiags);
+        void validateDocumentAsync(
+          connection,
+          doc,
+          token,
+          inProcessDiags,
+          lastCliDiags,
+        );
       }, 100),
     );
   }
@@ -212,6 +227,7 @@ export function registerDiagnosticsProvider(
     const token = validationTokens.get(uri);
     if (token) token.cancelled = true;
     validationTokens.delete(uri);
+    lastCliDiags.delete(uri);
     connection.sendDiagnostics({ uri, diagnostics: [] });
   });
 }
