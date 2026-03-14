@@ -17,11 +17,6 @@
   "engines": {
     "vscode": "^1.100.0"
   },
-  "activationEvents": [
-    "workspaceContains:**/ghostty/config",
-    "workspaceContains:**/com.mitchellh.ghostty/config",
-    "workspaceContains:**/*.ghostty"
-  ],
   "categories": [
     "Programming Languages",
     "Formatters"

@@ -9,7 +9,7 @@ import type { TextDocument } from "vscode-languageserver-textdocument";
 import type { z } from "zod";
 import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 
-function extractValues(schema: z.ZodType): string[] | null {
+export function extractValues(schema: z.ZodType): string[] | null {
   // Zod v4: internal def is at schema._zod.def
   const def = (schema as unknown as { _zod: { def: Record<string, unknown> } })
     ._zod.def;

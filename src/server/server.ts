@@ -5,6 +5,7 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { registerCodeActionProvider } from "./codeActions";
 import { registerCompletionProvider } from "./completion";
 import { registerDiagnosticsProvider } from "./diagnostics";
 import { registerFormatterProvider } from "./formatter";
@@ -19,6 +20,7 @@ connection.onInitialize(() => ({
     hoverProvider: true,
     completionProvider: { triggerCharacters: [] },
     documentFormattingProvider: true,
+    codeActionProvider: true,
   },
 }));
 
@@ -26,6 +28,7 @@ registerHoverProvider(connection, documents);
 registerCompletionProvider(connection, documents);
 registerDiagnosticsProvider(connection, documents);
 registerFormatterProvider(connection, documents);
+registerCodeActionProvider(connection, documents);
 
 documents.listen(connection);
 connection.listen();

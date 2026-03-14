@@ -14,6 +14,7 @@ export function createMockConnection() {
   return {
     onHover: vi.fn(),
     onCompletion: vi.fn(),
+    onCodeAction: vi.fn(),
     sendDiagnostics: vi.fn(),
   };
 }
