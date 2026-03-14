@@ -934,8 +934,8 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "click-repeat-interval",
-    schema: durationString,
-    desc: "Interval for repeated click detection (double-click, triple-click). If unset, uses the platform default.",
+    schema: z.number().int().min(0),
+    desc: "Interval in milliseconds for repeated click detection (double-click, triple-click). Set to 0 to use the platform default.",
   },
 
   {
@@ -1313,9 +1313,9 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "gtk-titlebar-style",
-    schema: z.enum(["system", "primary", "flat"]),
-    default: "system",
-    desc: "Visual style of the GTK titlebar.",
+    schema: z.enum(["native", "tabs"]),
+    default: "native",
+    desc: "Style of the GTK titlebar. 'native': traditional titlebar with separate tab bar; 'tabs': tab bar integrated into the titlebar to save vertical space.",
   },
   {
     key: "gtk-wide-tabs",
