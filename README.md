@@ -3,7 +3,7 @@
 VS Code language support for [Ghostty](https://ghostty.org) configuration
 files, including validation, formatting, quick fixes, and outline support.
 
-![Demo](./demo.gif)
+![Demo](https://raw.githubusercontent.com/kazuito/ghostty-vscode/refs/heads/main/demo.gif)
 
 ## Features
 

@@ -19,7 +19,9 @@ function setupSymbols(content: string) {
 
   const getSymbols = (): DocumentSymbol[] => {
     if (!handler) return [];
-    return handler({ textDocument: { uri: "file:///test.ghostty" } }) as DocumentSymbol[];
+    return handler({
+      textDocument: { uri: "file:///test.ghostty" },
+    }) as DocumentSymbol[];
   };
 
   return { getSymbols };
@@ -105,7 +107,9 @@ describe("document symbols", () => {
     );
     const mockDocuments = { get: vi.fn(() => undefined) };
     registerDocumentSymbolProvider(connection as never, mockDocuments as never);
-    const result = handler?.({ textDocument: { uri: "file:///missing.ghostty" } });
+    const result = handler?.({
+      textDocument: { uri: "file:///missing.ghostty" },
+    });
     expect(result).toEqual([]);
   });
 });

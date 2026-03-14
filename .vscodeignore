@@ -1,3 +1,5 @@
+.claude/**
+.github/**
 .vscode/**
 .vscode-test/**
 .gitignore
@@ -9,6 +11,7 @@ biome.json
 pnpm-lock.yaml
 CLAUDE.md
 AGENTS.md
-test-config
+config.ghostty
 out/test/**
 vitest.config.ts
+demo.gif

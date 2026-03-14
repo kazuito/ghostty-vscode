@@ -40,7 +40,13 @@ export function registerDocumentSymbolProvider(
         };
 
         symbols.push(
-          DocumentSymbol.create(key, undefined, SymbolKind.Property, lineRange, selectionRange),
+          DocumentSymbol.create(
+            key,
+            undefined,
+            SymbolKind.Property,
+            lineRange,
+            selectionRange,
+          ),
         );
       }
 

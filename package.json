@@ -30,6 +30,7 @@
   ],
   "icon": "icon.png",
   "main": "./out/client/extension.js",
+  "activationEvents": [],
   "scripts": {
     "vscode:prepublish": "pnpm compile",
     "compile": "tsc -p ./",
