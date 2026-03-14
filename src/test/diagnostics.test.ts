@@ -102,10 +102,11 @@ describe("parseGhosttyOutput", () => {
     expect(diags[0]?.range.start.line).toBe(2);
   });
 
-  it("filters out unknown field messages", () => {
+  it("passes through unknown field messages from CLI", () => {
     const output = "/tmp/ghostty-test:1:badkey: unknown field";
     const diags = parseGhosttyOutput(output, ["badkey = foo"]);
-    expect(diags).toHaveLength(0);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.message).toContain("unknown field");
   });
 
   it("handles macOS /private/tmp path prefix", () => {
@@ -193,39 +194,6 @@ describe("diagnostics provider - no diagnostics", () => {
       "font-thicken-strength = 128",
     );
     expect(await getDiagnostics()).toHaveLength(0);
-  });
-});
-
-// ─── Integration: unknown key ─────────────────────────────────────────────────
-
-describe("diagnostics provider - unknown key", () => {
-  it("produces a warning diagnostic for unknown key", async () => {
-    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
-    const diags = await getDiagnostics();
-    const warning = diags.find(
-      (d) => d.severity === DiagnosticSeverity.Warning,
-    );
-    expect(warning).toBeDefined();
-  });
-
-  it("warning message contains the unknown key name", async () => {
-    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
-    const diags = await getDiagnostics();
-    const warning = diags.find(
-      (d) => d.severity === DiagnosticSeverity.Warning,
-    );
-    expect(warning?.message).toContain("not-a-real-key");
-  });
-
-  it("unknown key range points to the key on its line", async () => {
-    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
-    const diags = await getDiagnostics();
-    const warning = diags.find(
-      (d) => d.severity === DiagnosticSeverity.Warning,
-    );
-    expect(warning?.range.start.line).toBe(0);
-    expect(warning?.range.start.character).toBe(0);
-    expect(warning?.range.end.character).toBe("not-a-real-key".length);
   });
 });
 
@@ -377,7 +345,7 @@ describe("diagnostics provider - value validation", () => {
 describe("diagnostics provider - document close", () => {
   it("closing a document clears its diagnostics", async () => {
     const { getDiagnostics, getCloseDiagnostics } = await setupDiagnostics(
-      "not-a-real-key = value",
+      "font-size = 12\nfont-size = 14",
     );
     expect((await getDiagnostics()).length).toBeGreaterThan(0);
     expect(getCloseDiagnostics()).toHaveLength(0);
@@ -391,28 +359,26 @@ describe("diagnostics provider - mixed document", () => {
     const content = [
       "# valid comment",
       "font-size = 14", // valid
-      "not-a-key = value", // unknown key → warning
-      "font-thicken = bad", // invalid boolean → error (line 4, 1-indexed)
-      "font-size = 16", // duplicate → info
+      "not-a-key = value", // unknown key → CLI error (line 3, 1-indexed)
+      "font-thicken = bad", // invalid boolean → CLI error (line 4, 1-indexed)
+      "font-size = 16", // duplicate → in-process info
     ].join("\n");
 
-    // ghostty would report error on line 4 (1-indexed) for font-thicken
-    const ghosttyOutput =
-      '/tmp/mock:4:font-thicken: invalid value "bad", valid values are: true, false';
+    // ghostty reports errors for both the unknown key and invalid boolean
+    const ghosttyOutput = [
+      "/tmp/mock:3:not-a-key: unknown field",
+      '/tmp/mock:4:font-thicken: invalid value "bad", valid values are: true, false',
+    ].join("\n");
 
     const { getDiagnostics } = await setupDiagnostics(content, ghosttyOutput);
     const diags = await getDiagnostics();
 
-    const warnings = diags.filter(
-      (d) => d.severity === DiagnosticSeverity.Warning,
-    );
     const errors = diags.filter((d) => d.severity === DiagnosticSeverity.Error);
     const infos = diags.filter(
       (d) => d.severity === DiagnosticSeverity.Information,
     );
 
-    expect(warnings).toHaveLength(1);
-    expect(errors).toHaveLength(1);
+    expect(errors).toHaveLength(2);
     expect(infos).toHaveLength(1);
   });
 });

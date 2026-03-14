@@ -59,8 +59,7 @@ export function parseGhosttyOutput(
     const lineNum = parseInt(match[1], 10) - 1; // 1-based → 0-based
     const message = match[3].trim();
 
-    // Filter: we handle unknown keys in-process with better messaging
-    if (message.toLowerCase().includes("unknown field")) continue;
+    // Unknown keys are handled by CLI validation below
 
     if (lineNum < 0 || lineNum >= lines.length) continue;
     const line = lines[lineNum];
@@ -118,17 +117,8 @@ function validateInProcess(doc: TextDocument): Diagnostic[] {
       end: { line: i, character: keyStart + key.length },
     };
 
-    // Unknown key → warning
-    if (!validKeys.has(key)) {
-      diagnostics.push(
-        Diagnostic.create(
-          keyRange,
-          `Unknown Ghostty config key: '${key}'`,
-          DiagnosticSeverity.Warning,
-        ),
-      );
-      continue;
-    }
+    // Unknown key → skip in-process (CLI handles this)
+    if (!validKeys.has(key)) continue;
 
     // Duplicate key → info (skip additive keys)
     if (!additiveKeys.has(key)) {
