@@ -12,6 +12,7 @@ pnpm-lock.yaml
 CLAUDE.md
 AGENTS.md
 config.ghostty
+node_modules/**
 out/test/**
 vitest.config.ts
 demo.gif

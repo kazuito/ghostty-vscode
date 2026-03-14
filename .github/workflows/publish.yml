@@ -26,11 +26,11 @@ jobs:
       - name: Lint & Type check
         run: pnpm lint && pnpm typecheck
 
-      - name: Compile
-        run: pnpm compile
-
       - name: Test
         run: pnpm test
+
+      - name: Bundle
+        run: pnpm bundle
 
       - name: Package
         run: pnpm dlx @vscode/vsce package --no-dependencies --out ghostty.vsix

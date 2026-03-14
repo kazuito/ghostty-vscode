@@ -1,3 +1,4 @@
 pnpm lint
-pnpm compile
+pnpm typecheck
+pnpm bundle
 pnpm test

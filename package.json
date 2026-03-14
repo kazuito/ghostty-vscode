@@ -30,11 +30,10 @@
   ],
   "icon": "icon.png",
   "main": "./out/client/extension.js",
-  "activationEvents": [],
   "scripts": {
-    "vscode:prepublish": "pnpm compile",
-    "compile": "tsc -p ./",
-    "watch": "tsc -watch -p ./",
+    "vscode:prepublish": "pnpm bundle",
+    "bundle": "rolldown --config rolldown.config.ts",
+    "watch": "rolldown --config rolldown.config.ts --watch",
     "lint": "biome lint",
     "format": "biome format --write",
     "test": "vitest run",
@@ -52,6 +51,7 @@
     "@types/node": "~25.5.0",
     "@types/vscode": "^1.100.0",
     "husky": "^9.1.7",
+    "rolldown": "1.0.0-rc.9",
     "typescript": "^5.9.3",
     "vitest": "^4.1.0"
   },
