@@ -24,6 +24,7 @@
             { "include": "#boolean" },
             { "include": "#enum" },
             { "include": "#sub-assignment" },
+            { "include": "#duration" },
             { "include": "#number" },
             { "include": "#color" },
             { "include": "#codepoint" },
@@ -45,6 +46,7 @@
         { "include": "#quoted-string" },
         { "include": "#boolean" },
         { "include": "#enum" },
+        { "include": "#duration" },
         { "include": "#number" },
         { "include": "#color" },
         { "include": "#codepoint" },
@@ -82,6 +84,14 @@
         {
           "name": "constant.language.enum.ghostty",
           "match": "\\b(?:native|linear|linear-corrected|block|bar|underline|block_hollow|system|always|never|auto|epoll|io_uring|off|check|download|stable|tip|ask|allow|deny|srgb|display-p3|bright)\\b"
+        }
+      ]
+    },
+    "duration": {
+      "patterns": [
+        {
+          "name": "constant.numeric.duration.ghostty",
+          "match": "(?<![\\w-])(?:\\d+(?:ms|us|µs|ns|[ydhms]))+(?![\\w])"
         }
       ]
     },
