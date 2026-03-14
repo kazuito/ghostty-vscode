@@ -4,9 +4,25 @@
   "version": "2.0.0",
   "tasks": [
     {
-      "type": "npm",
-      "script": "watch",
-      "problemMatcher": "$tsc-watch",
+      "label": "pnpm: watch",
+      "type": "shell",
+      "command": "pnpm",
+      "args": [
+        "watch"
+      ],
+      "problemMatcher": [
+        {
+          "owner": "rolldown",
+          "pattern": {
+            "regexp": "^(?!x)x"
+          },
+          "background": {
+            "activeOnStart": true,
+            "beginsPattern": "^> ghostty@.+ watch .*$",
+            "endsPattern": "^Waiting for changes\\.\\.\\.$"
+          }
+        }
+      ],
       "isBackground": true,
       "presentation": {
         "reveal": "never"

@@ -327,6 +327,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
     key: "theme",
     schema: z.string(),
     desc: "Named Ghostty color theme to load. Supports separate light/dark themes via 'dark:<name>,light:<name>' syntax.",
+    comma: true,
   },
   {
     key: "background",

@@ -9,9 +9,13 @@
       "name": "Extension",
       "type": "extensionHost",
       "request": "launch",
-      "args": ["--extensionDevelopmentPath=${workspaceFolder}"],
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "args": [
+        "--extensionDevelopmentPath=${workspaceFolder}"
+      ],
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ],
+      "preLaunchTask": "pnpm: watch"
     },
     {
       "name": "Attach to Server",
@@ -19,8 +23,18 @@
       "request": "attach",
       "port": 6009,
       "restart": true,
-      "outFiles": ["${workspaceFolder}/out/**/*.js"],
-      "preLaunchTask": "${defaultBuildTask}"
+      "outFiles": [
+        "${workspaceFolder}/out/**/*.js"
+      ]
+    }
+  ],
+  "compounds": [
+    {
+      "name": "Extension + Server",
+      "configurations": [
+        "Extension",
+        "Attach to Server"
+      ]
     }
   ]
 }

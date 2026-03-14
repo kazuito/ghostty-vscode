@@ -1,12 +1,46 @@
-import { describe, expect, it, vi } from "vitest";
+import { describe, expect, it, vi, beforeEach } from "vitest";
 import {
   type Diagnostic,
   DiagnosticSeverity,
 } from "vscode-languageserver/node";
-import { registerDiagnosticsProvider } from "../server/diagnostics";
+
+vi.mock("node:child_process");
+vi.mock("node:fs/promises");
+
+import { execFile } from "node:child_process";
+import { writeFile, unlink } from "node:fs/promises";
+import {
+  registerDiagnosticsProvider,
+  parseGhosttyOutput,
+} from "../server/diagnostics";
 import { createDocument, createMockConnection } from "./helpers";
 
-function setupDiagnostics(content: string) {
+beforeEach(() => {
+  vi.clearAllMocks();
+  vi.useRealTimers();
+  vi.mocked(writeFile).mockResolvedValue(undefined);
+  vi.mocked(unlink).mockResolvedValue(undefined);
+});
+
+async function setupDiagnostics(content: string, ghosttyOutput = "") {
+  vi.useFakeTimers();
+
+  vi.mocked(execFile).mockImplementation(
+    (_cmd: unknown, _args: unknown, _opts: unknown, callback: unknown) => {
+      const cb = callback as (
+        err: Error | null,
+        stdout: string,
+        stderr: string,
+      ) => void;
+      if (ghosttyOutput.trim()) {
+        cb(Object.assign(new Error("exit 1"), { code: 1 }), ghosttyOutput, "");
+      } else {
+        cb(null, "", "");
+      }
+      return {} as ReturnType<typeof execFile>;
+    },
+  );
+
   const doc = createDocument(content);
   const connection = createMockConnection();
 
@@ -30,8 +64,9 @@ function setupDiagnostics(content: string) {
 
   registerDiagnosticsProvider(connection as never, mockDocuments as never);
 
-  const getDiagnostics = (): Diagnostic[] => {
+  const getDiagnostics = async (): Promise<Diagnostic[]> => {
     handlers.onDidOpen!({ document: doc });
+    await vi.runAllTimersAsync();
     const calls = connection.sendDiagnostics.mock.calls;
     return (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? [];
   };
@@ -45,73 +80,146 @@ function setupDiagnostics(content: string) {
   return { getDiagnostics, getCloseDiagnostics };
 }
 
-describe("diagnostics provider - no diagnostics", () => {
-  it("empty document produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("");
-    expect(getDiagnostics()).toHaveLength(0);
+// ─── parseGhosttyOutput unit tests ──────────────────────────────────────────
+
+describe("parseGhosttyOutput", () => {
+  it("parses a single error line into a diagnostic", () => {
+    const output =
+      '/tmp/ghostty-test:1:font-thicken: invalid value "notabool", valid values are: true, false';
+    const lines = ["font-thicken = notabool"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.severity).toBe(DiagnosticSeverity.Error);
+    expect(diags[0]?.message).toContain("notabool");
+    expect(diags[0]?.range.start.line).toBe(0);
   });
 
-  it("comment-only document produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("# this is a comment");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("maps 1-based line numbers to 0-based", () => {
+    const output = "/tmp/ghostty-test:3:font-size: invalid value";
+    const lines = ["", "", "font-size = bad"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.range.start.line).toBe(2);
   });
 
-  it("valid boolean value produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("font-thicken = true");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("filters out unknown field messages", () => {
+    const output = "/tmp/ghostty-test:1:badkey: unknown field";
+    const diags = parseGhosttyOutput(output, ["badkey = foo"]);
+    expect(diags).toHaveLength(0);
   });
 
-  it("valid boolean false produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("font-thicken = false");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("handles macOS /private/tmp path prefix", () => {
+    const output =
+      '/private/tmp/ghostty-abc:1:cursor-style: invalid value "xxx", valid values are: bar, block, underline, block_hollow';
+    const lines = ["cursor-style = xxx"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.message).toContain("xxx");
   });
 
-  it("valid positive number produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("font-size = 14");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("points the range at the value, not the key", () => {
+    const output = '/tmp/ghostty-test:1:font-size: invalid value "bad"';
+    const lines = ["font-size = bad"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags[0]?.range.start.character).toBe("font-size = ".length);
+    expect(diags[0]?.range.end.character).toBe("font-size = bad".length);
   });
 
-  it("valid enum value produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics("alpha-blending = native");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("skips lines with out-of-range line numbers", () => {
+    const output = "/tmp/ghostty-test:99:font-size: invalid value";
+    const diags = parseGhosttyOutput(output, ["font-size = bad"]);
+    expect(diags).toHaveLength(0);
   });
 
-  it("duplicate additive key produces no diagnostics", () => {
-    const { getDiagnostics } = setupDiagnostics(
-      "keybind = ctrl+a\nkeybind = ctrl+b",
-    );
-    expect(getDiagnostics()).toHaveLength(0);
+  it("parses multiple error lines", () => {
+    const output = [
+      '/tmp/ghostty-test:1:font-size: invalid value "bad"',
+      '/tmp/ghostty-test:2:cursor-style: invalid value "xxx"',
+    ].join("\n");
+    const lines = ["font-size = bad", "cursor-style = xxx"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(2);
   });
 
-  it("valid number within min/max range produces no diagnostics", () => {
-    // font-thicken-strength: z.number().int().min(0).max(255)
-    const { getDiagnostics } = setupDiagnostics("font-thicken-strength = 128");
-    expect(getDiagnostics()).toHaveLength(0);
+  it("returns empty array for empty output", () => {
+    expect(parseGhosttyOutput("", ["font-size = 14"])).toHaveLength(0);
   });
 });
 
+// ─── Integration: no diagnostics ─────────────────────────────────────────────
+
+describe("diagnostics provider - no diagnostics", () => {
+  it("empty document produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics("");
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("comment-only document produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics("# this is a comment");
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("valid boolean value produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics("font-thicken = true");
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("valid boolean false produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics("font-thicken = false");
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("valid positive number produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics("font-size = 14");
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("valid enum value produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
+      "alpha-blending = native",
+    );
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("duplicate additive key produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
+      "keybind = ctrl+a\nkeybind = ctrl+b",
+    );
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+
+  it("valid number within min/max range produces no diagnostics", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-thicken-strength = 128",
+    );
+    expect(await getDiagnostics()).toHaveLength(0);
+  });
+});
+
+// ─── Integration: unknown key ─────────────────────────────────────────────────
+
 describe("diagnostics provider - unknown key", () => {
-  it("produces a warning diagnostic for unknown key", () => {
-    const { getDiagnostics } = setupDiagnostics("not-a-real-key = value");
-    const diags = getDiagnostics();
+  it("produces a warning diagnostic for unknown key", async () => {
+    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
+    const diags = await getDiagnostics();
     const warning = diags.find(
       (d) => d.severity === DiagnosticSeverity.Warning,
     );
     expect(warning).toBeDefined();
   });
 
-  it("warning message contains the unknown key name", () => {
-    const { getDiagnostics } = setupDiagnostics("not-a-real-key = value");
-    const diags = getDiagnostics();
+  it("warning message contains the unknown key name", async () => {
+    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
+    const diags = await getDiagnostics();
     const warning = diags.find(
       (d) => d.severity === DiagnosticSeverity.Warning,
     );
     expect(warning?.message).toContain("not-a-real-key");
   });
 
-  it("unknown key range points to the key on its line", () => {
-    const { getDiagnostics } = setupDiagnostics("not-a-real-key = value");
-    const diags = getDiagnostics();
+  it("unknown key range points to the key on its line", async () => {
+    const { getDiagnostics } = await setupDiagnostics("not-a-real-key = value");
+    const diags = await getDiagnostics();
     const warning = diags.find(
       (d) => d.severity === DiagnosticSeverity.Warning,
     );
@@ -121,23 +229,25 @@ describe("diagnostics provider - unknown key", () => {
   });
 });
 
+// ─── Integration: duplicate key ──────────────────────────────────────────────
+
 describe("diagnostics provider - duplicate key", () => {
-  it("produces an information diagnostic for duplicate non-additive key", () => {
-    const { getDiagnostics } = setupDiagnostics(
+  it("produces an information diagnostic for duplicate non-additive key", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
       "font-size = 12\nfont-size = 14",
     );
-    const diags = getDiagnostics();
+    const diags = await getDiagnostics();
     const info = diags.find(
       (d) => d.severity === DiagnosticSeverity.Information,
     );
     expect(info).toBeDefined();
   });
 
-  it("duplicate message includes key name and first-seen line number", () => {
-    const { getDiagnostics } = setupDiagnostics(
+  it("duplicate message includes key name and first-seen line number", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
       "font-size = 12\nfont-size = 14",
     );
-    const diags = getDiagnostics();
+    const diags = await getDiagnostics();
     const info = diags.find(
       (d) => d.severity === DiagnosticSeverity.Information,
     );
@@ -145,11 +255,11 @@ describe("diagnostics provider - duplicate key", () => {
     expect(info?.message).toContain("line 1");
   });
 
-  it("duplicate diagnostic is on the second occurrence line", () => {
-    const { getDiagnostics } = setupDiagnostics(
+  it("duplicate diagnostic is on the second occurrence line", async () => {
+    const { getDiagnostics } = await setupDiagnostics(
       "font-size = 12\nfont-size = 14",
     );
-    const diags = getDiagnostics();
+    const diags = await getDiagnostics();
     const info = diags.find(
       (d) => d.severity === DiagnosticSeverity.Information,
     );
@@ -157,59 +267,94 @@ describe("diagnostics provider - duplicate key", () => {
   });
 });
 
+// ─── Integration: value validation (via mocked CLI) ──────────────────────────
+
 describe("diagnostics provider - value validation", () => {
-  it("invalid boolean value produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics("font-thicken = notabool");
-    const diags = getDiagnostics();
+  it("invalid boolean value produces an error", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:font-thicken: invalid value "notabool", valid values are: true, false';
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-thicken = notabool",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
-  it("boolean error message mentions true and false", () => {
-    const { getDiagnostics } = setupDiagnostics("font-thicken = notabool");
-    const diags = getDiagnostics();
+  it("boolean error message mentions true and false", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:font-thicken: invalid value "notabool", valid values are: true, false';
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-thicken = notabool",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error?.message).toContain("true");
     expect(error?.message).toContain("false");
   });
 
-  it("invalid enum value produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics("alpha-blending = bad-value");
-    const diags = getDiagnostics();
+  it("invalid enum value produces an error", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:alpha-blending: invalid value "bad-value", valid values are: native, linear-corrected';
+    const { getDiagnostics } = await setupDiagnostics(
+      "alpha-blending = bad-value",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
-  it("enum error message lists valid values", () => {
-    const { getDiagnostics } = setupDiagnostics("alpha-blending = bad-value");
-    const diags = getDiagnostics();
+  it("enum error message lists valid values", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:alpha-blending: invalid value "bad-value", valid values are: native, linear-corrected';
+    const { getDiagnostics } = await setupDiagnostics(
+      "alpha-blending = bad-value",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error?.message).toContain("native");
   });
 
-  it("non-numeric value for number key produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics("font-size = abc");
-    const diags = getDiagnostics();
+  it("non-numeric value for number key produces an error", async () => {
+    const ghosttyOutput = '/tmp/mock:1:font-size: invalid value "abc"';
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-size = abc",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
-  it("number below minimum produces an error", () => {
-    // font-thicken-strength: z.number().int().min(0).max(255)
-    const { getDiagnostics } = setupDiagnostics("font-thicken-strength = -1");
-    const diags = getDiagnostics();
+  it("number below minimum produces an error", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:font-thicken-strength: invalid value "-1"';
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-thicken-strength = -1",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
-  it("number above maximum produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics("font-thicken-strength = 256");
-    const diags = getDiagnostics();
+  it("number above maximum produces an error", async () => {
+    const ghosttyOutput =
+      '/tmp/mock:1:font-thicken-strength: invalid value "256"';
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-thicken-strength = 256",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
-  it("accepts the corrected valid values for the reported Ghostty keys", () => {
+  it("valid values produce no errors when CLI returns no output", async () => {
     const lines = [
       "scrollbar = never",
       "window-subtitle = working-directory",
@@ -219,53 +364,44 @@ describe("diagnostics provider - value validation", () => {
       "macos-applescript = true",
       "gtk-tabs-location = top",
     ];
-    const { getDiagnostics } = setupDiagnostics(lines.join("\n"));
-    const errors = getDiagnostics().filter(
+    const { getDiagnostics } = await setupDiagnostics(lines.join("\n"));
+    const errors = (await getDiagnostics()).filter(
       (d) => d.severity === DiagnosticSeverity.Error,
     );
     expect(errors).toHaveLength(0);
   });
-
-  it("rejects the runtime-invalid values reported by Ghostty", () => {
-    const lines = [
-      "scrollbar = always",
-      "window-subtitle = schema stress profile",
-      "quick-terminal-animation-duration = 180ms",
-      "app-notifications = clipboard-paste",
-      "macos-hidden = false",
-      "macos-applescript = allow",
-      "gtk-tabs-location = left",
-    ];
-    const { getDiagnostics } = setupDiagnostics(lines.join("\n"));
-    const errors = getDiagnostics().filter(
-      (d) => d.severity === DiagnosticSeverity.Error,
-    );
-    expect(errors).toHaveLength(lines.length);
-  });
 });
 
+// ─── Integration: document close ─────────────────────────────────────────────
+
 describe("diagnostics provider - document close", () => {
-  it("closing a document clears its diagnostics", () => {
-    const { getDiagnostics, getCloseDiagnostics } = setupDiagnostics(
+  it("closing a document clears its diagnostics", async () => {
+    const { getDiagnostics, getCloseDiagnostics } = await setupDiagnostics(
       "not-a-real-key = value",
     );
-    expect(getDiagnostics().length).toBeGreaterThan(0);
+    expect((await getDiagnostics()).length).toBeGreaterThan(0);
     expect(getCloseDiagnostics()).toHaveLength(0);
   });
 });
 
+// ─── Integration: mixed document ─────────────────────────────────────────────
+
 describe("diagnostics provider - mixed document", () => {
-  it("handles multiple issues in one document", () => {
+  it("handles multiple issues in one document", async () => {
     const content = [
       "# valid comment",
       "font-size = 14", // valid
       "not-a-key = value", // unknown key → warning
-      "font-thicken = bad", // invalid boolean → error
+      "font-thicken = bad", // invalid boolean → error (line 4, 1-indexed)
       "font-size = 16", // duplicate → info
     ].join("\n");
 
-    const { getDiagnostics } = setupDiagnostics(content);
-    const diags = getDiagnostics();
+    // ghostty would report error on line 4 (1-indexed) for font-thicken
+    const ghosttyOutput =
+      '/tmp/mock:4:font-thicken: invalid value "bad", valid values are: true, false';
+
+    const { getDiagnostics } = await setupDiagnostics(content, ghosttyOutput);
+    const diags = await getDiagnostics();
 
     const warnings = diags.filter(
       (d) => d.severity === DiagnosticSeverity.Warning,

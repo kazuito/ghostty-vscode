@@ -1,3 +1,8 @@
+import { execFile } from "node:child_process";
+import { randomBytes } from "node:crypto";
+import { unlink, writeFile } from "node:fs/promises";
+import { tmpdir } from "node:os";
+import { join } from "node:path";
 import {
   type Connection,
   Diagnostic,
@@ -5,126 +10,93 @@ import {
   type TextDocuments,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import type { z } from "zod";
 import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 
 const validKeys = new Set<string>(ghosttyConfigOptions.map((o) => o.key));
-const optionMap = new Map(ghosttyConfigOptions.map((o) => [o.key, o]));
 
-function getZodDef(schema: z.ZodType): Record<string, unknown> {
-  return (schema as unknown as { _zod: { def: Record<string, unknown> } })._zod
-    .def;
+// On macOS, Ghostty ships as an app bundle and may not be on the default PATH.
+const GHOSTTY_PATH_ENV =
+  process.platform === "darwin"
+    ? `${process.env.PATH ?? ""}:/Applications/Ghostty.app/Contents/MacOS`
+    : process.env.PATH;
+
+async function runGhosttyValidation(content: string): Promise<string> {
+  const tmpPath = join(
+    tmpdir(),
+    `ghostty-validate-${randomBytes(6).toString("hex")}`,
+  );
+  try {
+    await writeFile(tmpPath, content, "utf8");
+    return await new Promise<string>((resolve) => {
+      execFile(
+        "ghostty",
+        ["+validate-config", `--config-file=${tmpPath}`],
+        { timeout: 5000, env: { ...process.env, PATH: GHOSTTY_PATH_ENV } },
+        (_err, stdout, stderr) => {
+          resolve(`${stdout}\n${stderr}`);
+        },
+      );
+    });
+  } catch {
+    return "";
+  } finally {
+    unlink(tmpPath).catch(() => {});
+  }
 }
 
-function validateValue(schema: z.ZodType, raw: string): string | null {
-  const def = getZodDef(schema);
-  const type = def.type as string;
+export function parseGhosttyOutput(
+  output: string,
+  lines: string[],
+): Diagnostic[] {
+  const diagnostics: Diagnostic[] = [];
+  // Match: <path>:<linenum>:<key>: <message>
+  const lineRegex = /^.+?:(\d+):([^:]+):\s*(.+)$/;
 
-  if (type === "boolean") {
-    if (raw !== "true" && raw !== "false") {
-      return "Expected 'true' or 'false'";
+  for (const rawLine of output.split("\n")) {
+    const match = rawLine.match(lineRegex);
+    if (!match) continue;
+
+    const lineNum = parseInt(match[1], 10) - 1; // 1-based → 0-based
+    const message = match[3].trim();
+
+    // Filter: we handle unknown keys in-process with better messaging
+    if (message.toLowerCase().includes("unknown field")) continue;
+
+    if (lineNum < 0 || lineNum >= lines.length) continue;
+    const line = lines[lineNum];
+    if (!line) continue;
+
+    // Reconstruct value range so code actions can target the right text
+    const eqIndex = line.indexOf("=");
+    let start: number;
+    let end: number;
+    if (eqIndex >= 0) {
+      const trimmedValue = line.slice(eqIndex + 1).trim();
+      start = trimmedValue
+        ? line.indexOf(trimmedValue, eqIndex + 1)
+        : eqIndex + 1;
+      end = trimmedValue ? start + trimmedValue.length : start;
+    } else {
+      const key = (match[2] ?? "").trim();
+      start = Math.max(0, line.indexOf(key));
+      end = start + key.length;
     }
-    return null;
+
+    diagnostics.push(
+      Diagnostic.create(
+        {
+          start: { line: lineNum, character: start },
+          end: { line: lineNum, character: end },
+        },
+        message,
+        DiagnosticSeverity.Error,
+      ),
+    );
   }
-
-  if (type === "number") {
-    const n = Number(raw);
-    if (Number.isNaN(n)) {
-      return "Expected a number";
-    }
-    type ZodCheckDef = { check: string; value: number; inclusive: boolean };
-    type ZodCheck = { _zod?: { def?: ZodCheckDef } };
-    const checks = (def.checks as ZodCheck[]) ?? [];
-    for (const check of checks) {
-      const checkDef = check._zod?.def;
-      if (!checkDef) continue;
-      if (checkDef.check === "greater_than") {
-        if (checkDef.inclusive && n < checkDef.value) {
-          return `Expected a number >= ${checkDef.value}`;
-        }
-        if (!checkDef.inclusive && n <= checkDef.value) {
-          return `Expected a number > ${checkDef.value}`;
-        }
-      }
-      if (checkDef.check === "less_than") {
-        if (checkDef.inclusive && n > checkDef.value) {
-          return `Expected a number <= ${checkDef.value}`;
-        }
-        if (!checkDef.inclusive && n >= checkDef.value) {
-          return `Expected a number < ${checkDef.value}`;
-        }
-      }
-    }
-    return null;
-  }
-
-  if (type === "enum") {
-    const entries = def.entries as Record<string, unknown>;
-    if (!(raw in entries)) {
-      const allowed = Object.keys(entries).join(", ");
-      return `Expected one of: ${allowed}`;
-    }
-    return null;
-  }
-
-  if (type === "literal") {
-    const values = def.values as unknown[];
-    if (!values.includes(raw)) {
-      return `Expected one of: ${values.join(", ")}`;
-    }
-    return null;
-  }
-
-  if (type === "union") {
-    const options = (def.options as z.ZodType[]) ?? [];
-    // If any option is an unconstrained string, skip validation
-    for (const opt of options) {
-      const optDef = getZodDef(opt);
-      if (
-        optDef.type === "string" &&
-        !(optDef.checks as unknown[])?.length &&
-        !optDef.regex
-      ) {
-        return null;
-      }
-    }
-    // Try each option; pass if any succeeds
-    for (const opt of options) {
-      if (validateValue(opt, raw) === null) {
-        return null;
-      }
-    }
-    // Build error message from enum/literal/boolean options
-    const allowed: string[] = [];
-    for (const opt of options) {
-      const optDef = getZodDef(opt);
-      if (optDef.type === "enum") {
-        allowed.push(...Object.keys(optDef.entries as Record<string, unknown>));
-      } else if (optDef.type === "literal") {
-        allowed.push(...(optDef.values as unknown[]).map(String));
-      } else if (optDef.type === "boolean") {
-        allowed.push("true", "false");
-      }
-    }
-    if (allowed.length > 0) {
-      return `Expected one of: ${[...new Set(allowed)].join(", ")}`;
-    }
-    return "Invalid value";
-  }
-
-  if (type === "string") {
-    const result = schema.safeParse(raw);
-    if (!result.success) {
-      const issue = result.error.issues[0];
-      return issue?.message ?? "Invalid value";
-    }
-    return null;
-  }
-
-  return null;
+  return diagnostics;
 }
 
-function validateDocument(connection: Connection, doc: TextDocument): void {
+function validateInProcess(doc: TextDocument): Diagnostic[] {
   const diagnostics: Diagnostic[] = [];
   const lines = doc.getText().split("\n");
   const seenKeys = new Map<string, number>(); // key → first-seen line index
@@ -172,61 +144,69 @@ function validateDocument(connection: Connection, doc: TextDocument): void {
         seenKeys.set(key, i);
       }
     }
-
-    // Value validation → error
-    if (eqIndex >= 0) {
-      const rawValue = line.slice(eqIndex + 1).trim();
-      if (rawValue !== "") {
-        const entry = optionMap.get(key as Parameters<typeof optionMap.get>[0]);
-        if (entry) {
-          const parts: { token: string; offset: number }[] = [];
-          if (entry.comma) {
-            // Split on commas (with optional surrounding spaces), track each token's position
-            let searchFrom = eqIndex + 1;
-            for (const token of rawValue.split(/\s*,\s*/)) {
-              const tokenStart = line.indexOf(token, searchFrom);
-              parts.push({ token, offset: tokenStart });
-              searchFrom = tokenStart + token.length;
-            }
-          } else {
-            const valueStart = line.indexOf(rawValue, eqIndex + 1);
-            parts.push({ token: rawValue, offset: valueStart });
-          }
-
-          for (const { token, offset } of parts) {
-            const unquoted =
-              token.startsWith('"') && token.endsWith('"') && token.length >= 2
-                ? token.slice(1, -1)
-                : token;
-            const error = validateValue(entry.schema, unquoted);
-            if (error) {
-              diagnostics.push(
-                Diagnostic.create(
-                  {
-                    start: { line: i, character: offset },
-                    end: { line: i, character: offset + token.length },
-                  },
-                  error,
-                  DiagnosticSeverity.Error,
-                ),
-              );
-            }
-          }
-        }
-      }
-    }
   }
 
-  connection.sendDiagnostics({ uri: doc.uri, diagnostics });
+  return diagnostics;
+}
+
+async function validateDocumentAsync(
+  connection: Connection,
+  doc: TextDocument,
+  token: { cancelled: boolean },
+  inProcessDiags: Diagnostic[],
+): Promise<void> {
+  const output = await runGhosttyValidation(doc.getText());
+  if (token.cancelled) return;
+
+  const lines = doc.getText().split("\n");
+  const cliDiags = parseGhosttyOutput(output, lines);
+
+  connection.sendDiagnostics({
+    uri: doc.uri,
+    diagnostics: [...inProcessDiags, ...cliDiags],
+  });
 }
 
 export function registerDiagnosticsProvider(
   connection: Connection,
   documents: TextDocuments<TextDocument>,
 ): void {
-  documents.onDidOpen((e) => validateDocument(connection, e.document));
-  documents.onDidChangeContent((e) => validateDocument(connection, e.document));
-  documents.onDidClose((e) =>
-    connection.sendDiagnostics({ uri: e.document.uri, diagnostics: [] }),
-  );
+  const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
+  const validationTokens = new Map<string, { cancelled: boolean }>();
+
+  function scheduleValidation(doc: TextDocument): void {
+    const uri = doc.uri;
+
+    // 1. Fire in-process diagnostics immediately
+    const inProcessDiags = validateInProcess(doc);
+    connection.sendDiagnostics({ uri, diagnostics: inProcessDiags });
+
+    // 2. Cancel pending debounce + invalidate previous async token
+    clearTimeout(debounceTimers.get(uri));
+    const prevToken = validationTokens.get(uri);
+    if (prevToken) prevToken.cancelled = true;
+
+    // 3. Schedule async subprocess validation
+    const token = { cancelled: false };
+    validationTokens.set(uri, token);
+    debounceTimers.set(
+      uri,
+      setTimeout(() => {
+        debounceTimers.delete(uri);
+        void validateDocumentAsync(connection, doc, token, inProcessDiags);
+      }, 100),
+    );
+  }
+
+  documents.onDidOpen((e) => scheduleValidation(e.document));
+  documents.onDidChangeContent((e) => scheduleValidation(e.document));
+  documents.onDidClose((e) => {
+    const uri = e.document.uri;
+    clearTimeout(debounceTimers.get(uri));
+    debounceTimers.delete(uri);
+    const token = validationTokens.get(uri);
+    if (token) token.cancelled = true;
+    validationTokens.delete(uri);
+    connection.sendDiagnostics({ uri, diagnostics: [] });
+  });
 }
