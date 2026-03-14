@@ -89,11 +89,11 @@
       "patterns": [
         {
           "name": "constant.numeric.float.ghostty",
-          "match": "\\b-?(?:\\d+\\.\\d+|\\d+\\.|\\.\\d+)%?(?![a-zA-Z])"
+          "match": "(?<![\\w-])-?(?:\\d+\\.\\d+|\\d+\\.|\\.\\d+)%?(?![a-zA-Z\\d])"
         },
         {
           "name": "constant.numeric.integer.ghostty",
-          "match": "\\b-?\\d+%?(?![a-zA-Z])"
+          "match": "(?<![\\w-])-?\\d+%?(?![a-zA-Z.\\d])"
         }
       ]
     },
@@ -101,7 +101,7 @@
       "patterns": [
         {
           "name": "constant.other.color.hex.ghostty",
-          "match": "\\b#?[0-9A-Fa-f]{6}\\b"
+          "match": "(?:(?<![\\w])#[0-9A-Fa-f]{6}|(?<![\\w#])[0-9A-Fa-f]{6})(?![\\w])"
         },
         {
           "name": "constant.other.color.special.ghostty",
@@ -129,7 +129,7 @@
       "patterns": [
         {
           "name": "string.unquoted.ghostty",
-          "match": "[^\\s#][^#]*?"
+          "match": "[^\\s#]+"
         }
       ]
     }
