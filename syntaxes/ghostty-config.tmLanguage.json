@@ -111,7 +111,7 @@
       "patterns": [
         {
           "name": "constant.other.color.rgb-value.ghostty",
-          "match": "(?:(?<![\\w])#[0-9A-Fa-f]{6}|(?<![\\w#])[0-9A-Fa-f]{6})(?![\\w])"
+          "match": "(?:(?<![\\w])#[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?|(?<![\\w#])[0-9A-Fa-f]{3}(?:[0-9A-Fa-f]{3})?)(?![\\w])"
         },
         {
           "name": "support.constant.color.ghostty",
