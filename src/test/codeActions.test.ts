@@ -50,6 +50,17 @@ function makeWarning(line: number, message = "Unknown key"): Diagnostic {
   };
 }
 
+function makeUnknownFieldError(line: number, key: string): Diagnostic {
+  return {
+    range: {
+      start: { line, character: 0 },
+      end: { line, character: key.length },
+    },
+    message: "unknown field",
+    severity: DiagnosticSeverity.Error,
+  };
+}
+
 function makeInfo(line: number, message = "Duplicate key"): Diagnostic {
   return {
     range: { start: { line, character: 0 }, end: { line, character: 5 } },
@@ -90,12 +101,27 @@ describe("code actions - empty diagnostics", () => {
   });
 });
 
-describe("code actions - unknown key (warning)", () => {
-  it("offers 'Remove line' for unknown key", () => {
+describe("code actions - unknown key", () => {
+  it("offers 'Remove line' for legacy warning diagnostics", () => {
     const { getActions } = setupCodeActions("not-a-real-key = value");
     const actions = getActions(0, [makeWarning(0)]);
     const titles = actions.map((a) => a.title);
     expect(titles).toContain("Remove line");
+  });
+
+  it("offers 'Remove line' for current unknown field error diagnostics", () => {
+    const { getActions } = setupCodeActions("not-a-real-key = value");
+    const actions = getActions(0, [makeUnknownFieldError(0, "not-a-real-key")]);
+    const titles = actions.map((a) => a.title);
+    expect(titles).toContain("Remove line");
+  });
+
+  it("offers 'Did you mean?' for a close typo from an unknown field error", () => {
+    const { getActions } = setupCodeActions("font-siz = 14");
+    const actions = getActions(0, [makeUnknownFieldError(0, "font-siz")]);
+    const suggestion = actions.find((a) => a.title.startsWith("Did you mean"));
+    expect(suggestion).toBeDefined();
+    expect(suggestion?.title).toContain("font-size");
   });
 
   it("offers 'Did you mean?' for a close typo (font-siz)", () => {

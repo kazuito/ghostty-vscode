@@ -22,6 +22,8 @@ export interface CodeActionSuggestion {
 }
 
 const schemaKeys = ghosttyConfigOptions.map((option) => option.key);
+const UNKNOWN_FIELD_MESSAGE = "unknown field";
+const DUPLICATE_KEY_PREFIX = "Duplicate key ";
 
 function levenshtein(a: string, b: string): number {
   const m = a.length;
@@ -64,6 +66,7 @@ export function getCodeActionSuggestions(
   for (const diagnostic of diagnostics) {
     const lineIndex = diagnostic.range.start.line;
     const line = lines[lineIndex] ?? "";
+    const message = diagnostic.message.trim();
     const deleteRange =
       lineIndex + 1 < lines.length
         ? {
@@ -75,33 +78,39 @@ export function getCodeActionSuggestions(
             end: { line: lineIndex, character: line.length },
           };
 
-    if (diagnostic.severity === "warning") {
+    if (
+      diagnostic.severity === "warning" ||
+      message === UNKNOWN_FIELD_MESSAGE
+    ) {
+      const eqIndex = line.indexOf("=");
+      const keyPart = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
+      const key = keyPart.trim();
+      if (key) {
+        const keyStart = line.indexOf(key);
+        const keyRange = {
+          start: { line: lineIndex, character: keyStart },
+          end: { line: lineIndex, character: keyStart + key.length },
+        };
+
+        for (const suggestion of closestKeys(key)) {
+          suggestions.push({
+            title: `Did you mean '${suggestion}'?`,
+            edit: { range: keyRange, newText: suggestion },
+          });
+        }
+      }
+
       suggestions.push({
         title: "Remove line",
         edit: { range: deleteRange, newText: "" },
       });
-
-      const eqIndex = line.indexOf("=");
-      const keyPart = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
-      const key = keyPart.trim();
-      if (!key) continue;
-
-      const keyStart = line.indexOf(key);
-      const keyRange = {
-        start: { line: lineIndex, character: keyStart },
-        end: { line: lineIndex, character: keyStart + key.length },
-      };
-
-      for (const suggestion of closestKeys(key)) {
-        suggestions.push({
-          title: `Did you mean '${suggestion}'?`,
-          edit: { range: keyRange, newText: suggestion },
-        });
-      }
       continue;
     }
 
-    if (diagnostic.severity === "information") {
+    if (
+      diagnostic.severity === "information" ||
+      message.startsWith(DUPLICATE_KEY_PREFIX)
+    ) {
       suggestions.push({
         title: "Remove line",
         edit: { range: deleteRange, newText: "" },
