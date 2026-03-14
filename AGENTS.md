@@ -1,8 +1,12 @@
 # Ghostty VSCode Extension
 
-A VSCode extension that provides language support for Ghostty terminal
-configuration files (`config` filename or `.ghostty` extension), including
-formatting, quick fixes, and outline support.
+A VS Code extension that provides language support for Ghostty terminal
+configuration files, including formatting, quick fixes, and outline support.
+The extension activates for:
+
+- `**/ghostty/config`
+- `**/com.mitchellh.ghostty/config`
+- Files ending in `.ghostty`
 
 ## Current Project State
 
@@ -11,6 +15,8 @@ formatting, quick fixes, and outline support.
   symbols.
 - The language server is modular. `src/server/server.ts` only wires providers
   together; feature logic lives in separate files.
+- Builds are bundled with Rolldown into `out/client/extension.js` and
+  `out/server/server.js`; there is no standalone `pnpm compile` script.
 - `src/shared/schema.ts` is the source of truth for config keys, descriptions,
   defaults, repeatable "additive" keys, and comma-separated value metadata.
 - Completion, diagnostics, and some quick-fix generation inspect Zod v4
@@ -45,7 +51,8 @@ src/test/
 ├── diagnostics.test.ts
 ├── formatter.test.ts
 ├── codeActions.test.ts
-└── documentSymbols.test.ts
+├── documentSymbols.test.ts
+└── helpers.ts
 ```
 
 You generally don't need to read the entire `schema.ts` file unless necessary, as it is very large (over 1,300 lines).
@@ -56,7 +63,7 @@ Generated output is written to `out/`. Do not hand-edit files there.
 
 - Uses `vscode-languageclient` to launch `out/server/server.js` over IPC.
 - Registers for documents with language ID `ghostty-config`.
-- The extension entry point in `package.json` is `out/client/extension.js`.
+- The extension entry point in `package.json` is `./out/client/extension.js`.
 
 ### Server (`src/server/server.ts`)
 
@@ -141,7 +148,7 @@ Generated output is written to `out/`. Do not hand-edit files there.
 `package.json` contributes:
 
 - Language ID: `ghostty-config`
-- Filenames: `config`
+- Filename patterns: `**/ghostty/config`, `**/com.mitchellh.ghostty/config`
 - Extensions: `.ghostty`
 - Grammar: `syntaxes/ghostty-config.tmLanguage.json`
 - Language configuration: `language-configuration.json`
@@ -162,8 +169,9 @@ sync.
 ## Build And Verification
 
 ```bash
-pnpm compile    # TypeScript build to out/
-pnpm watch      # Incremental build
+pnpm bundle     # Rolldown bundle to out/
+pnpm watch      # Rolldown watch build
+pnpm vscode:prepublish # Prepublish bundle hook used by VS Code packaging
 pnpm typecheck  # Type-check without emitting
 pnpm lint       # Biome lint
 pnpm format     # Biome format --write
@@ -173,6 +181,7 @@ pnpm test       # Vitest suite under src/test/
 Notes:
 
 - `prepare` runs `husky`.
+- `rolldown.config.ts` controls the client/server bundles emitted into `out/`.
 - `config.ghostty` is a sample Ghostty config file that is useful for quick manual
   verification in VSCode.
 
@@ -187,4 +196,4 @@ Notes:
 - If you add a new LSP feature module, register it in `src/server/server.ts`.
 - If you add or rename formatter settings, update both `package.json` and
   `README.md`.
-- Rebuild `out/` before testing the extension in VSCode or publishing it.
+- Rebundle `out/` before testing the extension in VS Code or publishing it.
