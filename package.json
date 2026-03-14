@@ -2,7 +2,7 @@
   "name": "ghostty",
   "displayName": "Ghostty",
   "description": "Support for Ghostty configurations.",
-  "version": "0.0.1",
+  "version": "1.0.0",
   "publisher": "kazuito",
 	"license": "MIT",
   "repository": {
@@ -18,6 +18,13 @@
   },
   "categories": [
     "Programming Languages"
+  ],
+  "keywords": [
+    "ghostty",
+    "terminal",
+    "config",
+    "syntax highlighting",
+    "language support"
   ],
   "icon": "icon.png",
   "main": "./out/client/extension.js",

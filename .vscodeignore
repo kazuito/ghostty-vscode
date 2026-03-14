@@ -1,4 +1,12 @@
 .vscode/**
 .vscode-test/**
 .gitignore
+.husky/**
 vsc-extension-quickstart.md
+src/**
+tsconfig.json
+biome.json
+pnpm-lock.yaml
+CLAUDE.md
+AGENTS.md
+test-config
