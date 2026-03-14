@@ -89,7 +89,11 @@
       "properties": {
         "ghostty.format.equalSpacing": {
           "type": "string",
-          "enum": ["space", "no-space", "preserve"],
+          "enum": [
+            "space",
+            "no-space",
+            "preserve"
+          ],
           "enumDescriptions": [
             "Normalize to 'key = value' (space on both sides of '=').",
             "Normalize to 'key=value' (no spaces around '=').",
@@ -100,7 +104,10 @@
         },
         "ghostty.format.blankLines": {
           "type": "string",
-          "enum": ["collapse", "preserve"],
+          "enum": [
+            "collapse",
+            "preserve"
+          ],
           "enumDescriptions": [
             "Collapse multiple consecutive blank lines into one.",
             "Leave blank lines as-is."
@@ -110,7 +117,11 @@
         },
         "ghostty.format.colorCase": {
           "type": "string",
-          "enum": ["uppercase", "lowercase", "preserve"],
+          "enum": [
+            "uppercase",
+            "lowercase",
+            "preserve"
+          ],
           "enumDescriptions": [
             "Normalize hex color digits to uppercase (e.g. #1A1B26).",
             "Normalize hex color digits to lowercase (e.g. #1a1b26).",
@@ -126,7 +137,10 @@
         },
         "ghostty.format.booleanCase": {
           "type": "string",
-          "enum": ["lowercase", "preserve"],
+          "enum": [
+            "lowercase",
+            "preserve"
+          ],
           "enumDescriptions": [
             "Normalize boolean literals to lowercase (true/false).",
             "Leave boolean casing as-is."
@@ -136,7 +150,11 @@
         },
         "ghostty.format.commaSpacing": {
           "type": "string",
-          "enum": ["space", "no-space", "preserve"],
+          "enum": [
+            "space",
+            "no-space",
+            "preserve"
+          ],
           "enumDescriptions": [
             "Normalize to 'a, b' (space after comma).",
             "Normalize to 'a,b' (no space after comma).",

@@ -15,10 +15,7 @@ function setupCompletion(content: string) {
   const connection = createMockConnection();
   const documents = createMockDocuments(doc);
 
-  registerCompletionProvider(
-    connection as never,
-    documents as never,
-  );
+  registerCompletionProvider(connection as never, documents as never);
 
   const handler = connection.onCompletion.mock.calls[0][0] as (
     params: TextDocumentPositionParams,
@@ -79,7 +76,9 @@ describe("completion provider - key completions", () => {
     const result = complete(0, 9);
     const item = result?.items.find((i) => i.label === "font-size");
     expect(item).toBeDefined();
-    expect((item?.textEdit as { newText: string }).newText).toBe("font-size = ");
+    expect((item?.textEdit as { newText: string }).newText).toBe(
+      "font-size = ",
+    );
   });
 
   it("key completion uses Property kind", () => {

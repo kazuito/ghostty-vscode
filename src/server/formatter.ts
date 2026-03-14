@@ -258,7 +258,10 @@ export function registerFormatterProvider(
       scopeUri: params.textDocument.uri,
       section: "ghostty.format",
     });
-    const opts: FormatterOptions = { ...DEFAULT_FORMATTER_OPTIONS, ...(raw ?? {}) };
+    const opts: FormatterOptions = {
+      ...DEFAULT_FORMATTER_OPTIONS,
+      ...(raw ?? {}),
+    };
 
     const original = doc.getText();
     let formatted: string;

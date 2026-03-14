@@ -1,5 +1,8 @@
 import { describe, expect, it } from "vitest";
-import type { Hover, TextDocumentPositionParams } from "vscode-languageserver/node";
+import type {
+  Hover,
+  TextDocumentPositionParams,
+} from "vscode-languageserver/node";
 import { registerHoverProvider } from "../server/hover";
 import {
   createDocument,
@@ -12,10 +15,7 @@ function setupHover(content: string) {
   const connection = createMockConnection();
   const documents = createMockDocuments(doc);
 
-  registerHoverProvider(
-    connection as never,
-    documents as never,
-  );
+  registerHoverProvider(connection as never, documents as never);
 
   const handler = connection.onHover.mock.calls[0][0] as (
     params: TextDocumentPositionParams,
@@ -87,9 +87,7 @@ describe("hover provider", () => {
   });
 
   it("returns hover for correct line in multiline document", () => {
-    const hover = setupHover(
-      "# comment\nfont-size = 14\nfont-thicken = true",
-    );
+    const hover = setupHover("# comment\nfont-size = 14\nfont-thicken = true");
     const result = hover(1, 0);
     expect(result).not.toBeNull();
     expect((result?.contents as { value: string }).value).toContain(

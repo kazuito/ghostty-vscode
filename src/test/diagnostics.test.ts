@@ -28,25 +28,18 @@ function setupDiagnostics(content: string) {
     }),
   };
 
-  registerDiagnosticsProvider(
-    connection as never,
-    mockDocuments as never,
-  );
+  registerDiagnosticsProvider(connection as never, mockDocuments as never);
 
   const getDiagnostics = (): Diagnostic[] => {
     handlers.onDidOpen!({ document: doc });
     const calls = connection.sendDiagnostics.mock.calls;
-    return (
-      (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? []
-    );
+    return (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? [];
   };
 
   const getCloseDiagnostics = (): Diagnostic[] => {
     handlers.onDidClose!({ document: doc });
     const calls = connection.sendDiagnostics.mock.calls;
-    return (
-      (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? []
-    );
+    return (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? [];
   };
 
   return { getDiagnostics, getCloseDiagnostics };
@@ -181,18 +174,14 @@ describe("diagnostics provider - value validation", () => {
   });
 
   it("invalid enum value produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics(
-      "alpha-blending = bad-value",
-    );
+    const { getDiagnostics } = setupDiagnostics("alpha-blending = bad-value");
     const diags = getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
   it("enum error message lists valid values", () => {
-    const { getDiagnostics } = setupDiagnostics(
-      "alpha-blending = bad-value",
-    );
+    const { getDiagnostics } = setupDiagnostics("alpha-blending = bad-value");
     const diags = getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error?.message).toContain("native");
@@ -207,18 +196,14 @@ describe("diagnostics provider - value validation", () => {
 
   it("number below minimum produces an error", () => {
     // font-thicken-strength: z.number().int().min(0).max(255)
-    const { getDiagnostics } = setupDiagnostics(
-      "font-thicken-strength = -1",
-    );
+    const { getDiagnostics } = setupDiagnostics("font-thicken-strength = -1");
     const diags = getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
 
   it("number above maximum produces an error", () => {
-    const { getDiagnostics } = setupDiagnostics(
-      "font-thicken-strength = 256",
-    );
+    const { getDiagnostics } = setupDiagnostics("font-thicken-strength = 256");
     const diags = getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
@@ -285,9 +270,7 @@ describe("diagnostics provider - mixed document", () => {
     const warnings = diags.filter(
       (d) => d.severity === DiagnosticSeverity.Warning,
     );
-    const errors = diags.filter(
-      (d) => d.severity === DiagnosticSeverity.Error,
-    );
+    const errors = diags.filter((d) => d.severity === DiagnosticSeverity.Error);
     const infos = diags.filter(
       (d) => d.severity === DiagnosticSeverity.Information,
     );

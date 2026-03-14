@@ -87,7 +87,10 @@ export function registerCompletionProvider(
           .map((v) => ({
             label: v,
             kind: CompletionItemKind.Value,
-            detail: defaultVal !== undefined && v === defaultVal ? "default" : undefined,
+            detail:
+              defaultVal !== undefined && v === defaultVal
+                ? "default"
+                : undefined,
             textEdit: {
               range: {
                 start: {
