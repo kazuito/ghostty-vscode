@@ -23,7 +23,8 @@
     "workspaceContains:**/*.ghostty"
   ],
   "categories": [
-    "Programming Languages"
+    "Programming Languages",
+    "Formatters"
   ],
   "keywords": [
     "ghostty",
