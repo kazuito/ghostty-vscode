@@ -1,353 +1,246 @@
-# =========================================================
-# Ghostty debug config
-# =========================================================
+# Complex Ghostty config for exercising the VSCode extension.
+# This sample stays within src/shared/schema.ts and covers a wide range of key/value shapes.
 
-# ---------------------------------------------------------
-# Basic UI / language
-# ---------------------------------------------------------
-language = en
-
-# ---------------------------------------------------------
-# Fonts
-# repeatable values, quoted/unquoted, reset-to-default style patterns
-# ---------------------------------------------------------
-font-family = "JetBrains Mono"
-font-family = "Noto Sans Mono"
-font-family = "Symbols Nerd Font Mono"
-
-font-family-bold = "JetBrains Mono"
-font-family-italic = "JetBrains Mono"
-font-family-bold-italic = "JetBrains Mono"
-
-
-font-style = Regular
-font-style-bold = Bold
-font-style-italic = Italic
-font-style-bold-italic = "Bold Italic"
-
-font-synthetic-style = no-bold,no-italic
-
-font-feature = liga
-font-feature = dlig
-font-feature = ss01
-
-font-size = 14
-
-font-variation = wght=450
-font-variation-bold = wght=700
-font-variation-italic = slnt=-10
-font-variation-bold-italic = wght=700
-
-font-codepoint-map = U+2600-U+26FF=Symbols Nerd Font Mono
-font-codepoint-map = U+E000-U+F8FF=Symbols Nerd Font Mono
-clipboard-codepoint-map = U+00A0= 
-
-font-thicken = true
-font-thicken-strength = 30
-
-font-shaping-break = cursor
-
-adjust-cell-width = 0
-adjust-cell-height = 0
-adjust-font-baseline = 0
-adjust-underline-position = 1
-adjust-underline-thickness = 1
-adjust-strikethrough-position = 0
-adjust-strikethrough-thickness = 1
-adjust-overline-position = 0
-adjust-overline-thickness = 1
-adjust-cursor-thickness = 2
-adjust-cursor-height = 0
-adjust-box-thickness = 1
-adjust-icon-height = 0
-
-grapheme-width-method = unicode
-freetype-load-flags = no-monochrome
-
-# ---------------------------------------------------------
-# Theme / colors
-# ---------------------------------------------------------
-theme = "Tokyo Night"
-
-background = 1a1b26
-foreground = c0caf5
-
-selection-foreground = 1a1b26
-selection-background = 7aa2f7
+# Language and theme
+language = en-US
+theme = dark:tokyonight,light:papercolor
+background = #101418
+foreground = ivory
+background-image = /Users/zari/Pictures/ghostty-grid.png
+background-image-opacity = 0.72
+background-image-position = bottom-right
+background-image-fit = cover
+background-image-repeat = false
+selection-foreground = cell-background
+selection-background = #3A415B
 selection-clear-on-typing = true
 selection-clear-on-copy = false
-selection-word-chars = "-_./:@"
-
-minimum-contrast = 1.1
-palette = 0=#15161e
-palette = 1=#f7768e
-palette = 2=#9ece6a
-palette = 3=#e0af68
-palette = 4=#7aa2f7
-palette = 5=#bb9af7
-palette = 6=#7dcfff
-palette = 7=#a9b1d6
+selection-word-chars = -./?_
+minimum-contrast = 3.5
+palette = 0=#1d2021
+palette = 1=#cc241d
+palette = 2=#98971a
+palette = 3=#d79921
+palette = 4=#458588
+palette = 5=#b16286
 palette-generate = false
 palette-harmonious = true
-
 bold-color = bright
 faint-opacity = 0.65
 
-cursor-color = cell-foreground
+# Font stack and shaping
+font-family = JetBrains Mono
+font-family = Symbols Nerd Font Mono
+font-family-bold = JetBrains Mono
+font-family-italic = JetBrains Mono
+font-family-bold-italic = JetBrains Mono
+font-style = SemiBold
+font-style-bold = ExtraBold
+font-style-italic = Italic
+font-style-bold-italic = Bold Italic
+font-synthetic-style = bold,no-italic
+font-feature = calt,-liga
+font-size = 13.5
+font-variation = wght=450
+font-variation = slnt=0
+font-variation-bold = wght=750
+font-variation-italic = slnt=-10
+font-variation-bold-italic = slnt=-10
+font-codepoint-map = U+2600-U+26FF=Symbols Nerd Font Mono
+font-codepoint-map = U+1F300-U+1F5FF=Symbols Nerd Font Mono
+clipboard-codepoint-map = U+00A0=
+font-thicken = true
+font-thicken-strength = 120
+font-shaping-break = cursor,no-cursor
+alpha-blending = linear-corrected
+adjust-cell-width = 4%
+adjust-cell-height = 2
+adjust-font-baseline = -6%
+adjust-underline-position = 8%
+adjust-underline-thickness = 1
+adjust-strikethrough-position = -3%
+adjust-strikethrough-thickness = 1
+adjust-overline-position = 5%
+adjust-overline-thickness = 1
+adjust-cursor-thickness = 12%
+adjust-cursor-height = -8%
+adjust-box-thickness = 5%
+adjust-icon-height = -16.6%
+grapheme-width-method = unicode
+freetype-load-flags = hinting,no-light
+
+# Cursor, search, and mouse behavior
+cursor-color = #ffcc66
 cursor-opacity = 0.9
-cursor-style = block
+cursor-style = block_hollow
 cursor-style-blink = true
-cursor-text = 1a1b26
-cursor-click-to-move = false
-
-search-foreground = 000000
-search-background = ffdd57
-search-selected-foreground = ffffff
-search-selected-background = 7c3aed
-
-# ---------------------------------------------------------
-# Background image / transparency / blur
-# ---------------------------------------------------------
-background-image = ~/.config/ghostty/backgrounds/noise.png
-background-image-opacity = 0.08
-background-image-position = center
-background-image-fit = cover
-background-image-repeat = false
-
-background-opacity = 0.94
-background-opacity-cells = false
-background-blur = 20
-alpha-blending = native
-
-unfocused-split-opacity = 0.8
-unfocused-split-fill = 0f1117
-split-divider-color = 2f334d
-split-preserve-zoom = true
-
-# ---------------------------------------------------------
-# Mouse / scrolling
-# ---------------------------------------------------------
+cursor-text = cell-foreground
+cursor-click-to-move = true
+search-foreground = #111827
+search-background = #f59e0b
+search-selected-foreground = #ffffff
+search-selected-background = #ef4444
 mouse-hide-while-typing = true
-scroll-to-bottom = false
-mouse-shift-capture = true
-mouse-reporting = true
-mouse-scroll-multiplier = 1.5
-
-scrollback-limit = 200000
-scrollbar = always
-
-# ---------------------------------------------------------
-# Links
-# ---------------------------------------------------------
+scroll-to-bottom = keystroke,no-output
+mouse-shift-capture = always
+mouse-reporting = false
+mouse-scroll-multiplier = 2.75
+scrollbar = system
+# link = false
 link-url = true
 link-previews = true
 
-# ---------------------------------------------------------
-# Command / shell / environment
-# ---------------------------------------------------------
-command = /bin/zsh --login
-initial-command = echo "Ghostty debug profile loaded"
-
-env = EDITOR=nvim
-env = LANG=en_US.UTF-8
-env = COLORTERM=truecolor
-env = DEBUG_GHOSTTY=1
-
-wait-after-command = false
-notify-on-command-finish = never
-notify-on-command-finish-action = bell
-notify-on-command-finish-after = 5d
-abnormal-command-exit-runtime = 250
-
-working-directory = ~/Projects
-term = xterm-ghostty
-enquiry-response = yes
-
-shell-integration = zsh
-shell-integration-features = cursor,sudo,title
-
-# ---------------------------------------------------------
-# Clipboard / terminal safety
-# ---------------------------------------------------------
-clipboard-read = allow
-clipboard-write = deny
-clipboard-trim-trailing-spaces = true
-clipboard-paste-protection = true
-clipboard-paste-bracketed-safe = true
-
-copy-on-select = false
-title-report = false
-image-storage-limit = 100000000
-right-click-action = paste
-click-repeat-interval = 3h
-vt-kam-allowed = false
-
-# ---------------------------------------------------------
-# Window / tabs / layout
-# ---------------------------------------------------------
+# Window appearance and layout
+background-opacity = 0.92
+background-opacity-cells = true
+background-blur = 18
+unfocused-split-opacity = 0.8
+unfocused-split-fill = slategray
+split-divider-color = #303744
+split-preserve-zoom = true
 maximize = false
 fullscreen = false
-title = "Ghostty Debug"
-class = com.example.ghostty-debug
+title = Ghostty Extension Debug Profile
+class = com.mitchellh.ghostty.debug
 x11-instance-name = ghostty-debug
-
-window-padding-x = 10
-window-padding-y = 10
+working-directory = /Users/zari/dev/vscode-ext/ghostty
+window-padding-x = 12,24
+window-padding-y = 8,16
 window-padding-balance = true
-window-padding-color = 11121d
+window-padding-color = extend-always
 window-vsync = true
-
 window-inherit-working-directory = true
 tab-inherit-working-directory = true
-split-inherit-working-directory = true
+split-inherit-working-directory = false
 window-inherit-font-size = true
-
-window-decoration = true
-window-title-font-family = Inter
-window-subtitle = "sample config"
-window-theme = auto
-window-colorspace = srgb
+window-decoration = auto
+window-title-font-family = SF Pro Display
+window-subtitle = working-directory
+window-theme = ghostty
+window-colorspace = display-p3
 window-height = 48
-window-width = 140
+window-width = 160
 window-position-x = 120
 window-position-y = 80
 window-save-state = always
 window-step-resize = true
 window-new-tab-position = end
-window-show-tab-bar = auto
-window-titlebar-background = 1a1b26
-window-titlebar-foreground = c0caf5
+window-show-tab-bar = always
+window-titlebar-background = #16181d
+window-titlebar-foreground = #d8dee9
+resize-overlay = always
+resize-overlay-position = bottom-right
+resize-overlay-duration = 1200ms
+focus-follows-mouse = true
 
-resize-overlay = never
-resize-overlay-position = center
-resize-overlay-duration = 750m
+# Commands, env, and shell integration
+command = /bin/zsh -l
+initial-command = tmux new-session -A -s main
+notify-on-command-finish = unfocused
+notify-on-command-finish-action = bell,notify
+notify-on-command-finish-after = 2s
+env = COLORTERM=truecolor
+env = EDITOR=nvim
+env = PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin
+input = raw:printf 'bootstrapped\n'
+input = path:/Users/zari/dev/vscode-ext/ghostty/test-config
+wait-after-command = false
+abnormal-command-exit-runtime = 250
+scrollback-limit = 200000
+shell-integration = zsh
+shell-integration-features = cursor,sudo,title,ssh-env,no-path
+osc-color-report-format = 16-bit
+vt-kam-allowed = false
+term = xterm-ghostty
+enquiry-response = ghostty-debug
+async-backend = auto
 
-focus-follows-mouse = false
-
-# ---------------------------------------------------------
-# Confirm / lifecycle
-# ---------------------------------------------------------
-confirm-close-surface = always
-quit-after-last-window-closed = true
-quit-after-last-window-closed-delay = 0m
-initial-window = true
-undo-timeout = 5y
-
-# ---------------------------------------------------------
-# Quick terminal
-# ---------------------------------------------------------
-quick-terminal-position = top
-quick-terminal-size = 0.42%
-quick-terminal-screen = main
-quick-terminal-animation-duration = 180s
-quick-terminal-autohide = true
-quick-terminal-space-behavior = move
-quick-terminal-keyboard-interactivity = on-demand
-
-# GTK-specific quick terminal options
-gtk-quick-terminal-layer = overlay
-gtk-quick-terminal-namespace = ghostty-debug
-
-# ---------------------------------------------------------
-# Key remaps / keybinds
-# repeatable keys, sequences, performable action pattern
-# ---------------------------------------------------------
-key-remap = caps_lock=escape
-key-remap = right_alt=alt
-
-keybind = clear
-keybind = ctrl+shift+c=copy_to_clipboard
-keybind = ctrl+shift+v=paste_from_clipboard
-keybind = ctrl+shift+t=new_tab
-keybind = ctrl+shift+w=close_surface
+# Keymaps and command palette
 keybind = ctrl+shift+d=new_split:right
-keybind = ctrl+shift+e=new_split:down
-keybind = ctrl+alt+left=goto_split:left
-keybind = ctrl+alt+right=goto_split:right
-keybind = ctrl+alt+up=goto_split:up
-keybind = ctrl+alt+down=goto_split:down
-keybind = ctrl+plus=increase_font_size:1
-keybind = ctrl+minus=decrease_font_size:1
-keybind = ctrl+0=reset_font_size
-keybind = ctrl+shift+r=reload_config
-keybind = ctrl+shift+f=toggle_fullscreen
-keybind = ctrl+a>c=new_tab
-keybind = ctrl+a>v=new_split:right
-keybind = ctrl+a>s=new_split:down
-keybind = performable:ctrl+shift+g=open_selection
-keybind = super+shift+enter=toggle_quick_terminal
+keybind = ctrl+shift+enter=new_tab
+keybind = alt+enter=toggle_fullscreen
+# key-remap = caps_lock=escape
+command-palette-entry = title:Reload Config,action:reload_config
+command-palette-entry = title:Open Split Right,action:new_split:right
 
-# ---------------------------------------------------------
-# Command palette / custom entries
-# ---------------------------------------------------------
-command-palette-entry = "Open dotfiles=goto_tab:1"
-command-palette-entry = "Reload config=reload_config"
-command-palette-entry = "Toggle fullscreen=toggle_fullscreen"
+# Clipboard and click behavior
+clipboard-read = ask
+clipboard-write = allow
+clipboard-trim-trailing-spaces = true
+clipboard-paste-protection = true
+clipboard-paste-bracketed-safe = false
+title-report = false
+image-storage-limit = 640000000
+copy-on-select = clipboard
+right-click-action = copy-or-paste
+click-repeat-interval = 350
 
-# ---------------------------------------------------------
-# Shader / bell
-# ---------------------------------------------------------
-custom-shader = ~/.config/ghostty/shaders/vignette.glsl
-custom-shader = ~/.config/ghostty/shaders/grain.glsl
-custom-shader-animation = false
+# Config chaining and lifecycle
+config-file = /Users/zari/.config/ghostty/base
+config-file = /Users/zari/.config/ghostty/work
+config-default-files = true
+confirm-close-surface = always
+quit-after-last-window-closed = false
+quit-after-last-window-closed-delay = 1500ms
+initial-window = true
+undo-timeout = 15s
 
-bell-features = audio,border
-bell-audio-path = ~/.config/ghostty/sounds/pop.wav
+# Quick terminal
+quick-terminal-position = center
+quick-terminal-size = 42.5%
+gtk-quick-terminal-layer = overlay
+gtk-quick-terminal-namespace = dev.zari.ghostty.debug
+quick-terminal-screen = mouse
+quick-terminal-animation-duration = 180
+quick-terminal-autohide = true
+quick-terminal-space-behavior = remain
+quick-terminal-keyboard-interactivity = exclusive
+
+# Shaders, bell, and notifications
+custom-shader = /Users/zari/dev/shaders/crt-warp.glsl
+custom-shader = /Users/zari/dev/shaders/chromatic-aberration.glsl
+custom-shader-animation = always
+bell-features = system,attention,title,no-border
+bell-audio-path = /System/Library/Sounds/Glass.aiff
 bell-audio-volume = 0.4
-
-app-notifications = no-clipboard-paste
+app-notifications = true
 desktop-notifications = true
-progress-style = floating
+# progress-style = floating,dock,no-hidden
 
-# ---------------------------------------------------------
-# Config splitting
-# config-file can be repeated; ? prefix means optional
-# ---------------------------------------------------------
-config-file = ~/.config/ghostty/themes/local-overrides.ghostty
-config-file = ?~/.config/ghostty/machine-specific.ghostty
-config-file = ?~/.config/ghostty/platform-macos.ghostty
-
-# ---------------------------------------------------------
-# macOS-specific
-# ---------------------------------------------------------
-macos-non-native-fullscreen = false
+# macOS-specific toggles
+macos-non-native-fullscreen = visible-menu
 macos-window-buttons = visible
 macos-titlebar-style = tabs
 macos-titlebar-proxy-icon = visible
-macos-dock-drop-behavior = new-tab
-macos-option-as-alt = false
+macos-dock-drop-behavior = new-window
+macos-option-as-alt = right
 macos-window-shadow = true
-macos-hidden = false
+macos-hidden = never
 macos-auto-secure-input = true
 macos-secure-input-indication = true
-macos-applescript = deny
-macos-icon = official
-macos-custom-icon = ~/Pictures/ghostty.icns
-macos-icon-frame = aluminum
-macos-icon-ghost-color = c0caf5
-macos-icon-screen-color = 1a1b26,7aa2f7,bb9af7
+macos-applescript = true
+macos-icon = custom-style
+macos-icon-frame = chrome
+macos-icon-ghost-color = #7aa2f7
+macos-icon-screen-color = #0b0f14,#1b2430,#2f3b54
 macos-shortcuts = ask
 
-# ---------------------------------------------------------
-# Linux-specific
-# ---------------------------------------------------------
-linux-cgroup = always
-linux-cgroup-memory-limit = 1073741824
-linux-cgroup-processes-limit = 256
+# Linux and GTK-specific toggles
+linux-cgroup = single-instance
+linux-cgroup-memory-limit = 2147483648
+linux-cgroup-processes-limit = 512
 linux-cgroup-hard-fail = false
-
 gtk-opengl-debug = false
-gtk-single-instance = true
+gtk-single-instance = detect
 gtk-titlebar = true
 gtk-tabs-location = top
 gtk-titlebar-hide-when-maximized = true
-gtk-toolbar-style = flat
-gtk-titlebar-style = primary
+gtk-toolbar-style = raised-border
+gtk-titlebar-style = tabs
 gtk-wide-tabs = false
-gtk-custom-css = ~/.config/ghostty/ghostty.css
+gtk-custom-css = /Users/zari/.config/ghostty/debug.css
+gtk-custom-css = /Users/zari/.config/ghostty/overrides.css
 
-# ---------------------------------------------------------
-# Misc
-# ---------------------------------------------------------
-config-default-files = true
-input = ~/.config/ghostty/fragments/generated-input.conf
+# Update behavior
+auto-update = check
+auto-update-channel = stable

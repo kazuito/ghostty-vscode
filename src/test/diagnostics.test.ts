@@ -223,6 +223,40 @@ describe("diagnostics provider - value validation", () => {
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
   });
+
+  it("accepts the corrected valid values for the reported Ghostty keys", () => {
+    const lines = [
+      "scrollbar = never",
+      "window-subtitle = working-directory",
+      "quick-terminal-animation-duration = 0.18",
+      "app-notifications = clipboard-copy, config-reload",
+      "macos-hidden = never",
+      "macos-applescript = true",
+      "gtk-tabs-location = top",
+    ];
+    const { getDiagnostics } = setupDiagnostics(lines.join("\n"));
+    const errors = getDiagnostics().filter(
+      (d) => d.severity === DiagnosticSeverity.Error,
+    );
+    expect(errors).toHaveLength(0);
+  });
+
+  it("rejects the runtime-invalid values reported by Ghostty", () => {
+    const lines = [
+      "scrollbar = always",
+      "window-subtitle = schema stress profile",
+      "quick-terminal-animation-duration = 180ms",
+      "app-notifications = clipboard-paste",
+      "macos-hidden = false",
+      "macos-applescript = allow",
+      "gtk-tabs-location = left",
+    ];
+    const { getDiagnostics } = setupDiagnostics(lines.join("\n"));
+    const errors = getDiagnostics().filter(
+      (d) => d.severity === DiagnosticSeverity.Error,
+    );
+    expect(errors).toHaveLength(lines.length);
+  });
 });
 
 describe("diagnostics provider - document close", () => {

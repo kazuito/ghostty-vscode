@@ -134,4 +134,65 @@ describe("completion provider - value completions", () => {
     expect(item).toBeDefined();
     expect((item?.textEdit as { newText: string }).newText).toBe("native");
   });
+
+  it("surfaces the corrected Ghostty value sets for affected keys", () => {
+    const cases = [
+      {
+        input: "scrollbar = ",
+        cursor: 12,
+        expected: ["system", "never"],
+        unexpected: ["always"],
+      },
+      {
+        input: "window-subtitle = ",
+        cursor: 18,
+        expected: ["false", "working-directory"],
+        unexpected: ["true"],
+      },
+      {
+        input: "app-notifications = ",
+        cursor: 20,
+        expected: [
+          "true",
+          "false",
+          "clipboard-copy",
+          "config-reload",
+          "no-clipboard-copy",
+          "no-config-reload",
+        ],
+        unexpected: ["clipboard-paste", "no-clipboard-paste"],
+      },
+      {
+        input: "macos-hidden = ",
+        cursor: 15,
+        expected: ["never", "always"],
+        unexpected: ["true", "false"],
+      },
+      {
+        input: "macos-applescript = ",
+        cursor: 20,
+        expected: ["true", "false"],
+        unexpected: ["allow", "deny"],
+      },
+      {
+        input: "gtk-tabs-location = ",
+        cursor: 20,
+        expected: ["top", "bottom"],
+        unexpected: ["left", "right", "hidden"],
+      },
+    ] as const;
+
+    for (const testCase of cases) {
+      const complete = setupCompletion(testCase.input);
+      const result = complete(0, testCase.cursor);
+      const labels = result?.items.map((i) => i.label) ?? [];
+
+      for (const value of testCase.expected) {
+        expect(labels).toContain(value);
+      }
+      for (const value of testCase.unexpected) {
+        expect(labels).not.toContain(value);
+      }
+    }
+  });
 });

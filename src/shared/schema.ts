@@ -622,9 +622,9 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
 
   {
     key: "scrollbar",
-    schema: z.enum(["system", "always", "never"]),
+    schema: z.enum(["system", "never"]),
     default: "system",
-    desc: "Scrollbar visibility. 'system': follows platform conventions.",
+    desc: "Scrollbar visibility. 'system': follows platform conventions; 'never': always hide the scrollbar.",
   },
 
   {
@@ -764,8 +764,8 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "window-subtitle",
-    schema: z.string(),
-    desc: "Subtitle shown below the main window title where the platform supports it.",
+    schema: z.enum(["false", "working-directory"]),
+    desc: "Subtitle shown below the main window title where the platform supports it. 'false': disable the subtitle; 'working-directory': show the current working directory.",
   },
   {
     key: "window-theme",
@@ -1013,9 +1013,8 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "quick-terminal-animation-duration",
-    schema: durationString,
-    default: "200ms",
-    desc: "Duration of the slide animation when toggling the quick terminal. Set to '0' to disable animation.",
+    schema: z.number().nonnegative(),
+    desc: "Duration of the slide animation when toggling the quick terminal, in seconds. Set to '0' to disable animation.",
   },
   {
     key: "quick-terminal-autohide",
@@ -1136,8 +1135,16 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
 
   {
     key: "app-notifications",
-    schema: z.enum(["clipboard-paste", "no-clipboard-paste"]),
-    desc: "App-level notification types to enable or disable. 'clipboard-paste': shows banner on clipboard paste operations. Comma-separated.",
+    schema: z.union([
+      z.boolean(),
+      z.enum([
+        "clipboard-copy",
+        "config-reload",
+        "no-clipboard-copy",
+        "no-config-reload",
+      ]),
+    ]),
+    desc: "App-level notification types to enable or disable. Use true/false for all on/off, or a comma-separated list of specific notifications: clipboard-copy, config-reload. Prefix with 'no-' to disable.",
     comma: true,
   },
 
@@ -1186,9 +1193,9 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "macos-hidden",
-    schema: z.boolean(),
-    default: false,
-    desc: "Start Ghostty hidden on macOS (not visible in the Dock). Useful for background service mode.",
+    schema: z.enum(["never", "always"]),
+    default: "never",
+    desc: "Whether Ghostty launches hidden on macOS. 'never': normal launch; 'always': launch hidden.",
   },
   {
     key: "macos-auto-secure-input",
@@ -1204,8 +1211,8 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "macos-applescript",
-    schema: z.enum(["allow", "deny"]),
-    default: "allow",
+    schema: z.boolean(),
+    default: true,
     desc: "Whether to allow AppleScript to control Ghostty on macOS.",
   },
   {
@@ -1295,7 +1302,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   },
   {
     key: "gtk-tabs-location",
-    schema: z.enum(["top", "bottom", "hidden", "left", "right"]),
+    schema: z.enum(["top", "bottom"]),
     default: "top",
     desc: "Location of the tab bar in the GTK window.",
   },
