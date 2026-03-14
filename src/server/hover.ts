@@ -31,10 +31,15 @@ export function registerHoverProvider(
     const option = ghosttyConfigOptions.find((o) => o.key === key);
     if (!option) return null;
 
+    const defaultLine =
+      option.default !== undefined
+        ? `\n\n**Default:** \`${option.default}\``
+        : "";
+
     return {
       contents: {
         kind: "markdown",
-        value: `**${option.key}**\n\n${option.desc}\n\n[Documentation](https://ghostty.org/docs/config/reference#${option.key})`,
+        value: `**${option.key}**\n\n${option.desc}${defaultLine}\n\n[Documentation](https://ghostty.org/docs/config/reference#${option.key})`,
       },
     };
   });

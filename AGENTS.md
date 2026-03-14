@@ -31,6 +31,8 @@ src/
     └── schema.ts          # Ghostty keys, descriptions, Zod schemas, additive keys
 ```
 
+You generally don't need to read the entire `schema.ts` file unless necessary, as it is very large (over 1,300 lines).
+
 Generated output is written to `out/`. Do not hand-edit files there.
 
 ### Client (`src/client/extension.ts`)

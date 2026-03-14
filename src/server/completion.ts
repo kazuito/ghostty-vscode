@@ -79,11 +79,15 @@ export function registerCompletionProvider(
 
         const valuePrefixStart = params.position.character - valuePrefix.length;
 
+        const defaultVal =
+          option.default !== undefined ? String(option.default) : undefined;
+
         const items = values
           .filter((v) => v.startsWith(valuePrefix))
           .map((v) => ({
             label: v,
             kind: CompletionItemKind.Value,
+            detail: defaultVal !== undefined && v === defaultVal ? "default" : undefined,
             textEdit: {
               range: {
                 start: {
@@ -124,7 +128,10 @@ export function registerCompletionProvider(
         .map((o) => ({
           label: o.key,
           kind: CompletionItemKind.Property,
-          detail: o.desc,
+          detail:
+            o.default !== undefined
+              ? `${o.desc} Default: ${o.default}`
+              : o.desc,
           textEdit: {
             range: {
               start: { line: params.position.line, character: prefixStart },
