@@ -7,6 +7,7 @@ import {
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { registerCompletionProvider } from "./completion";
 import { registerDiagnosticsProvider } from "./diagnostics";
+import { registerFormatterProvider } from "./formatter";
 import { registerHoverProvider } from "./hover";
 
 const connection = createConnection(ProposedFeatures.all);
@@ -17,12 +18,14 @@ connection.onInitialize(() => ({
     textDocumentSync: TextDocumentSyncKind.Incremental,
     hoverProvider: true,
     completionProvider: { triggerCharacters: [] },
+    documentFormattingProvider: true,
   },
 }));
 
 registerHoverProvider(connection, documents);
 registerCompletionProvider(connection, documents);
 registerDiagnosticsProvider(connection, documents);
+registerFormatterProvider(connection, documents);
 
 documents.listen(connection);
 connection.listen();
