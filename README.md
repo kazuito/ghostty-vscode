@@ -2,6 +2,8 @@
 
 VSCode language support for [Ghostty](https://ghostty.org) configuration files.
 
+![Demo](./demo.gif)
+
 ### Features
 
 - **Syntax highlighting** — full tokenization for keys, values, and comments
