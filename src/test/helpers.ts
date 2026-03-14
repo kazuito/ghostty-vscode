@@ -1,0 +1,28 @@
+import { vi } from "vitest";
+import { TextDocument } from "vscode-languageserver-textdocument";
+
+export function createDocument(content: string): TextDocument {
+  return TextDocument.create(
+    "file:///test.ghostty",
+    "ghostty-config",
+    1,
+    content,
+  );
+}
+
+export function createMockConnection() {
+  return {
+    onHover: vi.fn(),
+    onCompletion: vi.fn(),
+    sendDiagnostics: vi.fn(),
+  };
+}
+
+export function createMockDocuments(doc: TextDocument) {
+  return {
+    get: vi.fn(() => doc),
+    onDidOpen: vi.fn(),
+    onDidChangeContent: vi.fn(),
+    onDidClose: vi.fn(),
+  };
+}

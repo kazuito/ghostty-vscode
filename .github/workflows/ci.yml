@@ -32,3 +32,6 @@ jobs:
 
       - name: Compile
         run: pnpm compile
+
+      - name: Test
+        run: pnpm test

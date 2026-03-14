@@ -10,3 +10,5 @@ pnpm-lock.yaml
 CLAUDE.md
 AGENTS.md
 test-config
+out/test/**
+vitest.config.ts

@@ -32,13 +32,27 @@ function validateValue(schema: z.ZodType, raw: string): string | null {
     if (Number.isNaN(n)) {
       return "Expected a number";
     }
-    const checks = (def.checks as Array<{ kind: string; value: number }>) ?? [];
+    type ZodCheckDef = { check: string; value: number; inclusive: boolean };
+    type ZodCheck = { _zod?: { def?: ZodCheckDef } };
+    const checks = (def.checks as ZodCheck[]) ?? [];
     for (const check of checks) {
-      if (check.kind === "min" && n < check.value) {
-        return `Expected a number >= ${check.value}`;
+      const checkDef = check._zod?.def;
+      if (!checkDef) continue;
+      if (checkDef.check === "greater_than") {
+        if (checkDef.inclusive && n < checkDef.value) {
+          return `Expected a number >= ${checkDef.value}`;
+        }
+        if (!checkDef.inclusive && n <= checkDef.value) {
+          return `Expected a number > ${checkDef.value}`;
+        }
       }
-      if (check.kind === "max" && n > check.value) {
-        return `Expected a number <= ${check.value}`;
+      if (checkDef.check === "less_than") {
+        if (checkDef.inclusive && n > checkDef.value) {
+          return `Expected a number <= ${checkDef.value}`;
+        }
+        if (!checkDef.inclusive && n >= checkDef.value) {
+          return `Expected a number < ${checkDef.value}`;
+        }
       }
     }
     return null;

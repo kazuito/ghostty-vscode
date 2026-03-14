@@ -29,6 +29,9 @@ jobs:
       - name: Compile
         run: pnpm compile
 
+      - name: Test
+        run: pnpm test
+
       - name: Package
         run: pnpm dlx @vscode/vsce package --out ghostty.vsix
 
