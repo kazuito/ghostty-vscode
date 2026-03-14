@@ -21,13 +21,13 @@ describe("schema indexes", () => {
 
 describe("extractSchemaValues", () => {
   it("extracts boolean values", () => {
-    const values = extractSchemaValues(optionByKey.get("font-thicken")!.schema);
+    const values = extractSchemaValues(optionByKey.get("font-thicken")?.schema);
     expect(values).toEqual(["true", "false"]);
   });
 
   it("extracts enum values", () => {
     const values = extractSchemaValues(
-      optionByKey.get("alpha-blending")!.schema,
+      optionByKey.get("alpha-blending")?.schema,
     );
     expect(values).toContain("native");
     expect(values).toContain("linear");
@@ -35,7 +35,7 @@ describe("extractSchemaValues", () => {
 
   it("extracts union literal values", () => {
     const values = extractSchemaValues(
-      optionByKey.get("window-subtitle")!.schema,
+      optionByKey.get("window-subtitle")?.schema,
     );
     expect(values).toContain("false");
     expect(values).toContain("working-directory");
@@ -43,7 +43,7 @@ describe("extractSchemaValues", () => {
 
   it("returns null for non-enum-like schemas", () => {
     expect(
-      extractSchemaValues(optionByKey.get("font-size")!.schema),
+      extractSchemaValues(optionByKey.get("font-size")?.schema),
     ).toBeNull();
   });
 });

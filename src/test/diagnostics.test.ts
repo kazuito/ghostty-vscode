@@ -1,4 +1,4 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import {
   type Diagnostic,
   DiagnosticSeverity,
@@ -8,9 +8,9 @@ vi.mock("node:child_process");
 vi.mock("node:fs/promises");
 
 import { execFile } from "node:child_process";
-import { writeFile, unlink } from "node:fs/promises";
-import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
+import { unlink, writeFile } from "node:fs/promises";
 import { parseGhosttyOutput } from "../lib/diagnostics";
+import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
 import { createDocument, createMockConnection } from "./helpers";
 
 beforeEach(() => {
@@ -63,14 +63,14 @@ async function setupDiagnostics(content: string, ghosttyOutput = "") {
   registerDiagnosticsProvider(connection as never, mockDocuments as never);
 
   const getDiagnostics = async (): Promise<Diagnostic[]> => {
-    handlers.onDidOpen!({ document: doc });
+    handlers.onDidOpen?.({ document: doc });
     await vi.runAllTimersAsync();
     const calls = connection.sendDiagnostics.mock.calls;
     return (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? [];
   };
 
   const getCloseDiagnostics = (): Diagnostic[] => {
-    handlers.onDidClose!({ document: doc });
+    handlers.onDidClose?.({ document: doc });
     const calls = connection.sendDiagnostics.mock.calls;
     return (calls[calls.length - 1]?.[0]?.diagnostics as Diagnostic[]) ?? [];
   };

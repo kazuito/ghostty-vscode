@@ -1,5 +1,7 @@
 import { describe, expect, it } from "vitest";
+import type { FormatterOptions } from "../lib/formatter";
 import {
+  DEFAULT_FORMATTER_OPTIONS,
   formatBoolean,
   formatColor,
   formatCommaSeparated,
@@ -9,8 +11,6 @@ import {
   isHexColor,
   parseLine,
 } from "../lib/formatter";
-import type { FormatterOptions } from "../lib/formatter";
-import { DEFAULT_FORMATTER_OPTIONS } from "../lib/formatter";
 
 // Shorthand: merge overrides onto defaults
 function opts(overrides: Partial<FormatterOptions> = {}): FormatterOptions {

@@ -27,6 +27,12 @@ function setupSymbols(content: string) {
   return { getSymbols };
 }
 
+function getFirstSymbol(symbols: DocumentSymbol[]) {
+  const symbol = symbols[0];
+  expect(symbol).toBeDefined();
+  return symbol;
+}
+
 describe("document symbols", () => {
   it("returns empty array for empty document", () => {
     const { getSymbols } = setupSymbols("");
@@ -60,7 +66,7 @@ describe("document symbols", () => {
 
   it("selectionRange covers only the key", () => {
     const { getSymbols } = setupSymbols("font-size = 14");
-    const sym = getSymbols()[0]!;
+    const sym = getFirstSymbol(getSymbols());
     expect(sym.selectionRange.start.character).toBe(0);
     expect(sym.selectionRange.end.character).toBe("font-size".length);
   });
@@ -68,7 +74,7 @@ describe("document symbols", () => {
   it("range covers the full line", () => {
     const line = "font-size = 14";
     const { getSymbols } = setupSymbols(line);
-    const sym = getSymbols()[0]!;
+    const sym = getFirstSymbol(getSymbols());
     expect(sym.range.start.character).toBe(0);
     expect(sym.range.end.character).toBe(line.length);
   });

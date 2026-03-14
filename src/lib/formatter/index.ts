@@ -5,9 +5,9 @@
  * be extractable into a standalone package in the future.
  */
 
-import { parseLine, type ParsedLine } from "../document";
+import { type ParsedLine, parseLine } from "../document";
 import { commaKeys, validKeys } from "../schema";
-import { type FormatterOptions, DEFAULT_FORMATTER_OPTIONS } from "./types";
+import { DEFAULT_FORMATTER_OPTIONS, type FormatterOptions } from "./types";
 
 // ── Color key sets ───────────────────────────────────────────────────────────
 

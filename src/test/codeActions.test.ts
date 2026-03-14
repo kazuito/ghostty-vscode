@@ -74,6 +74,15 @@ function makeError(
   };
 }
 
+function getActionEdits(action: CodeAction | undefined) {
+  expect(action).toBeDefined();
+  const changes = action?.edit?.changes;
+  expect(changes).toBeDefined();
+  const edits = Object.values(changes ?? {})[0];
+  expect(edits).toBeDefined();
+  return edits ?? [];
+}
+
 describe("code actions - empty diagnostics", () => {
   it("returns empty array when no diagnostics", () => {
     const { getActions } = setupCodeActions("font-size = 14");
@@ -120,8 +129,7 @@ describe("code actions - unknown key (warning)", () => {
     const { getActions } = setupCodeActions("font-siz = 14");
     const actions = getActions(0, [makeWarning(0)]);
     const suggestion = actions.find((a) => a.title.includes("font-size"));
-    expect(suggestion?.edit?.changes).toBeDefined();
-    const edits = Object.values(suggestion!.edit!.changes!)[0]!;
+    const edits = getActionEdits(suggestion);
     expect(edits[0]?.newText).toBe("font-size");
   });
 });
@@ -205,7 +213,7 @@ describe("code actions - 'Remove line' edit", () => {
     const { getActions } = setupCodeActions(content);
     const actions = getActions(0, [makeWarning(0)]);
     const removeAction = actions.find((a) => a.title === "Remove line");
-    const edits = Object.values(removeAction!.edit!.changes!)[0]!;
+    const edits = getActionEdits(removeAction);
     // Should delete from line 0 char 0 to line 1 char 0
     expect(edits[0]?.range.start.line).toBe(0);
     expect(edits[0]?.range.start.character).toBe(0);
@@ -218,7 +226,7 @@ describe("code actions - 'Remove line' edit", () => {
     const { getActions } = setupCodeActions(content);
     const actions = getActions(0, [makeWarning(0)]);
     const removeAction = actions.find((a) => a.title === "Remove line");
-    const edits = Object.values(removeAction!.edit!.changes!)[0]!;
+    const edits = getActionEdits(removeAction);
     expect(edits[0]?.range.start.line).toBe(0);
     expect(edits[0]?.range.end.line).toBe(0);
     expect(edits[0]?.range.end.character).toBe(content.length);
