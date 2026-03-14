@@ -1,17 +1,25 @@
 # Ghostty
 
-VSCode language support for [Ghostty](https://ghostty.org) configuration files.
+VS Code language support for [Ghostty](https://ghostty.org) configuration
+files, including validation, formatting, quick fixes, and outline support.
 
 ![Demo](./demo.gif)
 
-### Features
+## Features
 
-- **Syntax highlighting** — full tokenization for keys, values, and comments
-- **Hover docs** — inline documentation with links to the official reference
-- **Completions** — key and value suggestions as you type
-- **Diagnostics** — warnings for unknown keys and duplicate entries
+- **Syntax highlighting** for keys, values, strings, and comments
+- **Hover documentation** with defaults when available and links to the
+  official Ghostty reference
+- **Completions** for config keys plus schema-derived value suggestions
+- **Diagnostics** for unknown keys, duplicate non-repeatable keys, and invalid
+  values
+- **Quick fixes** to remove invalid lines, correct mistyped keys, and replace
+  invalid boolean/enum/literal values
+- **Document formatting** for consistent spacing, casing, and blank-line
+  handling
+- **Outline and breadcrumbs** powered by document symbols for config entries
 
-### File detection
+## Supported files
 
 The extension activates on:
 
@@ -19,14 +27,49 @@ The extension activates on:
 - `**/com.mitchellh.ghostty/config`
 - Any file with a `.ghostty` extension
 
-### Install
+## Validation and fixes
 
-Search **Ghostty** in the VSCode Extensions panel, or install via the CLI:
+The language server validates Ghostty config files against the bundled schema.
+Today that includes:
+
+- Unknown key warnings
+- Duplicate-key diagnostics for non-additive settings
+- Value validation for booleans, numbers, enums, literals, regex-backed
+  strings, and supported comma-separated options
+
+When a diagnostic has an obvious fix, the extension offers quick actions such
+as:
+
+- `Remove line` for unknown or duplicate entries
+- `Did you mean ...?` suggestions for mistyped keys
+- `Replace with ...` suggestions for invalid boolean, enum, or literal values
+
+## Formatting
+
+Use VS Code's **Format Document** command on Ghostty config files. The formatter
+is controlled by these settings:
+
+| Setting | Default | Description |
+| --- | --- | --- |
+| `ghostty.format.equalSpacing` | `space` | Normalize `=` as `key = value`, `key=value`, or preserve existing spacing |
+| `ghostty.format.blankLines` | `collapse` | Collapse repeated blank lines or preserve them |
+| `ghostty.format.colorCase` | `uppercase` | Normalize hex color digits to uppercase, lowercase, or preserve |
+| `ghostty.format.colorAddPrefix` | `true` | Ensure hex color values are prefixed with `#` |
+| `ghostty.format.booleanCase` | `lowercase` | Normalize boolean values to lowercase or preserve |
+| `ghostty.format.commaSpacing` | `space` | Normalize spacing after commas or preserve it |
+| `ghostty.format.trimWhitespace` | `true` | Trim leading and trailing whitespace from config lines |
+
+The formatter intentionally leaves quoted strings untouched and preserves
+non-hex color names.
+
+## Install
+
+Search **Ghostty** in the VS Code Extensions view, or install it from the CLI:
 
 ```sh
 code --install-extension kazuito.ghostty
 ```
 
-### License
+## License
 
 MIT

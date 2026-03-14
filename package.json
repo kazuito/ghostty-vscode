@@ -1,8 +1,8 @@
 {
   "name": "ghostty",
   "displayName": "Ghostty",
-  "description": "Support for Ghostty configurations.",
-  "version": "1.0.0",
+  "description": "Language support, validation, formatting, quick fixes, and outlines for Ghostty config files.",
+  "version": "1.0.1",
   "publisher": "kazuito",
   "license": "MIT",
   "repository": {
@@ -19,14 +19,14 @@
   },
   "categories": [
     "Programming Languages",
+    "Linters",
     "Formatters"
   ],
   "keywords": [
     "ghostty",
     "terminal",
     "config",
-    "syntax highlighting",
-    "language support"
+    "formatter"
   ],
   "icon": "icon.png",
   "main": "./out/client/extension.js",
