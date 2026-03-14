@@ -15,23 +15,32 @@ import { additiveKeys, ghosttyConfigOptions } from "../shared/schema";
 const validKeys = new Set<string>(ghosttyConfigOptions.map((o) => o.key));
 
 // On macOS, Ghostty ships as an app bundle and may not be on the default PATH.
-const GHOSTTY_PATH_ENV =
+const GHOSTTY_DEFAULT_PATH_ENV =
   process.platform === "darwin"
     ? `${process.env.PATH ?? ""}:/Applications/Ghostty.app/Contents/MacOS`
     : process.env.PATH;
 
-async function runGhosttyValidation(content: string): Promise<string> {
+async function runGhosttyValidation(
+  content: string,
+  executablePath: string,
+): Promise<string> {
   const tmpPath = join(
     tmpdir(),
     `ghostty-validate-${randomBytes(6).toString("hex")}`,
   );
+  // If a custom path is provided use it directly; otherwise fall back to PATH
+  // resolution (with the macOS app-bundle directory appended on Darwin).
+  const bin = executablePath || "ghostty";
+  const env = executablePath
+    ? { ...process.env }
+    : { ...process.env, PATH: GHOSTTY_DEFAULT_PATH_ENV };
   try {
     await writeFile(tmpPath, content, "utf8");
     return await new Promise<string>((resolve) => {
       execFile(
-        "ghostty",
+        bin,
         ["+validate-config", `--config-file=${tmpPath}`],
-        { timeout: 5000, env: { ...process.env, PATH: GHOSTTY_PATH_ENV } },
+        { timeout: 5000, env },
         (_err, stdout, stderr) => {
           resolve(`${stdout}\n${stderr}`);
         },
@@ -145,7 +154,13 @@ async function validateDocumentAsync(
   token: { cancelled: boolean },
   inProcessDiags: Diagnostic[],
 ): Promise<void> {
-  const output = await runGhosttyValidation(doc.getText());
+  const raw = await connection.workspace.getConfiguration({
+    scopeUri: doc.uri,
+    section: "ghostty",
+  });
+  const executablePath: string =
+    (raw as { executablePath?: string })?.executablePath ?? "";
+  const output = await runGhosttyValidation(doc.getText(), executablePath);
   if (token.cancelled) return;
 
   const lines = doc.getText().split("\n");
