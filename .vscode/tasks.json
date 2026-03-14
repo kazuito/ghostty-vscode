@@ -19,7 +19,7 @@
           "background": {
             "activeOnStart": true,
             "beginsPattern": "^> ghostty@.+ watch .*$",
-            "endsPattern": "^Waiting for changes\\.\\.\\.$"
+            "endsPattern": "^✔ Rebuilt .*$"
           }
         }
       ],
