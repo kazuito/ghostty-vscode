@@ -33,10 +33,10 @@ jobs:
         run: pnpm test
 
       - name: Package
-        run: pnpm dlx @vscode/vsce package --out ghostty.vsix
+        run: pnpm dlx @vscode/vsce package --no-dependencies --out ghostty.vsix
 
       - name: Publish to VS Code Marketplace
-        run: pnpm dlx @vscode/vsce publish --packagePath ghostty.vsix
+        run: pnpm dlx @vscode/vsce publish --no-dependencies --packagePath ghostty.vsix
         env:
           VSCE_PAT: ${{ secrets.VSCE_PAT }}
 
