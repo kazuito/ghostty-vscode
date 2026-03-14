@@ -5,19 +5,6 @@
  * extracted into a standalone `ghostty-fmt` package in the future.
  */
 
-export type ParsedLine =
-  | { type: "blank" }
-  | { type: "comment"; raw: string }
-  | {
-      type: "entry";
-      key: string;
-      /** Raw value string — everything after "=", NOT trimmed. */
-      rawValue: string;
-      raw: string;
-      eqIndex: number;
-    }
-  | { type: "unknown"; raw: string };
-
 export interface FormatterOptions {
   /** Spacing around "=". "space" → `key = value`; "no-space" → `key=value`; "preserve" → leave as-is. */
   equalSpacing: "space" | "no-space" | "preserve";

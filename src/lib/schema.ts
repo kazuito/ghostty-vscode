@@ -70,7 +70,7 @@ export const additiveKeys = new Set([
   "env",
 ]);
 
-type ConfigEntry = {
+export type ConfigEntry = {
   key: string;
   schema: z.ZodType;
   desc: string;
@@ -1402,3 +1402,39 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
     desc: "Release channel for auto-updates on macOS. 'tip': pre-release builds from main branch.",
   },
 ] as const;
+
+export const optionByKey = new Map(
+  ghosttyConfigOptions.map((option) => [option.key, option] as const),
+);
+
+export const validKeys = new Set<string>(
+  ghosttyConfigOptions.map((o) => o.key),
+);
+
+export const commaKeys = new Set<string>(
+  ghosttyConfigOptions.filter((o) => o.comma).map((o) => o.key),
+);
+
+export function extractSchemaValues(schema: z.ZodType): string[] | null {
+  const def = (schema as unknown as { _zod: { def: Record<string, unknown> } })
+    ._zod.def;
+
+  switch (def.type) {
+    case "boolean":
+      return ["true", "false"];
+    case "enum":
+      return Object.keys(def.entries as Record<string, unknown>);
+    case "literal":
+      return (def.values as unknown[]).map(String);
+    case "union": {
+      const results: string[] = [];
+      for (const option of def.options as z.ZodType[]) {
+        const values = extractSchemaValues(option);
+        if (values) results.push(...values);
+      }
+      return results.length > 0 ? results : null;
+    }
+    default:
+      return null;
+  }
+}

@@ -7,9 +7,7 @@
       "label": "pnpm: watch",
       "type": "shell",
       "command": "pnpm",
-      "args": [
-        "watch"
-      ],
+      "args": ["watch"],
       "problemMatcher": [
         {
           "owner": "rolldown",

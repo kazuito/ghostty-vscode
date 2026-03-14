@@ -3,7 +3,7 @@ import type {
   Hover,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
-import { registerHoverProvider } from "../server/hover";
+import { registerHoverProvider } from "../server/providers/hover";
 import {
   createDocument,
   createMockConnection,

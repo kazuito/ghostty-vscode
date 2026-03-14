@@ -9,10 +9,8 @@ vi.mock("node:fs/promises");
 
 import { execFile } from "node:child_process";
 import { writeFile, unlink } from "node:fs/promises";
-import {
-  registerDiagnosticsProvider,
-  parseGhosttyOutput,
-} from "../server/diagnostics";
+import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
+import { parseGhosttyOutput } from "../lib/diagnostics";
 import { createDocument, createMockConnection } from "./helpers";
 
 beforeEach(() => {
@@ -89,7 +87,7 @@ describe("parseGhosttyOutput", () => {
     const lines = ["font-thicken = notabool"];
     const diags = parseGhosttyOutput(output, lines);
     expect(diags).toHaveLength(1);
-    expect(diags[0]?.severity).toBe(DiagnosticSeverity.Error);
+    expect(diags[0]?.severity).toBe("error");
     expect(diags[0]?.message).toContain("notabool");
     expect(diags[0]?.range.start.line).toBe(0);
   });

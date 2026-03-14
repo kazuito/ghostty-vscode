@@ -14,10 +14,11 @@ The extension activates for:
   hover, completion, diagnostics, formatting, code actions, and document
   symbols.
 - The language server is modular. `src/server/server.ts` only wires providers
-  together; feature logic lives in separate files.
+  together; VS Code glue lives in `src/server/providers/` and Ghostty/domain
+  logic lives in `src/lib/`.
 - Builds are bundled with Rolldown into `out/client/extension.js` and
   `out/server/server.js`; there is no standalone `pnpm compile` script.
-- `src/shared/schema.ts` is the source of truth for config keys, descriptions,
+- `src/lib/schema.ts` is the source of truth for config keys, descriptions,
   defaults, repeatable "additive" keys, and comma-separated value metadata.
 - Completion, diagnostics, and some quick-fix generation inspect Zod v4
   internals (`schema._zod.def`), so they are sensitive to upstream Zod
@@ -33,25 +34,34 @@ The extension activates for:
 src/
 ├── client/
 │   └── extension.ts       # VSCode entry point; starts the language server
+├── lib/
+│   ├── codeActions.ts     # Quick-fix suggestion generation
+│   ├── completion.ts      # Key/value completion logic
+│   ├── diagnostics.ts     # In-process + Ghostty CLI validation logic
+│   ├── document.ts        # Shared config line parsing helpers
+│   ├── documentSymbols.ts # Outline symbol generation
+│   ├── formatter/         # Pure formatter logic and formatter types
+│   ├── hover.ts           # Hover content generation
+│   └── schema.ts          # Ghostty keys, descriptions, defaults, and Zod schemas
 ├── server/
-│   ├── server.ts          # LSP bootstrap; registers providers
-│   ├── hover.ts           # Hover provider
-│   ├── completion.ts      # Key/value completions
-│   ├── diagnostics.ts     # Unknown-key, duplicate-key, and value diagnostics
-│   ├── formatter.ts       # Document formatter
-│   ├── codeActions.ts     # Quick fixes from diagnostics
-│   └── documentSymbols.ts # Outline/breadcrumb symbols
-└── shared/
-    ├── schema.ts          # Ghostty keys, descriptions, defaults, and Zod schemas
-    └── formatter-types.ts # Formatter options and defaults
+│   ├── providers/
+│   │   ├── codeActions.ts
+│   │   ├── completion.ts
+│   │   ├── diagnostics.ts
+│   │   ├── documentSymbols.ts
+│   │   ├── formatter.ts
+│   │   └── hover.ts
+│   └── server.ts          # LSP bootstrap; registers providers
 
 src/test/
+├── document.test.ts
 ├── completion.test.ts
 ├── hover.test.ts
 ├── diagnostics.test.ts
 ├── formatter.test.ts
 ├── codeActions.test.ts
 ├── documentSymbols.test.ts
+├── schema.test.ts
 └── helpers.ts
 ```
 
@@ -70,11 +80,11 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Uses `vscode-languageserver` with Node transport.
 - Creates the shared `Connection` and `TextDocuments<TextDocument>` instances.
 - Registers hover, completion, diagnostics, formatter, code action, and document
-  symbol providers from sibling modules.
+  symbol providers from `src/server/providers/`.
 - Advertises incremental sync, hover support, completion support, document
   formatting, code actions, and document symbols.
 
-### Hover (`src/server/hover.ts`)
+### Hover (`src/server/providers/hover.ts` + `src/lib/hover.ts`)
 
 - Extracts the key from the hovered line.
 - Ignores blank lines and comment lines beginning with `#`.
@@ -82,7 +92,7 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Returns Markdown with the description, default value when present, and a link
   to `https://ghostty.org/docs/config/reference#<key>`.
 
-### Completion (`src/server/completion.ts`)
+### Completion (`src/server/providers/completion.ts` + `src/lib/completion.ts`)
 
 - Before `=`, suggests config keys from `ghosttyConfigOptions`.
 - Duplicate keys are filtered out of key completions unless the key is listed in
@@ -96,7 +106,7 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Value extraction currently relies on Zod v4 internals (`schema._zod.def`), so
   completion code is sensitive to Zod implementation changes.
 
-### Diagnostics (`src/server/diagnostics.ts`)
+### Diagnostics (`src/server/providers/diagnostics.ts` + `src/lib/diagnostics.ts`)
 
 - Publishes a warning for unknown config keys.
 - Publishes an informational diagnostic for duplicate non-additive keys, pointing
@@ -108,7 +118,7 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Uses Zod internals to derive validation behavior, so schema representation
   changes can affect diagnostics.
 
-### Formatter (`src/server/formatter.ts`)
+### Formatter (`src/server/providers/formatter.ts` + `src/lib/formatter/index.ts`)
 
 - Exposes whole-document formatting through `textDocument/formatting`.
 - Keeps most logic in pure helpers (`parseLine`, `formatValue`,
@@ -117,9 +127,9 @@ Generated output is written to `out/`. Do not hand-edit files there.
   prefixes, boolean casing, comma spacing, and leading/trailing whitespace.
 - Leaves quoted strings and non-hex color names untouched.
 - Reads workspace settings from `ghostty.format.*`; defaults live in
-  `src/shared/formatter-types.ts`.
+  `src/lib/formatter/types.ts`.
 
-### Code Actions (`src/server/codeActions.ts`)
+### Code Actions (`src/server/providers/codeActions.ts` + `src/lib/codeActions.ts`)
 
 - Provides quick fixes derived from diagnostics.
 - Unknown keys get `Remove line` plus up to three `Did you mean ...?`
@@ -128,13 +138,13 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Invalid enum/literal/boolean values can get up to five `Replace with ...`
   suggestions derived from the schema.
 
-### Document Symbols (`src/server/documentSymbols.ts`)
+### Document Symbols (`src/server/providers/documentSymbols.ts` + `src/lib/documentSymbols.ts`)
 
 - Returns one `Property` symbol per non-comment, non-blank config line.
 - The symbol name is the config key; the selection range covers only the key.
 - Powers VSCode Outline and breadcrumb navigation for Ghostty config files.
 
-### Shared Schema (`src/shared/schema.ts`)
+### Shared Schema (`src/lib/schema.ts`)
 
 - Exports `ghosttyConfigOptions` as an `as const` array of
   `{ key, schema, desc, default?, comma? }`.
@@ -187,13 +197,16 @@ Notes:
 
 ## Working Rules For Future Changes
 
-- When adding or changing a config option, update `src/shared/schema.ts` first.
+- When adding or changing a config option, update `src/lib/schema.ts` first.
 - If a key is valid multiple times in one file, add it to `additiveKeys`.
 - Keep `syntaxes/ghostty-config.tmLanguage.json` in sync with any schema key
   changes.
 - If schema changes affect completion, diagnostics, formatter behavior, or code
   actions, update the relevant Vitest coverage in `src/test/`.
-- If you add a new LSP feature module, register it in `src/server/server.ts`.
+- If you add a new LSP feature module, put pure logic in `src/lib/<feature>.ts`
+  when it fits in one file, or `src/lib/<feature>/` when it has multiple
+  modules. Keep the LSP adapter in `src/server/providers/`, then register it in
+  `src/server/server.ts`.
 - If you add or rename formatter settings, update both `package.json` and
   `README.md`.
 - Rebundle `out/` before testing the extension in VS Code or publishing it.

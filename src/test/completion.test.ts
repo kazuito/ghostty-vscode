@@ -3,7 +3,7 @@ import type {
   CompletionList,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
-import { registerCompletionProvider } from "../server/completion";
+import { registerCompletionProvider } from "../server/providers/completion";
 import {
   createDocument,
   createMockConnection,

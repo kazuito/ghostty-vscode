@@ -16,7 +16,14 @@ export function createMockConnection() {
     onCompletion: vi.fn(),
     onCodeAction: vi.fn(),
     onDocumentSymbol: vi.fn(),
+    onDocumentFormatting: vi.fn(),
     sendDiagnostics: vi.fn(),
+    workspace: {
+      getConfiguration: vi.fn().mockResolvedValue(undefined),
+    },
+    console: {
+      error: vi.fn(),
+    },
   };
 }
 

@@ -8,9 +8,9 @@ import {
   formatPaletteValue,
   isHexColor,
   parseLine,
-} from "../server/formatter";
-import type { FormatterOptions } from "../shared/formatter-types";
-import { DEFAULT_FORMATTER_OPTIONS } from "../shared/formatter-types";
+} from "../lib/formatter";
+import type { FormatterOptions } from "../lib/formatter";
+import { DEFAULT_FORMATTER_OPTIONS } from "../lib/formatter";
 
 // Shorthand: merge overrides onto defaults
 function opts(overrides: Partial<FormatterOptions> = {}): FormatterOptions {
