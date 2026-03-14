@@ -23,6 +23,7 @@
             { "include": "#quoted-string" },
             { "include": "#boolean" },
             { "include": "#enum" },
+            { "include": "#sub-assignment" },
             { "include": "#number" },
             { "include": "#color" },
             { "include": "#codepoint" },
@@ -30,6 +31,25 @@
             { "include": "#bareword" }
           ]
         }
+      ]
+    },
+    "sub-assignment": {
+      "name": "meta.sub-assignment.ghostty",
+      "begin": "([^=\\s]+)(=)",
+      "beginCaptures": {
+        "1": { "name": "entity.name.function.ghostty" },
+        "2": { "name": "keyword.operator.assignment.ghostty" }
+      },
+      "end": "(?=\\s|$)",
+      "patterns": [
+        { "include": "#quoted-string" },
+        { "include": "#boolean" },
+        { "include": "#enum" },
+        { "include": "#number" },
+        { "include": "#color" },
+        { "include": "#codepoint" },
+        { "include": "#pathish" },
+        { "include": "#bareword" }
       ]
     },
     "quoted-string": {
@@ -69,11 +89,11 @@
       "patterns": [
         {
           "name": "constant.numeric.float.ghostty",
-          "match": "\\b-?(?:\\d+\\.\\d+|\\d+\\.|\\.\\d+)%?"
+          "match": "\\b-?(?:\\d+\\.\\d+|\\d+\\.|\\.\\d+)%?(?![a-zA-Z])"
         },
         {
           "name": "constant.numeric.integer.ghostty",
-          "match": "\\b-?\\d+%?"
+          "match": "\\b-?\\d+%?(?![a-zA-Z])"
         }
       ]
     },
