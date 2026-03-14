@@ -19,26 +19,30 @@ const GHOSTTY_DEFAULT_PATH_ENV =
     ? `${process.env.PATH ?? ""}:/Applications/Ghostty.app/Contents/MacOS`
     : process.env.PATH;
 
+export function createValidationTempPath(): string {
+  return join(tmpdir(), `ghostty-validate-${randomBytes(6).toString("hex")}`);
+}
+
 export async function runGhosttyValidation(
   content: string,
   executablePath: string,
+  tmpPath?: string,
+  signal?: AbortSignal,
 ): Promise<string> {
-  const tmpPath = join(
-    tmpdir(),
-    `ghostty-validate-${randomBytes(6).toString("hex")}`,
-  );
+  const validationTmpPath = tmpPath ?? createValidationTempPath();
   const bin = executablePath || "ghostty";
   const env = executablePath
     ? { ...process.env }
     : { ...process.env, PATH: GHOSTTY_DEFAULT_PATH_ENV };
+  const shouldDeleteTempFile = tmpPath == null;
 
   try {
-    await writeFile(tmpPath, content, "utf8");
+    await writeFile(validationTmpPath, content, "utf8");
     return await new Promise<string>((resolve) => {
       execFile(
         bin,
-        ["+validate-config", `--config-file=${tmpPath}`],
-        { timeout: 5000, env },
+        ["+validate-config", `--config-file=${validationTmpPath}`],
+        { timeout: 5000, env, signal },
         (_err, stdout, stderr) => {
           resolve(`${stdout}\n${stderr}`);
         },
@@ -47,7 +51,9 @@ export async function runGhosttyValidation(
   } catch {
     return "";
   } finally {
-    unlink(tmpPath).catch(() => {});
+    if (shouldDeleteTempFile) {
+      unlink(validationTmpPath).catch(() => {});
+    }
   }
 }
 

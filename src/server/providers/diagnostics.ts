@@ -1,3 +1,4 @@
+import { unlink } from "node:fs/promises";
 import {
   type Connection,
   Diagnostic,
@@ -6,11 +7,19 @@ import {
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
 import {
+  createValidationTempPath,
   parseGhosttyOutput,
   runGhosttyValidation,
   type ValidationDiagnostic,
   validateInProcess,
 } from "../../lib/diagnostics";
+
+const CLI_VALIDATION_DEBOUNCE_MS = 300;
+
+interface ValidationState {
+  controller: AbortController | null;
+  tmpPath: string;
+}
 
 function toLspSeverity(
   severity: ValidationDiagnostic["severity"],
@@ -35,28 +44,51 @@ function toLspDiagnostic(diagnostic: ValidationDiagnostic): Diagnostic {
 
 async function validateDocumentAsync(
   connection: Connection,
-  doc: TextDocument,
-  token: { cancelled: boolean },
+  uri: string,
+  text: string,
+  state: ValidationState,
   inProcessDiags: Diagnostic[],
   lastCliDiags: Map<string, Diagnostic[]>,
 ): Promise<void> {
-  const raw = await connection.workspace.getConfiguration({
-    scopeUri: doc.uri,
-    section: "ghostty",
-  });
-  const executablePath: string =
-    (raw as { executablePath?: string })?.executablePath ?? "";
-  const output = await runGhosttyValidation(doc.getText(), executablePath);
-  if (token.cancelled) return;
+  const controller = new AbortController();
+  state.controller = controller;
 
-  const lines = doc.getText().split("\n");
-  const cliDiags = parseGhosttyOutput(output, lines).map(toLspDiagnostic);
-  lastCliDiags.set(doc.uri, cliDiags);
+  try {
+    const raw = await connection.workspace.getConfiguration({
+      scopeUri: uri,
+      section: "ghostty",
+    });
+    if (state.controller !== controller) return;
 
-  connection.sendDiagnostics({
-    uri: doc.uri,
-    diagnostics: [...inProcessDiags, ...cliDiags],
-  });
+    const executablePath: string =
+      (raw as { executablePath?: string })?.executablePath ?? "";
+    const output = await runGhosttyValidation(
+      text,
+      executablePath,
+      state.tmpPath,
+      controller.signal,
+    );
+    if (state.controller !== controller) return;
+
+    state.controller = null;
+    const lines = text.split("\n");
+    const cliDiags = parseGhosttyOutput(output, lines).map(toLspDiagnostic);
+    lastCliDiags.set(uri, cliDiags);
+
+    connection.sendDiagnostics({
+      uri,
+      diagnostics: [...inProcessDiags, ...cliDiags],
+    });
+  } catch (error) {
+    if (state.controller === controller) {
+      state.controller = null;
+    }
+    connection.console.error(
+      `Ghostty validation failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
+    );
+  }
 }
 
 export function registerDiagnosticsProvider(
@@ -64,14 +96,36 @@ export function registerDiagnosticsProvider(
   documents: TextDocuments<TextDocument>,
 ): void {
   const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
-  const validationTokens = new Map<string, { cancelled: boolean }>();
+  const validationStates = new Map<string, ValidationState>();
   const lastCliDiags = new Map<string, Diagnostic[]>();
+
+  function getValidationState(uri: string): ValidationState {
+    let state = validationStates.get(uri);
+    if (!state) {
+      state = {
+        controller: null,
+        tmpPath: createValidationTempPath(),
+      };
+      validationStates.set(uri, state);
+    }
+    return state;
+  }
+
+  function cancelValidation(uri: string): void {
+    const state = validationStates.get(uri);
+    state?.controller?.abort();
+    if (state) {
+      state.controller = null;
+    }
+  }
 
   function scheduleValidation(doc: TextDocument): void {
     const uri = doc.uri;
-    const inProcessDiags = validateInProcess(doc.getText()).map(
-      toLspDiagnostic,
-    );
+    const text = doc.getText();
+    const inProcessDiags = validateInProcess(text).map(toLspDiagnostic);
+    const state = getValidationState(uri);
+
+    cancelValidation(uri);
 
     connection.sendDiagnostics({
       uri,
@@ -79,23 +133,19 @@ export function registerDiagnosticsProvider(
     });
 
     clearTimeout(debounceTimers.get(uri));
-    const prevToken = validationTokens.get(uri);
-    if (prevToken) prevToken.cancelled = true;
-
-    const token = { cancelled: false };
-    validationTokens.set(uri, token);
     debounceTimers.set(
       uri,
       setTimeout(() => {
         debounceTimers.delete(uri);
         void validateDocumentAsync(
           connection,
-          doc,
-          token,
+          uri,
+          text,
+          state,
           inProcessDiags,
           lastCliDiags,
         );
-      }, 100),
+      }, CLI_VALIDATION_DEBOUNCE_MS),
     );
   }
 
@@ -105,10 +155,13 @@ export function registerDiagnosticsProvider(
     const uri = e.document.uri;
     clearTimeout(debounceTimers.get(uri));
     debounceTimers.delete(uri);
-    const token = validationTokens.get(uri);
-    if (token) token.cancelled = true;
-    validationTokens.delete(uri);
+    cancelValidation(uri);
+    const state = validationStates.get(uri);
+    validationStates.delete(uri);
     lastCliDiags.delete(uri);
+    if (state) {
+      unlink(state.tmpPath).catch(() => {});
+    }
     connection.sendDiagnostics({ uri, diagnostics: [] });
   });
 }

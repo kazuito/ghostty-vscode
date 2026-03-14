@@ -9,6 +9,7 @@ vi.mock("node:fs/promises");
 
 import { execFile } from "node:child_process";
 import { unlink, writeFile } from "node:fs/promises";
+import { TextDocument } from "vscode-languageserver-textdocument";
 import { parseGhosttyOutput } from "../lib/diagnostics";
 import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
 import { createDocument, createMockConnection } from "./helpers";
@@ -347,6 +348,225 @@ describe("diagnostics provider - document close", () => {
     );
     expect((await getDiagnostics()).length).toBeGreaterThan(0);
     expect(getCloseDiagnostics()).toHaveLength(0);
+  });
+});
+
+describe("diagnostics provider - validation lifecycle", () => {
+  it("reuses one temp file per document until close", async () => {
+    vi.useFakeTimers();
+    vi.mocked(execFile).mockImplementation(
+      (_cmd: unknown, _args: unknown, _opts: unknown, callback: unknown) => {
+        const cb = callback as (
+          err: Error | null,
+          stdout: string,
+          stderr: string,
+        ) => void;
+        cb(null, "", "");
+        return {} as ReturnType<typeof execFile>;
+      },
+    );
+
+    const connection = createMockConnection();
+    const handlers: {
+      onDidOpen?: (e: { document: TextDocument }) => void;
+      onDidChangeContent?: (e: { document: TextDocument }) => void;
+      onDidClose?: (e: { document: TextDocument }) => void;
+    } = {};
+
+    const mockDocuments = {
+      onDidOpen: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidOpen = cb;
+      }),
+      onDidChangeContent: vi.fn(
+        (cb: (e: { document: TextDocument }) => void) => {
+          handlers.onDidChangeContent = cb;
+        },
+      ),
+      onDidClose: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidClose = cb;
+      }),
+    };
+
+    registerDiagnosticsProvider(connection as never, mockDocuments as never);
+
+    const doc1 = createDocument("font-size = 12");
+    const doc2 = TextDocument.create(
+      doc1.uri,
+      doc1.languageId,
+      2,
+      "font-size = 14",
+    );
+
+    handlers.onDidOpen?.({ document: doc1 });
+    await vi.runAllTimersAsync();
+
+    handlers.onDidChangeContent?.({ document: doc2 });
+    await vi.runAllTimersAsync();
+
+    expect(writeFile).toHaveBeenCalledTimes(2);
+    expect(vi.mocked(writeFile).mock.calls[0]?.[0]).toBe(
+      vi.mocked(writeFile).mock.calls[1]?.[0],
+    );
+    expect(unlink).not.toHaveBeenCalled();
+
+    handlers.onDidClose?.({ document: doc2 });
+
+    expect(unlink).toHaveBeenCalledTimes(1);
+    expect(unlink).toHaveBeenCalledWith(
+      vi.mocked(writeFile).mock.calls[0]?.[0],
+    );
+  });
+
+  it("aborts an in-flight validation when a newer change arrives", async () => {
+    vi.useFakeTimers();
+    const signals: AbortSignal[] = [];
+    const callbacks: Array<
+      (err: Error | null, stdout: string, stderr: string) => void
+    > = [];
+
+    vi.mocked(execFile).mockImplementation(
+      (_cmd: unknown, _args: unknown, opts: unknown, callback: unknown) => {
+        const options = opts as { signal?: AbortSignal };
+        if (options.signal) {
+          signals.push(options.signal);
+        }
+        callbacks.push(
+          callback as (
+            err: Error | null,
+            stdout: string,
+            stderr: string,
+          ) => void,
+        );
+        return {} as ReturnType<typeof execFile>;
+      },
+    );
+
+    const connection = createMockConnection();
+    const handlers: {
+      onDidOpen?: (e: { document: TextDocument }) => void;
+      onDidChangeContent?: (e: { document: TextDocument }) => void;
+      onDidClose?: (e: { document: TextDocument }) => void;
+    } = {};
+
+    const mockDocuments = {
+      onDidOpen: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidOpen = cb;
+      }),
+      onDidChangeContent: vi.fn(
+        (cb: (e: { document: TextDocument }) => void) => {
+          handlers.onDidChangeContent = cb;
+        },
+      ),
+      onDidClose: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidClose = cb;
+      }),
+    };
+
+    registerDiagnosticsProvider(connection as never, mockDocuments as never);
+
+    const doc1 = createDocument("font-size = bad");
+    const doc2 = TextDocument.create(
+      doc1.uri,
+      doc1.languageId,
+      2,
+      "font-size = 12",
+    );
+
+    handlers.onDidOpen?.({ document: doc1 });
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(signals).toHaveLength(1);
+    expect(signals[0]?.aborted).toBe(false);
+
+    handlers.onDidChangeContent?.({ document: doc2 });
+
+    expect(signals[0]?.aborted).toBe(true);
+
+    callbacks[0]?.(
+      Object.assign(new Error("aborted"), { name: "AbortError" }),
+      "",
+      "",
+    );
+    await vi.advanceTimersByTimeAsync(300);
+
+    expect(signals).toHaveLength(2);
+
+    callbacks[1]?.(null, "", "");
+    await Promise.resolve();
+  });
+
+  it("keeps the last CLI diagnostics visible while a new validation is pending", async () => {
+    vi.useFakeTimers();
+    const callbacks: Array<
+      (err: Error | null, stdout: string, stderr: string) => void
+    > = [];
+
+    vi.mocked(execFile).mockImplementation(
+      (_cmd: unknown, _args: unknown, _opts: unknown, callback: unknown) => {
+        callbacks.push(
+          callback as (
+            err: Error | null,
+            stdout: string,
+            stderr: string,
+          ) => void,
+        );
+        return {} as ReturnType<typeof execFile>;
+      },
+    );
+
+    const connection = createMockConnection();
+    const handlers: {
+      onDidOpen?: (e: { document: TextDocument }) => void;
+      onDidChangeContent?: (e: { document: TextDocument }) => void;
+      onDidClose?: (e: { document: TextDocument }) => void;
+    } = {};
+
+    const mockDocuments = {
+      onDidOpen: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidOpen = cb;
+      }),
+      onDidChangeContent: vi.fn(
+        (cb: (e: { document: TextDocument }) => void) => {
+          handlers.onDidChangeContent = cb;
+        },
+      ),
+      onDidClose: vi.fn((cb: (e: { document: TextDocument }) => void) => {
+        handlers.onDidClose = cb;
+      }),
+    };
+
+    registerDiagnosticsProvider(connection as never, mockDocuments as never);
+
+    const doc1 = createDocument("font-size = bad");
+    const doc2 = TextDocument.create(
+      doc1.uri,
+      doc1.languageId,
+      2,
+      "font-size = still-bad",
+    );
+
+    handlers.onDidOpen?.({ document: doc1 });
+    await vi.advanceTimersByTimeAsync(300);
+
+    callbacks[0]?.(null, '/tmp/mock:1:font-size: invalid value "bad"', "");
+    await Promise.resolve();
+    await Promise.resolve();
+
+    const openCalls = connection.sendDiagnostics.mock.calls;
+    const openDiags = (openCalls[openCalls.length - 1]?.[0]?.diagnostics ??
+      []) as Diagnostic[];
+    expect(
+      openDiags.some((d) => d.message.includes('invalid value "bad"')),
+    ).toBe(true);
+
+    handlers.onDidChangeContent?.({ document: doc2 });
+
+    const changeCalls = connection.sendDiagnostics.mock.calls;
+    const changeDiags = (changeCalls[changeCalls.length - 1]?.[0]
+      ?.diagnostics ?? []) as Diagnostic[];
+    expect(
+      changeDiags.some((d) => d.message.includes('invalid value "bad"')),
+    ).toBe(true);
   });
 });
 
