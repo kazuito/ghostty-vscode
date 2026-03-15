@@ -1,3 +1,4 @@
+import { ghosttyDefaults } from "./defaults";
 import { parseLine } from "./document";
 import { optionByKey } from "./schema";
 
@@ -16,11 +17,11 @@ export function getHoverContent(line: string): HoverContent | null {
   const option = optionByKey.get(key);
   if (!option) return null;
 
-  // const defaultLine =
-  //   option.default !== undefined
-  //     ? `\n\n**Default:** \`${option.default}\``
-  //     : "";
-  const defaultLine = "";
+  const defaultVal = ghosttyDefaults.get(key);
+  const defaultLine =
+    defaultVal !== undefined
+      ? `\n\n**Default:** ${defaultVal === "" ? "*(empty)*" : `\`${defaultVal}\``}`
+      : "";
 
   return {
     kind: "markdown",

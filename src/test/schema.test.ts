@@ -1,11 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  additiveKeys,
-  commaKeys,
-  extractSchemaValues,
-  optionByKey,
-  validKeys,
-} from "../lib/schema";
+import { additiveKeys, commaKeys, optionByKey, validKeys } from "../lib/schema";
 
 describe("schema indexes", () => {
   it("exposes fast key lookups", () => {
@@ -19,31 +13,25 @@ describe("schema indexes", () => {
   });
 });
 
-describe("extractSchemaValues", () => {
-  it("extracts boolean values", () => {
-    const values = extractSchemaValues(optionByKey.get("font-thicken")?.schema);
-    expect(values).toEqual(["true", "false"]);
+describe("schema enum values", () => {
+  it("exposes boolean enum for boolean keys", () => {
+    const entry = optionByKey.get("font-thicken");
+    expect(entry?.enum?.map(String)).toEqual(["true", "false"]);
   });
 
-  it("extracts enum values", () => {
-    const values = extractSchemaValues(
-      optionByKey.get("alpha-blending")?.schema,
-    );
-    expect(values).toContain("native");
-    expect(values).toContain("linear");
+  it("exposes enum values for enum keys", () => {
+    const entry = optionByKey.get("alpha-blending");
+    expect(entry?.enum).toContain("native");
+    expect(entry?.enum).toContain("linear");
   });
 
-  it("extracts union literal values", () => {
-    const values = extractSchemaValues(
-      optionByKey.get("window-subtitle")?.schema,
-    );
-    expect(values).toContain("false");
-    expect(values).toContain("working-directory");
+  it("exposes union literal values", () => {
+    const entry = optionByKey.get("window-subtitle");
+    expect(entry?.enum).toContain("false");
+    expect(entry?.enum).toContain("working-directory");
   });
 
-  it("returns null for non-enum-like schemas", () => {
-    expect(
-      extractSchemaValues(optionByKey.get("font-size")?.schema),
-    ).toBeNull();
+  it("has no enum for free-form keys", () => {
+    expect(optionByKey.get("font-size")?.enum).toBeUndefined();
   });
 });

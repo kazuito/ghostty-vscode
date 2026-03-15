@@ -4,6 +4,7 @@ import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseDocument, type Range } from "./document";
+import { ghosttyBin, ghosttyEnv } from "./ghostty";
 import { additiveKeys, validKeys } from "./schema";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
@@ -13,11 +14,6 @@ export interface ValidationDiagnostic {
   message: string;
   severity: DiagnosticSeverity;
 }
-
-const GHOSTTY_DEFAULT_PATH_ENV =
-  process.platform === "darwin"
-    ? `${process.env.PATH ?? ""}:/Applications/Ghostty.app/Contents/MacOS`
-    : process.env.PATH;
 
 export function createValidationTempPath(): string {
   return join(tmpdir(), `ghostty-validate-${randomBytes(6).toString("hex")}`);
@@ -30,10 +26,8 @@ export async function runGhosttyValidation(
   signal?: AbortSignal,
 ): Promise<string> {
   const validationTmpPath = tmpPath ?? createValidationTempPath();
-  const bin = executablePath || "ghostty";
-  const env = executablePath
-    ? { ...process.env }
-    : { ...process.env, PATH: GHOSTTY_DEFAULT_PATH_ENV };
+  const bin = ghosttyBin(executablePath);
+  const env = ghosttyEnv(executablePath);
   const shouldDeleteTempFile = tmpPath == null;
 
   try {

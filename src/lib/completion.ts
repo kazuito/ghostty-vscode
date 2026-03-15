@@ -1,3 +1,4 @@
+import { ghosttyDefaults } from "./defaults";
 import { parseDocument } from "./document";
 import { additiveKeys, ghosttyConfigOptions, optionByKey } from "./schema";
 
@@ -25,7 +26,7 @@ export function getCompletionSuggestions(
     if (!option) return null;
 
     const values = option.enum?.map(String) ?? [];
-    if (!values) return null;
+    if (values.length === 0) return null;
 
     const afterEq = lineUpToCursor.slice(eqIndex + 1);
     const valuePrefix = option.comma
@@ -33,18 +34,17 @@ export function getCompletionSuggestions(
       : afterEq.trimStart();
 
     const replacementStart = cursorCharacter - valuePrefix.length;
-    // const defaultVal =
-    //   option.default !== undefined ? String(option.default) : undefined;
+    const defaultVal = ghosttyDefaults.get(key);
 
     return values
       .filter((value) => value.startsWith(valuePrefix))
       .map((value) => ({
         label: value,
         kind: "value" as const,
-        // detail:
-        //   defaultVal !== undefined && value === defaultVal
-        //     ? "default"
-        //     : undefined,
+        detail:
+          defaultVal !== undefined && value === defaultVal
+            ? "default"
+            : undefined,
         replacementStart,
         replacementEnd: cursorCharacter,
         insertText: value,
@@ -73,16 +73,19 @@ export function getCompletionSuggestions(
         option.key === prefix,
     )
     .filter((option) => option.key.startsWith(prefix))
-    .map((option) => ({
-      label: option.key,
-      kind: "property" as const,
-      // detail:
-      //   option.default !== undefined
-      //     ? `${option.desc} Default: ${option.default}`
-      //     : option.desc,
-      detail: option.desc,
-      replacementStart,
-      replacementEnd: cursorCharacter,
-      insertText: `${option.key} = `,
-    }));
+    .map((option) => {
+      const defaultVal = ghosttyDefaults.get(option.key);
+      const detail =
+        defaultVal !== undefined && defaultVal !== ""
+          ? `${option.desc} (default: ${defaultVal})`
+          : option.desc;
+      return {
+        label: option.key,
+        kind: "property" as const,
+        detail,
+        replacementStart,
+        replacementEnd: cursorCharacter,
+        insertText: `${option.key} = `,
+      };
+    });
 }
