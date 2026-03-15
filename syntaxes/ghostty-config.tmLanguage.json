@@ -83,7 +83,7 @@
       "patterns": [
         {
           "name": "constant.language.enum.ghostty",
-          "match": "\\b(?:native|linear|linear-corrected|block|bar|underline|block_hollow|system|always|never|auto|epoll|io_uring|off|check|download|stable|tip|ask|allow|deny|srgb|display-p3|bright)\\b"
+          "match": "\\b(?:true|false)\\b"
         }
       ]
     },

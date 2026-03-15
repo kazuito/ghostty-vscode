@@ -1,5 +1,4 @@
-# Complex Ghostty config for exercising the VSCode extension.
-# This sample stays within src/shared/schema.ts and covers a wide range of key/value shapes.
+# Sample Ghostty Configuration
 
 # Language and theme
 language = en-US

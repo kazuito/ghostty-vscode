@@ -542,10 +542,12 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   {
     key: "window-padding-x",
     desc: "Horizontal padding inside the window in points. Single value for both sides; 'left,right' for asymmetric padding.",
+    comma: true
   },
   {
     key: "window-padding-y",
     desc: "Vertical padding inside the window in points. Single value for both sides; 'top,bottom' for asymmetric padding.",
+    comma: true
   },
   {
     key: "window-padding-balance",
