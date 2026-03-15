@@ -10,7 +10,8 @@ files, including validation, formatting, quick fixes, and outline support.
 - **Syntax highlighting** for keys, values, strings, and comments
 - **Hover documentation** with defaults when available and links to the
   official Ghostty reference
-- **Completions** for config keys plus schema-derived value suggestions
+- **Completions** for config keys plus schema-derived values, named colors,
+  and Ghostty font families when available
 - **Diagnostics** for unknown keys, duplicate non-repeatable keys, and invalid
   values
 - **Quick fixes** to remove invalid lines, correct mistyped keys, and replace
@@ -44,6 +45,18 @@ as:
 - `Did you mean ...?` suggestions for mistyped keys
 - `Replace with ...` suggestions for invalid boolean, enum, or literal values
 
+## Ghostty executable integration
+
+The extension uses the Ghostty CLI when it is available to:
+
+- run `ghostty +validate-config` for additional diagnostics
+- load Ghostty default values so completion details can mark defaults
+- load installed font family names for font-related value completion
+
+By default the extension searches the system `PATH` and, on macOS,
+`/Applications/Ghostty.app/Contents/MacOS`. If Ghostty is installed elsewhere,
+set `ghostty.executablePath` in your VS Code settings.
+
 ## Formatting
 
 Use VS Code's **Format Document** command on Ghostty config files. The formatter
@@ -69,6 +82,8 @@ Search **Ghostty** in the VS Code Extensions view, or install it from the CLI:
 ```sh
 code --install-extension kazuito.ghostty
 ```
+
+This extension requires VS Code `1.100.0` or newer.
 
 ## License
 

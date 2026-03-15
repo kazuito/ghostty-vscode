@@ -4,6 +4,34 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.2] - 2026-03-15
+
+### Added
+
+- Ghostty CLI integration for validation, default value loading, and installed
+  font discovery when the `ghostty` executable is available
+- A new `ghostty.executablePath` setting for pointing the extension at a
+  non-standard Ghostty binary
+- Value completions for named colors and installed Ghostty font families
+
+### Changed
+
+- Diagnostics now combine in-process duplicate-key checks with
+  `ghostty +validate-config` results for more accurate runtime validation
+- Hover and completion details now use Ghostty default values loaded from the
+  installed CLI when available
+- Configuration descriptions and enum extraction were refreshed for existing
+  Ghostty options
+
+### Fixed
+
+- Quick fixes now work with CLI-reported `unknown field` diagnostics, including
+  typo suggestions and `Remove line`
+- Validation results remain visible while a new CLI validation is pending, with
+  improved cancellation and temp-file reuse during edits
+- Syntax highlighting now recognizes both 3-digit and 6-digit hex colors more
+  reliably
+
 ## [1.0.1] - 2026-03-14
 
 ### Added

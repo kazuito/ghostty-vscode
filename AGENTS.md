@@ -18,6 +18,9 @@ The extension activates for:
   logic lives in `src/lib/`.
 - Builds are bundled with Rolldown into `out/client/extension.js` and
   `out/server/server.js`; there is no standalone `pnpm compile` script.
+- The server shells out to the Ghostty CLI at startup and during validation to
+  load defaults, installed fonts, and CLI diagnostics. That behavior is
+  configured by `ghostty.executablePath`.
 - `src/lib/schema.ts` is the source of truth for config keys, descriptions,
   defaults, repeatable "additive" keys, and comma-separated value metadata.
 - Completion, diagnostics, and some quick-fix generation inspect Zod v4
@@ -97,12 +100,12 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Before `=`, suggests config keys from `ghosttyConfigOptions`.
 - Duplicate keys are filtered out of key completions unless the key is listed in
   `additiveKeys`.
-- After `=`, suggests values only when they can be derived from the Zod schema
-  as booleans, enums, literals, or unions of those.
+- After `=`, suggests schema-derived values plus named colors and installed
+  Ghostty font families for relevant keys.
 - For comma-separated settings, value completion only replaces the segment after
   the last comma.
 - Completion item details include the config description and default value when
-  one exists.
+  one exists, based on Ghostty defaults loaded at server startup.
 - Value extraction currently relies on Zod v4 internals (`schema._zod.def`), so
   completion code is sensitive to Zod implementation changes.
 
@@ -114,6 +117,8 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Publishes error diagnostics for invalid values when the schema can validate
   them, including booleans, numbers and numeric ranges, enums, literals,
   supported unions, regex-backed strings, and comma-separated tokens.
+- Runs `ghostty +validate-config` asynchronously for additional CLI-backed
+  errors when the Ghostty executable is available.
 - Clears diagnostics when a document closes.
 - Uses Zod internals to derive validation behavior, so schema representation
   changes can affect diagnostics.
@@ -209,4 +214,7 @@ Notes:
   `src/server/server.ts`.
 - If you add or rename formatter settings, update both `package.json` and
   `README.md`.
+- When cutting a release, bump `package.json`, add a dated `CHANGELOG.md`
+  entry, and keep `README.md` aligned with user-visible settings and runtime
+  Ghostty integration behavior.
 - Rebundle `out/` before testing the extension in VS Code or publishing it.
