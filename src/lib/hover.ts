@@ -16,10 +16,11 @@ export function getHoverContent(line: string): HoverContent | null {
   const option = optionByKey.get(key);
   if (!option) return null;
 
-  const defaultLine =
-    option.default !== undefined
-      ? `\n\n**Default:** \`${option.default}\``
-      : "";
+  // const defaultLine =
+  //   option.default !== undefined
+  //     ? `\n\n**Default:** \`${option.default}\``
+  //     : "";
+  const defaultLine = "";
 
   return {
     kind: "markdown",

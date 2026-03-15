@@ -6,7 +6,7 @@ language = en-US
 theme = dark:tokyonight,light:papercolor
 background = #101418
 foreground = ivory
-background-image = /Users/zari/Pictures/ghostty-grid.png
+background-image = /Users/ghost/Pictures/ghostty-grid.png
 background-image-opacity = 0.72
 background-image-position = bottom-right
 background-image-fit = cover
@@ -17,12 +17,12 @@ selection-clear-on-typing = true
 selection-clear-on-copy = false
 selection-word-chars = -./?_
 minimum-contrast = 3.5
-palette = 0=#1d2021
-palette = 1=#cc241d
-palette = 2=#98971a
-palette = 3=#d79921
+palette = 0=#1D2021
+palette = 1=#CC241D
+palette = 2=#98971A
+palette = 3=#D79921
 palette = 4=#458588
-palette = 5=#b16286
+palette = 5=#B16286
 palette-generate = false
 palette-harmonious = true
 bold-color = bright
@@ -38,8 +38,8 @@ font-style = SemiBold
 font-style-bold = ExtraBold
 font-style-italic = Italic
 font-style-bold-italic = Bold Italic
-font-synthetic-style = bold,no-italic
-font-feature = calt,-liga
+font-synthetic-style = bold, no-italic
+font-feature = calt, -liga
 font-size = 13.5
 font-variation = wght=450
 font-variation = slnt=0
@@ -51,7 +51,7 @@ font-codepoint-map = U+1F300-U+1F5FF=Symbols Nerd Font Mono
 clipboard-codepoint-map = U+00A0=
 font-thicken = true
 font-thicken-strength = 120
-font-shaping-break = cursor,no-cursor
+font-shaping-break = cursor, no-cursor
 alpha-blending = linear-corrected
 adjust-cell-width = 4%
 adjust-cell-height = 2
@@ -67,21 +67,21 @@ adjust-cursor-height = -8%
 adjust-box-thickness = 5%
 adjust-icon-height = -16.6%
 grapheme-width-method = unicode
-freetype-load-flags = hinting,no-light
+freetype-load-flags = hinting, no-light
 
 # Cursor, search, and mouse behavior
-cursor-color = #ffcc66
+cursor-color = #FFCC66
 cursor-opacity = 0.9
 cursor-style = block_hollow
 cursor-style-blink = true
 cursor-text = cell-foreground
 cursor-click-to-move = true
 search-foreground = #111827
-search-background = #f59e0b
-search-selected-foreground = #ffffff
-search-selected-background = #ef4444
+search-background = #F59E0B
+search-selected-foreground = #FFFFFF
+search-selected-background = #EF4444
 mouse-hide-while-typing = true
-scroll-to-bottom = keystroke,no-output
+scroll-to-bottom = keystroke, no-output
 mouse-shift-capture = always
 mouse-reporting = false
 mouse-scroll-multiplier = 2.75
@@ -103,7 +103,7 @@ fullscreen = false
 title = Ghostty Extension Debug Profile
 class = com.mitchellh.ghostty.debug
 x11-instance-name = ghostty-debug
-working-directory = /Users/zari/dev/vscode-ext/ghostty
+working-directory = /Users/ghost/dev/ghostty
 window-padding-x = 12,24
 window-padding-y = 8,16
 window-padding-balance = true
@@ -126,8 +126,8 @@ window-save-state = always
 window-step-resize = true
 window-new-tab-position = end
 window-show-tab-bar = always
-window-titlebar-background = #16181d
-window-titlebar-foreground = #d8dee9
+window-titlebar-background = #16181D
+window-titlebar-foreground = #D8DEE9
 resize-overlay = always
 resize-overlay-position = bottom-right
 resize-overlay-duration = 1200ms
@@ -137,18 +137,18 @@ focus-follows-mouse = true
 command = /bin/zsh -l
 initial-command = tmux new-session -A -s main
 notify-on-command-finish = unfocused
-notify-on-command-finish-action = bell,notify
+notify-on-command-finish-action = bell, notify
 notify-on-command-finish-after = 2s
 env = COLORTERM=truecolor
 env = EDITOR=nvim
 env = PATH=/opt/homebrew/bin:/usr/local/bin:/usr/bin
 input = raw:printf 'bootstrapped\n'
-input = path:/Users/zari/dev/vscode-ext/ghostty/test-config
+input = path:/Users/ghost/dev/ghostty/test-config
 wait-after-command = false
 abnormal-command-exit-runtime = 250
 scrollback-limit = 200000
 shell-integration = zsh
-shell-integration-features = cursor,sudo,title,ssh-env,no-path
+shell-integration-features = cursor, sudo, title, ssh-env, no-path
 osc-color-report-format = 16-bit
 vt-kam-allowed = false
 term = xterm-ghostty
@@ -176,8 +176,8 @@ right-click-action = copy-or-paste
 click-repeat-interval = 350
 
 # Config chaining and lifecycle
-config-file = /Users/zari/.config/ghostty/base
-config-file = /Users/zari/.config/ghostty/work
+config-file = /Users/ghost/.config/ghostty/base
+config-file = /Users/ghost/.config/ghostty/work
 config-default-files = true
 confirm-close-surface = always
 quit-after-last-window-closed = false
@@ -189,7 +189,7 @@ undo-timeout = 15s
 quick-terminal-position = center
 quick-terminal-size = 42.5%
 gtk-quick-terminal-layer = overlay
-gtk-quick-terminal-namespace = dev.zari.ghostty.debug
+gtk-quick-terminal-namespace = dev.ghost.ghostty.debug
 quick-terminal-screen = mouse
 quick-terminal-animation-duration = 180
 quick-terminal-autohide = true
@@ -197,10 +197,10 @@ quick-terminal-space-behavior = remain
 quick-terminal-keyboard-interactivity = exclusive
 
 # Shaders, bell, and notifications
-custom-shader = /Users/zari/dev/shaders/crt-warp.glsl
-custom-shader = /Users/zari/dev/shaders/chromatic-aberration.glsl
+custom-shader = /Users/ghost/dev/shaders/crt-warp.glsl
+custom-shader = /Users/ghost/dev/shaders/chromatic-aberration.glsl
 custom-shader-animation = always
-bell-features = system,attention,title,no-border
+bell-features = system, attention, title, no-border
 bell-audio-path = /System/Library/Sounds/Glass.aiff
 bell-audio-volume = 0.4
 app-notifications = true
@@ -221,8 +221,8 @@ macos-secure-input-indication = true
 macos-applescript = true
 macos-icon = custom-style
 macos-icon-frame = chrome
-macos-icon-ghost-color = #7aa2f7
-macos-icon-screen-color = #0b0f14,#1b2430,#2f3b54
+macos-icon-ghost-color = #7AA2F7
+macos-icon-screen-color = #0B0F14, #1B2430, #2F3B54
 macos-shortcuts = ask
 
 # Linux and GTK-specific toggles
@@ -238,8 +238,8 @@ gtk-titlebar-hide-when-maximized = true
 gtk-toolbar-style = raised-border
 gtk-titlebar-style = tabs
 gtk-wide-tabs = false
-gtk-custom-css = /Users/zari/.config/ghostty/debug.css
-gtk-custom-css = /Users/zari/.config/ghostty/overrides.css
+gtk-custom-css = /Users/ghost/.config/ghostty/debug.css
+gtk-custom-css = /Users/ghost/.config/ghostty/overrides.css
 
 # Update behavior
 auto-update = check

@@ -1,9 +1,5 @@
 import type { Range } from "./document";
-import {
-  extractSchemaValues,
-  ghosttyConfigOptions,
-  optionByKey,
-} from "./schema";
+import { ghosttyConfigOptions, optionByKey } from "./schema";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 
@@ -125,13 +121,13 @@ export function getCodeActionSuggestions(
     const option = optionByKey.get(key);
     if (!option) continue;
 
-    const values = extractSchemaValues(option.schema);
+    const values = option.enum;
     if (!values) continue;
 
     for (const value of values.slice(0, 5)) {
       suggestions.push({
         title: `Replace with '${value}'`,
-        edit: { range: diagnostic.range, newText: value },
+        edit: { range: diagnostic.range, newText: value.toString() },
       });
     }
   }

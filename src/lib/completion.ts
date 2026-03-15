@@ -1,10 +1,5 @@
 import { parseDocument } from "./document";
-import {
-  additiveKeys,
-  extractSchemaValues,
-  ghosttyConfigOptions,
-  optionByKey,
-} from "./schema";
+import { additiveKeys, ghosttyConfigOptions, optionByKey } from "./schema";
 
 export interface CompletionSuggestion {
   label: string;
@@ -29,7 +24,7 @@ export function getCompletionSuggestions(
     const option = optionByKey.get(key);
     if (!option) return null;
 
-    const values = extractSchemaValues(option.schema);
+    const values = option.enum?.map(String) ?? [];
     if (!values) return null;
 
     const afterEq = lineUpToCursor.slice(eqIndex + 1);
@@ -38,18 +33,18 @@ export function getCompletionSuggestions(
       : afterEq.trimStart();
 
     const replacementStart = cursorCharacter - valuePrefix.length;
-    const defaultVal =
-      option.default !== undefined ? String(option.default) : undefined;
+    // const defaultVal =
+    //   option.default !== undefined ? String(option.default) : undefined;
 
     return values
       .filter((value) => value.startsWith(valuePrefix))
       .map((value) => ({
         label: value,
         kind: "value" as const,
-        detail:
-          defaultVal !== undefined && value === defaultVal
-            ? "default"
-            : undefined,
+        // detail:
+        //   defaultVal !== undefined && value === defaultVal
+        //     ? "default"
+        //     : undefined,
         replacementStart,
         replacementEnd: cursorCharacter,
         insertText: value,
@@ -81,10 +76,11 @@ export function getCompletionSuggestions(
     .map((option) => ({
       label: option.key,
       kind: "property" as const,
-      detail:
-        option.default !== undefined
-          ? `${option.desc} Default: ${option.default}`
-          : option.desc,
+      // detail:
+      //   option.default !== undefined
+      //     ? `${option.desc} Default: ${option.default}`
+      //     : option.desc,
+      detail: option.desc,
       replacementStart,
       replacementEnd: cursorCharacter,
       insertText: `${option.key} = `,
