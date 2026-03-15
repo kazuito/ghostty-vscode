@@ -1,5 +1,5 @@
-import { ghosttyDefaults } from "./defaults";
 import { parseLine } from "./document";
+import { ghosttyDefaults } from "./ghostty/defaults";
 import { optionByKey } from "./schema";
 
 export interface HoverContent {

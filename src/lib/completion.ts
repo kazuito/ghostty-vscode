@@ -1,5 +1,7 @@
-import { ghosttyDefaults } from "./defaults";
 import { parseDocument } from "./document";
+import { ghosttyDefaults } from "./ghostty/defaults";
+import { ghosttyFonts } from "./ghostty/fonts";
+import { ghosttyColors } from "./ghostty/colors";
 import { additiveKeys, ghosttyConfigOptions, optionByKey } from "./schema";
 
 export interface CompletionSuggestion {
@@ -25,15 +27,35 @@ export function getCompletionSuggestions(
     const option = optionByKey.get(key);
     if (!option) return null;
 
-    const values = option.enum?.map(String) ?? [];
-    if (values.length === 0) return null;
+    const isColorKey = option.assets?.includes("color") ?? false;
+    const isFontKey = option.assets?.includes("font") ?? false;
 
     const afterEq = lineUpToCursor.slice(eqIndex + 1);
     const valuePrefix = option.comma
       ? (afterEq.slice(afterEq.lastIndexOf(",") + 1) || afterEq).trimStart()
       : afterEq.trimStart();
-
     const replacementStart = cursorCharacter - valuePrefix.length;
+
+    if (isColorKey) {
+      const suggestions: CompletionSuggestion[] = [];
+      for (const color of ghosttyColors) {
+        if (color.name.startsWith(valuePrefix)) {
+          suggestions.push({
+            label: color.name,
+            kind: "value",
+            detail: color.hex,
+            replacementStart,
+            replacementEnd: cursorCharacter,
+            insertText: color.name,
+          });
+        }
+      }
+      return suggestions.length > 0 ? suggestions : null;
+    }
+
+    const values = isFontKey ? ghosttyFonts : (option.enum?.map(String) ?? []);
+    if (values.length === 0) return null;
+
     const defaultVal = ghosttyDefaults.get(key);
 
     return values

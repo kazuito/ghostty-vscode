@@ -4,7 +4,7 @@ import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { parseDocument, type Range } from "./document";
-import { ghosttyBin, ghosttyEnv } from "./ghostty";
+import { ghosttyBin, ghosttyEnv } from "./ghostty/ghostty";
 import { additiveKeys, validKeys } from "./schema";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";

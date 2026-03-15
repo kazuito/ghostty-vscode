@@ -34,8 +34,9 @@
     "vscode:prepublish": "pnpm bundle",
     "bundle": "rolldown --config rolldown.config.ts",
     "watch": "rolldown --config rolldown.config.ts --watch",
-    "lint": "biome check .",
-    "format": "biome format --write .",
+    "lint": "biome lint",
+    "format": "biome format --write",
+    "check": "pnpm format && pnpm typecheck",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"

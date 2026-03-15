@@ -61,17 +61,14 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   {
     key: "font-family-bold",
     desc: "Font family for bold text. Falls back to font-family if unset. Can be repeated for fallback fonts.",
-    assets: ["font"],
   },
   {
     key: "font-family-italic",
     desc: "Font family for italic text. Falls back to font-family if unset. Can be repeated for fallback fonts.",
-    assets: ["font"],
   },
   {
     key: "font-family-bold-italic",
     desc: "Font family for bold italic text. Falls back to font-family if unset. Can be repeated for fallback fonts.",
-    assets: ["font"],
   },
   {
     key: "font-style",
@@ -595,6 +592,7 @@ export const ghosttyConfigOptions: ConfigEntry[] = [
   {
     key: "window-title-font-family",
     desc: "Font family for window and tab title bars. Any system font; does not need to be monospace.",
+    assets: ["font"],
   },
   {
     key: "window-subtitle",
