@@ -1,6 +1,6 @@
 import * as path from "node:path";
-import * as vscode from "vscode";
 import type { ExtensionContext } from "vscode";
+import * as vscode from "vscode";
 import {
   LanguageClient,
   type LanguageClientOptions,
@@ -39,9 +39,12 @@ export function activate(context: ExtensionContext) {
   );
 
   client.start();
-  client.onNotification("ghostty/openSettings", ({ query }: { query: string }) => {
-    vscode.commands.executeCommand("workbench.action.openSettings", query);
-  });
+  client.onNotification(
+    "ghostty/openSettings",
+    ({ query }: { query: string }) => {
+      vscode.commands.executeCommand("workbench.action.openSettings", query);
+    },
+  );
   context.subscriptions.push(client);
 }
 

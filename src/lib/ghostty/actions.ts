@@ -26,7 +26,10 @@ export function parseActionsOutput(output: string): GhosttyAction[] {
 
   const flush = () => {
     if (currentName !== null) {
-      actions.push({ name: currentName, doc: currentDocLines.join("\n").trim() });
+      actions.push({
+        name: currentName,
+        doc: currentDocLines.join("\n").trim(),
+      });
     }
   };
 

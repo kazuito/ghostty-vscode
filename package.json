@@ -36,7 +36,7 @@
     "watch": "rolldown --config rolldown.config.ts --watch",
     "lint": "biome lint",
     "format": "biome format --write",
-    "check": "pnpm format && pnpm typecheck",
+    "check": "pnpm biome check --write --unsafe && pnpm typecheck",
     "test": "vitest run",
     "typecheck": "tsc --noEmit",
     "prepare": "husky"

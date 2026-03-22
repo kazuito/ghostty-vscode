@@ -1,10 +1,10 @@
-import { describe, expect, it, beforeEach, afterEach } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import type {
   CompletionList,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
-import { registerCompletionProvider } from "../server/providers/completion";
 import { ghosttyActions } from "../lib/ghostty/actions";
+import { registerCompletionProvider } from "../server/providers/completion";
 import {
   createDocument,
   createMockConnection,
@@ -200,8 +200,14 @@ describe("completion provider - value completions", () => {
 describe("completion provider - keybind action completions", () => {
   beforeEach(() => {
     ghosttyActions.push(
-      { name: "copy_to_clipboard", doc: "Copy the selected text to the clipboard." },
-      { name: "paste_from_clipboard", doc: "Paste the contents of the default clipboard." },
+      {
+        name: "copy_to_clipboard",
+        doc: "Copy the selected text to the clipboard.",
+      },
+      {
+        name: "paste_from_clipboard",
+        doc: "Paste the contents of the default clipboard.",
+      },
       { name: "new_window", doc: "Open a new window." },
       { name: "reload_config", doc: "Reload the configuration." },
     );

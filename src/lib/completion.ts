@@ -1,8 +1,8 @@
 import { parseDocument } from "./document";
 import { ghosttyActions } from "./ghostty/actions";
+import { ghosttyColors } from "./ghostty/colors";
 import { ghosttyDefaults } from "./ghostty/defaults";
 import { ghosttyFonts } from "./ghostty/fonts";
-import { ghosttyColors } from "./ghostty/colors";
 import { additiveKeys, ghosttyConfigOptions, optionByKey } from "./schema";
 
 export interface CompletionSuggestion {
