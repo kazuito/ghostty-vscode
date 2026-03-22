@@ -37,3 +37,10 @@ export function runGhosttySync(
     return "";
   }
 }
+
+/**
+ * Returns true if the ghostty binary is reachable and exits successfully.
+ */
+export function isGhosttyAvailable(executablePath?: string): boolean {
+  return runGhosttySync(["--version"], executablePath) !== "";
+}

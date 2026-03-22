@@ -8,6 +8,7 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import { loadGhosttyActions } from "../lib/ghostty/actions";
 import { loadGhosttyDefaults } from "../lib/ghostty/defaults";
 import { loadGhosttyFonts } from "../lib/ghostty/fonts";
+import { isGhosttyAvailable } from "../lib/ghostty/ghostty";
 import { registerCodeActionProvider } from "./providers/codeActions";
 import { registerCompletionProvider } from "./providers/completion";
 import { registerDiagnosticsProvider } from "./providers/diagnostics";
@@ -33,9 +34,30 @@ connection.onInitialized(async () => {
   const raw = await connection.workspace.getConfiguration("ghostty");
   const executablePath: string =
     (raw as { executablePath?: string })?.executablePath ?? "";
-  loadGhosttyDefaults(executablePath || undefined);
-  loadGhosttyFonts(executablePath || undefined);
-  loadGhosttyActions(executablePath || undefined);
+  const resolved = executablePath || undefined;
+
+  if (!isGhosttyAvailable(resolved)) {
+    const action = await connection.window.showWarningMessage(
+      "Ghostty CLI not found. Install Ghostty or set `ghostty.executablePath`.",
+      { title: "Install Ghostty" },
+      { title: "Configure Path" },
+    );
+    if (action?.title === "Install Ghostty") {
+      connection.window.showDocument({
+        uri: "https://ghostty.org/",
+        external: true,
+      });
+    } else if (action?.title === "Configure Path") {
+      connection.sendNotification("ghostty/openSettings", {
+        query: "ghostty.executablePath",
+      });
+    }
+    return;
+  }
+
+  loadGhosttyDefaults(resolved);
+  loadGhosttyFonts(resolved);
+  loadGhosttyActions(resolved);
 });
 
 registerHoverProvider(connection, documents);
