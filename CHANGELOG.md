@@ -4,6 +4,13 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.3] - 2026-03-23
+
+### Added
+
+- Keybind action completions — value completions for the `keybind` key now
+  include all available Ghostty actions loaded from the CLI
+
 ## [1.0.2] - 2026-03-15
 
 ### Added
