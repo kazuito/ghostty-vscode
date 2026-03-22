@@ -37,7 +37,7 @@ export function parseActionsOutput(output: string): GhosttyAction[] {
       currentName = line.slice(0, -1).trim();
       currentDocLines.length = 0;
     } else if (currentName !== null) {
-      currentDocLines.push(line.replace(/^  /, ""));
+      currentDocLines.push(line.replace(/^ {2}/, ""));
     }
   }
   flush();
