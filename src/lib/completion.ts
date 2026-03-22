@@ -1,4 +1,5 @@
 import { parseDocument } from "./document";
+import { ghosttyActions } from "./ghostty/actions";
 import { ghosttyDefaults } from "./ghostty/defaults";
 import { ghosttyFonts } from "./ghostty/fonts";
 import { ghosttyColors } from "./ghostty/colors";
@@ -31,6 +32,26 @@ export function getCompletionSuggestions(
     const isFontKey = option.assets?.includes("font") ?? false;
 
     const afterEq = lineUpToCursor.slice(eqIndex + 1);
+
+    // keybind: suggest action names after the second `=` (key_combo=action)
+    if (key === "keybind" && ghosttyActions.length > 0) {
+      const secondEqIndex = afterEq.indexOf("=");
+      if (secondEqIndex >= 0) {
+        const actionPrefix = afterEq.slice(secondEqIndex + 1).trimStart();
+        const replacementStart = cursorCharacter - actionPrefix.length;
+        return ghosttyActions
+          .filter((action) => action.name.startsWith(actionPrefix))
+          .map((action) => ({
+            label: action.name,
+            kind: "value" as const,
+            detail: action.doc.split("\n")[0] || undefined,
+            replacementStart,
+            replacementEnd: cursorCharacter,
+            insertText: action.name,
+          }));
+      }
+    }
+
     const valuePrefix = option.comma
       ? (afterEq.slice(afterEq.lastIndexOf(",") + 1) || afterEq).trimStart()
       : afterEq.trimStart();

@@ -5,6 +5,7 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { loadGhosttyActions } from "../lib/ghostty/actions";
 import { loadGhosttyDefaults } from "../lib/ghostty/defaults";
 import { loadGhosttyFonts } from "../lib/ghostty/fonts";
 import { registerCodeActionProvider } from "./providers/codeActions";
@@ -34,6 +35,7 @@ connection.onInitialized(async () => {
     (raw as { executablePath?: string })?.executablePath ?? "";
   loadGhosttyDefaults(executablePath || undefined);
   loadGhosttyFonts(executablePath || undefined);
+  loadGhosttyActions(executablePath || undefined);
 });
 
 registerHoverProvider(connection, documents);

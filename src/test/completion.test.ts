@@ -1,9 +1,10 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, beforeEach, afterEach } from "vitest";
 import type {
   CompletionList,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
 import { registerCompletionProvider } from "../server/providers/completion";
+import { ghosttyActions } from "../lib/ghostty/actions";
 import {
   createDocument,
   createMockConnection,
@@ -193,5 +194,60 @@ describe("completion provider - value completions", () => {
         expect(labels).not.toContain(value);
       }
     }
+  });
+});
+
+describe("completion provider - keybind action completions", () => {
+  beforeEach(() => {
+    ghosttyActions.push(
+      { name: "copy_to_clipboard", doc: "Copy the selected text to the clipboard." },
+      { name: "paste_from_clipboard", doc: "Paste the contents of the default clipboard." },
+      { name: "new_window", doc: "Open a new window." },
+      { name: "reload_config", doc: "Reload the configuration." },
+    );
+  });
+
+  afterEach(() => {
+    ghosttyActions.length = 0;
+  });
+
+  it("suggests all actions after key_combo=", () => {
+    const complete = setupCompletion("keybind = cmd+p=");
+    const result = complete(0, 16);
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).toContain("copy_to_clipboard");
+    expect(labels).toContain("paste_from_clipboard");
+    expect(labels).toContain("new_window");
+  });
+
+  it("filters actions by typed prefix", () => {
+    const complete = setupCompletion("keybind = cmd+p=copy");
+    const result = complete(0, 20);
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).toContain("copy_to_clipboard");
+    expect(labels).not.toContain("paste_from_clipboard");
+    expect(labels).not.toContain("new_window");
+  });
+
+  it("uses first doc line as detail", () => {
+    const complete = setupCompletion("keybind = cmd+p=new");
+    const result = complete(0, 19);
+    const item = result?.items.find((i) => i.label === "new_window");
+    expect(item?.detail).toBe("Open a new window.");
+  });
+
+  it("does not suggest actions before the second =", () => {
+    const complete = setupCompletion("keybind = cmd+p");
+    const result = complete(0, 15);
+    // cursor is before second =, so no action completions
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).not.toContain("copy_to_clipboard");
+  });
+
+  it("does not suggest actions for non-keybind keys", () => {
+    const complete = setupCompletion("font-family = copy");
+    const result = complete(0, 18);
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).not.toContain("copy_to_clipboard");
   });
 });
