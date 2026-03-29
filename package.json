@@ -32,7 +32,8 @@
   "main": "./out/client/extension.js",
   "scripts": {
     "vscode:prepublish": "pnpm bundle",
-    "bundle": "rolldown --config rolldown.config.ts",
+    "bundle": "NODE_ENV=production rolldown --config rolldown.config.ts",
+    "bundle:dev": "rolldown --config rolldown.config.ts",
     "watch": "rolldown --config rolldown.config.ts --watch",
     "lint": "biome lint",
     "format": "biome format --write",
