@@ -289,14 +289,7 @@ export const configMetadata: Record<string, ConfigMetadata> = {
   "gtk-wide-tabs": { enum: [true, false] },
   "desktop-notifications": { enum: [true, false] },
   "progress-style": {
-    enum: [
-      "floating",
-      "no-floating",
-      "hidden",
-      "no-hidden",
-      "dock",
-      "no-dock",
-    ],
+    enum: ["floating", "no-floating", "hidden", "no-hidden", "dock", "no-dock"],
     comma: true,
   },
   "bold-color": { enum: ["bright"], assets: ["color"] },
@@ -307,7 +300,10 @@ export const configMetadata: Record<string, ConfigMetadata> = {
 
 export const ghosttyConfigOptions: ConfigEntry[] = configKeys.map((entry) => {
   const meta = configMetadata[entry.key];
-  const option: ConfigEntry = { key: entry.key, desc: meta?.desc ?? entry.desc };
+  const option: ConfigEntry = {
+    key: entry.key,
+    desc: meta?.desc ?? entry.desc,
+  };
 
   if (meta?.enum) option.enum = meta.enum;
   if (meta?.assets) option.assets = meta.assets;

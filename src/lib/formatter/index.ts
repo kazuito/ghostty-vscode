@@ -40,8 +40,8 @@ const COMMA_COLOR_KEYS = new Set(["macos-icon-screen-color"]);
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
 
-export { parseLine, DEFAULT_FORMATTER_OPTIONS };
-export type { ParsedLine, FormatterOptions };
+export type { FormatterOptions, ParsedLine };
+export { DEFAULT_FORMATTER_OPTIONS, parseLine };
 
 export function isHexColor(token: string): boolean {
   return HEX_RE.test(token);
