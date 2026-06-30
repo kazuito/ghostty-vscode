@@ -63,8 +63,7 @@
       {
         "id": "ghostty-config",
         "aliases": [
-          "Ghostty Config",
-          "ghostty-config"
+          "Ghostty Config"
         ],
         "filenamePatterns": [
           "**/ghostty/config",
