@@ -59,18 +59,9 @@ set `ghostty.executablePath` in your VS Code settings.
 
 ## Formatting
 
-Use VS Code's **Format Document** command on Ghostty config files. The formatter
-is controlled by these settings:
-
-| Setting | Default | Description |
-| --- | --- | --- |
-| `ghostty.format.equalSpacing` | `space` | Normalize `=` as `key = value`, `key=value`, or preserve existing spacing |
-| `ghostty.format.blankLines` | `collapse` | Collapse repeated blank lines or preserve them |
-| `ghostty.format.colorCase` | `uppercase` | Normalize hex color digits to uppercase, lowercase, or preserve |
-| `ghostty.format.colorAddPrefix` | `true` | Ensure hex color values are prefixed with `#` |
-| `ghostty.format.booleanCase` | `lowercase` | Normalize boolean values to lowercase or preserve |
-| `ghostty.format.commaSpacing` | `space` | Normalize spacing after commas or preserve it |
-| `ghostty.format.trimWhitespace` | `true` | Trim leading and trailing whitespace from config lines |
+Use VS Code's **Format Document** command on Ghostty config files. Spacing,
+casing, and blank-line handling are configurable under the `ghostty.format.*`
+settings in VS Code.
 
 The formatter intentionally leaves quoted strings untouched and preserves
 non-hex color names.
@@ -84,6 +75,13 @@ code --install-extension kazuito.ghostty
 ```
 
 This extension requires VS Code `1.100.0` or newer.
+
+## Contributing
+
+Contributions are welcome! Feel free to open an
+[issue](https://github.com/kazuito/ghostty-vscode/issues) for bugs or feature
+requests, or send a
+[pull request](https://github.com/kazuito/ghostty-vscode/pulls).
 
 ## License
 
