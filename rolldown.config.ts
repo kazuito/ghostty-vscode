@@ -1,29 +1,29 @@
-import { defineConfig } from "rolldown";
+import { defineConfig, type RolldownOptions } from "rolldown";
 
 const isProd = process.env.NODE_ENV === "production";
 
+function bundle(
+  input: string,
+  file: string,
+  overrides: Partial<RolldownOptions> = {},
+): RolldownOptions {
+  return {
+    input,
+    platform: "node",
+    ...(isProd && { treeshake: true }),
+    ...overrides,
+    output: {
+      file,
+      format: "cjs",
+      sourcemap: !isProd,
+      ...(isProd && { minify: true }),
+    },
+  };
+}
+
 export default defineConfig([
-  {
-    input: "src/client/index.ts",
+  bundle("src/client/index.ts", "out/client/index.js", {
     external: ["vscode"],
-    platform: "node",
-    ...(isProd && { treeshake: true }),
-    output: {
-      file: "out/client/index.js",
-      format: "cjs",
-      sourcemap: !isProd,
-      ...(isProd && { minify: true }),
-    },
-  },
-  {
-    input: "src/server/index.ts",
-    platform: "node",
-    ...(isProd && { treeshake: true }),
-    output: {
-      file: "out/server/index.js",
-      format: "cjs",
-      sourcemap: !isProd,
-      ...(isProd && { minify: true }),
-    },
-  },
+  }),
+  bundle("src/server/index.ts", "out/server/index.js"),
 ]);
