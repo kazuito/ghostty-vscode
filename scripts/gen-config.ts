@@ -79,7 +79,7 @@ function writeConfigKeys(entries: Entry[]): void {
     "",
     "export type GeneratedConfigKey = { key: string; desc: string };",
     "",
-    "export const configKeys: readonly GeneratedConfigKey[] = [",
+    "export const configKeys = [",
   ].join("\n");
 
   const body = entries
@@ -90,7 +90,10 @@ function writeConfigKeys(entries: Entry[]): void {
     .join("\n");
 
   mkdirSync(path.dirname(generatedPath), { recursive: true });
-  writeFileSync(generatedPath, `${header}\n${body}\n];\n`);
+  writeFileSync(
+    generatedPath,
+    `${header}\n${body}\n] as const satisfies readonly GeneratedConfigKey[];\n`,
+  );
 }
 
 async function collectEnumValues(): Promise<string[]> {

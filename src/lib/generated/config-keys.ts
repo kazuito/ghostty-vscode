@@ -3,7 +3,7 @@
 
 export type GeneratedConfigKey = { key: string; desc: string };
 
-export const configKeys: readonly GeneratedConfigKey[] = [
+export const configKeys = [
   {
     key: "language",
     desc: "Set Ghostty's graphical user interface language to a language other than the system default language.",
@@ -770,4 +770,4 @@ export const configKeys: readonly GeneratedConfigKey[] = [
     key: "auto-update-channel",
     desc: "The release channel to use for auto-updates.",
   },
-];
+] as const satisfies readonly GeneratedConfigKey[];
