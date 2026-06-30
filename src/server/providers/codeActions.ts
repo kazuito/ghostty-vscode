@@ -42,7 +42,10 @@ export function registerCodeActionProvider(
         ? [
             {
               range: diagnostic.range,
-              message: diagnostic.message,
+              message:
+                typeof diagnostic.message === "string"
+                  ? diagnostic.message
+                  : diagnostic.message.value,
               severity,
             },
           ]

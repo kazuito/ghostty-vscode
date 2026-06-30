@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "ES2018",
+    "target": "ES2022",
     "module": "preserve",
-    "lib": ["ES2018"],
+    "lib": ["ES2022"],
     "outDir": "./out",
     "rootDir": "./src",
     "strict": true,
@@ -13,6 +13,7 @@
     "declarationMap": true,
     "sourceMap": true,
     "resolveJsonModule": true,
+    "types": ["node"],
     "moduleResolution": "bundler"
   },
   "include": ["src/**/*"],
