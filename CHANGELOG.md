@@ -4,6 +4,20 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.4] - 2026-06-30
+
+### Changed
+
+- Config keys and descriptions are now generated from Ghostty's upstream docs,
+  keeping completions, hover, and diagnostics in sync with the latest options
+- Ghostty CLI data (defaults, fonts, validation) now loads asynchronously and
+  reloads when the `ghostty.executablePath` setting changes
+
+### Fixed
+
+- Syntax highlighting now scopes commas neutrally and matches enum values more
+  precisely
+
 ## [1.0.3] - 2026-03-23
 
 ### Added
