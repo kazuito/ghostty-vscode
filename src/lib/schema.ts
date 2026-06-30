@@ -99,6 +99,7 @@ export const configMetadata: Partial<Record<GhosttyConfigKey, ConfigMetadata>> =
     "palette-harmonious": { enum: [true, false] },
     "cursor-style": { enum: ["block", "bar", "underline", "block_hollow"] },
     "cursor-style-blink": { enum: [true, false] },
+    "cursor-text": { assets: ["color"] },
     "cursor-click-to-move": { enum: [true, false] },
     "mouse-hide-while-typing": { enum: [true, false] },
     "scroll-to-bottom": {

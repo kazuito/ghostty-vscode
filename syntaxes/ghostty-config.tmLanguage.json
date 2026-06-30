@@ -56,6 +56,9 @@
               "include": "#codepoint"
             },
             {
+              "include": "#separator"
+            },
+            {
               "include": "#pathish"
             },
             {
@@ -100,6 +103,9 @@
           "include": "#codepoint"
         },
         {
+          "include": "#separator"
+        },
+        {
           "include": "#pathish"
         },
         {
@@ -140,7 +146,18 @@
       "patterns": [
         {
           "name": "constant.language.enum.ghostty",
-          "match": "\\b(?:no-clipboard-copy|no-force-autohint|working-directory|linear-corrected|no-config-reload|no-ssh-terminfo|single-instance|clipboard-copy|force-autohint|macos-menu-bar|no-bold-italic|bottom-center|config-reload|copy-or-paste|extend-always|no-monochrome|raised-border|block_hollow|bottom-right|center-right|context-menu|custom-style|macos-native|no-attention|no-keystroke|ssh-terminfo|visible-menu|after-first|bold-italic|bottom-left|center-left|no-autohint|no-floating|transparent|background|chalkboard|display-p3|monochrome|new-window|no-hinting|no-ssh-env|top-center|attention|blueprint|clipboard|exclusive|keystroke|no-border|no-cursor|no-hidden|no-italic|no-notify|no-output|no-system|on-demand|top-right|underline|unfocused|aluminum|autohint|download|floating|io_uring|no-audio|no-light|no-title|official|top-left|contain|current|default|ghostty|hinting|inherit|new-tab|no-bell|no-bold|no-dock|no-path|no-sudo|nushell|overlay|plastic|ssh-env|stretch|unicode|visible|16-bit|always|border|bottom|bright|center|chrome|client|cursor|custom|detect|elvish|extend|hidden|ignore|italic|legacy|linear|native|notify|output|raised|remain|server|stable|system|8-bit|allow|audio|beige|block|check|cover|epoll|false|false|light|mouse|never|paste|retro|right|title|auto|bash|bell|bold|copy|dark|deny|dock|fish|flat|home|left|main|move|none|path|srgb|sudo|tabs|true|true|ask|bar|end|off|tip|top|zsh)\\b"
+          "match": "\\G(?:no-clipboard-copy|no-force-autohint|working-directory|linear-corrected|no-config-reload|no-ssh-terminfo|single-instance|clipboard-copy|force-autohint|macos-menu-bar|no-bold-italic|bottom-center|config-reload|copy-or-paste|extend-always|no-monochrome|raised-border|block_hollow|bottom-right|center-right|context-menu|custom-style|macos-native|no-attention|no-keystroke|ssh-terminfo|visible-menu|after-first|bold-italic|bottom-left|center-left|no-autohint|no-floating|transparent|background|chalkboard|display-p3|monochrome|new-window|no-hinting|no-ssh-env|top-center|attention|blueprint|clipboard|exclusive|keystroke|no-border|no-cursor|no-hidden|no-italic|no-notify|no-output|no-system|on-demand|top-right|underline|unfocused|aluminum|autohint|download|floating|io_uring|no-audio|no-light|no-title|official|top-left|contain|current|default|ghostty|hinting|inherit|new-tab|no-bell|no-bold|no-dock|no-path|no-sudo|nushell|overlay|plastic|ssh-env|stretch|unicode|visible|16-bit|always|border|bottom|bright|center|chrome|client|cursor|custom|detect|elvish|extend|hidden|ignore|italic|legacy|linear|native|notify|output|raised|remain|server|stable|system|8-bit|allow|audio|beige|block|check|cover|epoll|false|false|light|mouse|never|paste|retro|right|title|auto|bash|bell|bold|copy|dark|deny|dock|fish|flat|home|left|main|move|none|path|srgb|sudo|tabs|true|true|ask|bar|end|off|tip|top|zsh)(?=\\s*(?:,|$))"
+        },
+        {
+          "match": "(,)(\\s*)((?:no-clipboard-copy|no-force-autohint|working-directory|linear-corrected|no-config-reload|no-ssh-terminfo|single-instance|clipboard-copy|force-autohint|macos-menu-bar|no-bold-italic|bottom-center|config-reload|copy-or-paste|extend-always|no-monochrome|raised-border|block_hollow|bottom-right|center-right|context-menu|custom-style|macos-native|no-attention|no-keystroke|ssh-terminfo|visible-menu|after-first|bold-italic|bottom-left|center-left|no-autohint|no-floating|transparent|background|chalkboard|display-p3|monochrome|new-window|no-hinting|no-ssh-env|top-center|attention|blueprint|clipboard|exclusive|keystroke|no-border|no-cursor|no-hidden|no-italic|no-notify|no-output|no-system|on-demand|top-right|underline|unfocused|aluminum|autohint|download|floating|io_uring|no-audio|no-light|no-title|official|top-left|contain|current|default|ghostty|hinting|inherit|new-tab|no-bell|no-bold|no-dock|no-path|no-sudo|nushell|overlay|plastic|ssh-env|stretch|unicode|visible|16-bit|always|border|bottom|bright|center|chrome|client|cursor|custom|detect|elvish|extend|hidden|ignore|italic|legacy|linear|native|notify|output|raised|remain|server|stable|system|8-bit|allow|audio|beige|block|check|cover|epoll|false|false|light|mouse|never|paste|retro|right|title|auto|bash|bell|bold|copy|dark|deny|dock|fish|flat|home|left|main|move|none|path|srgb|sudo|tabs|true|true|ask|bar|end|off|tip|top|zsh))(?=\\s*(?:,|$))",
+          "captures": {
+            "1": {
+              "name": "punctuation.separator.comma.ghostty"
+            },
+            "3": {
+              "name": "constant.language.enum.ghostty"
+            }
+          }
         }
       ]
     },
@@ -184,11 +201,19 @@
         }
       ]
     },
+    "separator": {
+      "patterns": [
+        {
+          "name": "punctuation.separator.comma.ghostty",
+          "match": ","
+        }
+      ]
+    },
     "pathish": {
       "patterns": [
         {
           "name": "string.unquoted.path.ghostty",
-          "match": "(?<!\\S)\\??(?:~|/|\\.|\\.\\.|\\$[A-Za-z_][A-Za-z0-9_]*)(?:[^\\s\"]*)"
+          "match": "(?<!\\S)\\??(?:~|/|\\.|\\.\\.|\\$[A-Za-z_][A-Za-z0-9_]*)(?:[^\\s\",]*)"
         }
       ]
     },
@@ -196,7 +221,7 @@
       "patterns": [
         {
           "name": "string.unquoted.ghostty",
-          "match": "[^\\s#]+"
+          "match": "[^\\s#,]+"
         }
       ]
     }

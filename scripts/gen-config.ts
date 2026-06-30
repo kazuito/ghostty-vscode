@@ -111,7 +111,10 @@ async function collectEnumValues(): Promise<string[]> {
 function updateGrammar(keys: string[], enumValues: string[]): void {
   const grammar = JSON.parse(readFileSync(grammarPath, "utf8"));
   grammar.repository.assignment.patterns[0].begin = `^(\\s*)(${keys.join("|")})(\\s*)(=)(\\s*)`;
-  grammar.repository.enum.patterns[0].match = `\\b(?:${enumValues.join("|")})\\b`;
+  const enumGroup = `(?:${enumValues.join("|")})`;
+  const enumTail = `(?=\\s*(?:,|$))`;
+  grammar.repository.enum.patterns[0].match = `\\G${enumGroup}${enumTail}`;
+  grammar.repository.enum.patterns[1].match = `(,)(\\s*)(${enumGroup})${enumTail}`;
   writeFileSync(grammarPath, `${JSON.stringify(grammar, null, 2)}\n`);
 }
 
