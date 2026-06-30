@@ -1,4 +1,4 @@
-import { execFileSync } from "node:child_process";
+import { execFile, execFileSync } from "node:child_process";
 
 /**
  * PATH augmented with the macOS app bundle location so `ghostty` is found
@@ -43,4 +43,35 @@ export function runGhosttySync(
  */
 export function isGhosttyAvailable(executablePath?: string): boolean {
   return runGhosttySync(["--version"], executablePath) !== "";
+}
+
+export type GhosttyRunner = (
+  args: string[],
+  executablePath?: string,
+) => Promise<string>;
+
+/**
+ * Run a ghostty command asynchronously and return stdout.
+ * Returns an empty string if ghostty is not found or the command fails.
+ */
+export const runGhosttyAsync: GhosttyRunner = (args, executablePath?) =>
+  new Promise<string>((resolve) => {
+    execFile(
+      ghosttyBin(executablePath),
+      args,
+      { encoding: "utf8", timeout: 5000, env: ghosttyEnv(executablePath) },
+      (err, stdout) => {
+        resolve(err ? "" : stdout);
+      },
+    );
+  });
+
+/**
+ * Returns true if the ghostty binary is reachable and exits successfully.
+ */
+export async function isGhosttyAvailableAsync(
+  executablePath?: string,
+  run: GhosttyRunner = runGhosttyAsync,
+): Promise<boolean> {
+  return (await run(["--version"], executablePath)) !== "";
 }

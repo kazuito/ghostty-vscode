@@ -1,4 +1,4 @@
-import { runGhosttySync } from "./ghostty";
+import { type GhosttyRunner, runGhosttyAsync, runGhosttySync } from "./ghostty";
 
 export interface GhosttyAction {
   name: string;
@@ -48,8 +48,18 @@ export function parseActionsOutput(output: string): GhosttyAction[] {
   return actions;
 }
 
-export function loadGhosttyActions(executablePath?: string): void {
+function applyActions(output: string): void {
   ghosttyActions.length = 0;
-  const output = runGhosttySync(["+list-actions", "--docs"], executablePath);
   ghosttyActions.push(...parseActionsOutput(output));
+}
+
+export function loadGhosttyActions(executablePath?: string): void {
+  applyActions(runGhosttySync(["+list-actions", "--docs"], executablePath));
+}
+
+export async function loadGhosttyActionsAsync(
+  executablePath?: string,
+  run: GhosttyRunner = runGhosttyAsync,
+): Promise<void> {
+  applyActions(await run(["+list-actions", "--docs"], executablePath));
 }

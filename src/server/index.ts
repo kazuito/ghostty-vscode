@@ -5,10 +5,7 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { loadGhosttyActions } from "../lib/ghostty/actions";
-import { loadGhosttyDefaults } from "../lib/ghostty/defaults";
-import { loadGhosttyFonts } from "../lib/ghostty/fonts";
-import { isGhosttyAvailable } from "../lib/ghostty/ghostty";
+import { reloadGhosttyData } from "../lib/ghostty/reload";
 import { registerCodeActionProvider } from "./providers/codeActions";
 import { registerCompletionProvider } from "./providers/completion";
 import { registerDiagnosticsProvider } from "./providers/diagnostics";
@@ -30,34 +27,55 @@ connection.onInitialize(() => ({
   },
 }));
 
-connection.onInitialized(async () => {
+async function promptGhosttyNotFound(): Promise<void> {
+  const action = await connection.window.showWarningMessage(
+    "Ghostty CLI not found. Install Ghostty or set `ghostty.executablePath`.",
+    { title: "Install Ghostty" },
+    { title: "Configure Path" },
+  );
+  if (action?.title === "Install Ghostty") {
+    connection.window.showDocument({
+      uri: "https://ghostty.org/",
+      external: true,
+    });
+  } else if (action?.title === "Configure Path") {
+    connection.sendNotification("ghostty/openSettings", {
+      query: "ghostty.executablePath",
+    });
+  }
+}
+
+let reloadToken = 0;
+let lastExecutablePath: string | undefined;
+
+async function refreshGhosttyData(force = false): Promise<void> {
   const raw = await connection.workspace.getConfiguration("ghostty");
   const executablePath: string =
     (raw as { executablePath?: string })?.executablePath ?? "";
-  const resolved = executablePath || undefined;
 
-  if (!isGhosttyAvailable(resolved)) {
-    const action = await connection.window.showWarningMessage(
-      "Ghostty CLI not found. Install Ghostty or set `ghostty.executablePath`.",
-      { title: "Install Ghostty" },
-      { title: "Configure Path" },
+  if (!force && executablePath === lastExecutablePath) return;
+  lastExecutablePath = executablePath;
+
+  const token = ++reloadToken;
+  try {
+    const available = await reloadGhosttyData(executablePath || undefined);
+    if (token !== reloadToken) return;
+    if (!available) await promptGhosttyNotFound();
+  } catch (error) {
+    connection.console.error(
+      `Ghostty data reload failed: ${
+        error instanceof Error ? error.message : String(error)
+      }`,
     );
-    if (action?.title === "Install Ghostty") {
-      connection.window.showDocument({
-        uri: "https://ghostty.org/",
-        external: true,
-      });
-    } else if (action?.title === "Configure Path") {
-      connection.sendNotification("ghostty/openSettings", {
-        query: "ghostty.executablePath",
-      });
-    }
-    return;
   }
+}
 
-  loadGhosttyDefaults(resolved);
-  loadGhosttyFonts(resolved);
-  loadGhosttyActions(resolved);
+connection.onInitialized(() => {
+  void refreshGhosttyData(true);
+});
+
+connection.onDidChangeConfiguration(() => {
+  void refreshGhosttyData();
 });
 
 registerHoverProvider(connection, documents);
