@@ -46,7 +46,7 @@ src/
 ├── lib/
 │   ├── codeActions.ts     # Quick-fix suggestion generation
 │   ├── completion.ts      # Key/value completion logic
-│   ├── diagnostics.ts     # In-process + Ghostty CLI validation logic
+│   ├── diagnostics/       # In-process + Ghostty CLI validation logic
 │   ├── document.ts        # Shared config line parsing helpers
 │   ├── documentSymbols.ts # Outline symbol generation
 │   ├── formatter/         # Pure formatter logic and formatter types
@@ -115,13 +115,24 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Completion item details include the config description and default value when
   one exists, based on Ghostty defaults loaded at server startup.
 
-### Diagnostics (`src/server/providers/diagnostics.ts` + `src/lib/diagnostics.ts`)
+### Diagnostics (`src/server/providers/diagnostics.ts` + `src/lib/diagnostics/`)
 
-- Publishes a warning for unknown config keys (checked against `validKeys`).
-- Publishes an informational diagnostic for duplicate non-additive keys, pointing
-  back to the first definition line.
+- `src/lib/diagnostics/` is split into `types.ts` (shared types), `cli.ts`
+  (temp-file write + `ghostty +validate-config` shell-out), `parse.ts`
+  (CLI output → diagnostics + the unparsed-error safety net), and
+  `inProcess.ts` (duplicate-key detection). `index.ts` re-exports them.
+- In-process validation only flags duplicate non-additive keys, pointing back to
+  the first definition line. Unknown keys and invalid values are detected by the
+  CLI, not in-process.
 - Delegates value validation to `ghostty +validate-config`, run asynchronously
-  for CLI-backed errors when the Ghostty executable is available.
+  when the Ghostty executable is available.
+- `ghostty +validate-config` emits two output formats: `file:line:field: msg`
+  for a single-source config, and `field: msg` (no source location) once a
+  theme or secondary config is loaded. `parseGhosttyOutput` handles both,
+  mapping the unlocated form back to its line by key.
+- Safety net: when ghostty exits non-zero but no diagnostic could be parsed, the
+  raw output is logged and surfaced as a single fallback diagnostic so future
+  output-format changes can never fail silently.
 - Clears diagnostics when a document closes.
 
 ### Formatter (`src/server/providers/formatter.ts` + `src/lib/formatter/index.ts`)
