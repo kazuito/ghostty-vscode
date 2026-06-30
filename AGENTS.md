@@ -214,8 +214,8 @@ Notes:
 
 - `prepare` runs `husky`.
 - `rolldown.config.ts` controls the client/server bundles emitted into `out/`.
-- `config.ghostty` is a sample Ghostty config file that is useful for quick manual
-  verification in VSCode.
+- `examples/` holds sample Ghostty config files (`basics.ghostty`,
+  `example.ghostty`) that are useful for quick manual verification in VSCode.
 
 ## Working Rules For Future Changes
 

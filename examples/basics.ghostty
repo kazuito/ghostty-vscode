@@ -1,0 +1,14 @@
+# Ghostty configuration
+
+theme = Dracula
+
+font-family = "Hack Nerd Font Mono"
+font-size = 14
+background-opacity = 0.92
+
+cursor-style = block
+shell-integration = zsh
+copy-on-select = true
+
+keybind = cmd+t=new_tab
+keybind = cmd+w=close_surface
