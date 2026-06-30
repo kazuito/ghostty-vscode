@@ -10,7 +10,10 @@ vi.mock("node:fs/promises");
 import { execFile } from "node:child_process";
 import { unlink, writeFile } from "node:fs/promises";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { parseGhosttyOutput } from "../lib/diagnostics";
+import {
+  buildUnparsedErrorsDiagnostic,
+  parseGhosttyOutput,
+} from "../lib/diagnostics";
 import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
 import { createDocument, createMockConnection } from "./helpers";
 
@@ -143,6 +146,62 @@ describe("parseGhosttyOutput", () => {
 
   it("returns empty array for empty output", () => {
     expect(parseGhosttyOutput("", ["font-size = 14"])).toHaveLength(0);
+  });
+
+  it("parses the unlocated format emitted when a theme is loaded", () => {
+    const output = 'font-size: invalid value "abc"';
+    const lines = ["theme = Dracula", "font-size = abc"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.range.start.line).toBe(1);
+    expect(diags[0]?.range.start.character).toBe("font-size = ".length);
+    expect(diags[0]?.message).toContain("abc");
+  });
+
+  it("parses an unlocated unknown field message", () => {
+    const output = "nonsense-key: unknown field";
+    const lines = ["theme = Dracula", "nonsense-key = 1"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(1);
+    expect(diags[0]?.range.start.line).toBe(1);
+    expect(diags[0]?.message).toContain("unknown field");
+  });
+
+  it("parses multiple unlocated error lines", () => {
+    const output = [
+      'font-size: invalid value "abc"',
+      "nonsense-key: unknown field",
+    ].join("\n");
+    const lines = ["theme = Dracula", "font-size = abc", "nonsense-key = 1"];
+    const diags = parseGhosttyOutput(output, lines);
+    expect(diags).toHaveLength(2);
+  });
+
+  it("skips unlocated lines whose field is not in the document", () => {
+    const output = "theme not found, tried path foo";
+    const diags = parseGhosttyOutput(output, ["theme = Dracula"]);
+    expect(diags).toHaveLength(0);
+  });
+});
+
+// ─── buildUnparsedErrorsDiagnostic (silent-failure safety net) ────────────────
+
+describe("buildUnparsedErrorsDiagnostic", () => {
+  it("surfaces raw output anchored at the first line", () => {
+    const diag = buildUnparsedErrorsDiagnostic(
+      "some unrecognized ghostty error\n",
+      ["font-size = 14"],
+    );
+    expect(diag?.severity).toBe("error");
+    expect(diag?.message).toContain("some unrecognized ghostty error");
+    expect(diag?.range.start.line).toBe(0);
+    expect(diag?.range.end.character).toBe("font-size = 14".length);
+  });
+
+  it("returns null for blank output", () => {
+    expect(buildUnparsedErrorsDiagnostic("\n  \n", ["font-size = 14"])).toBe(
+      null,
+    );
   });
 });
 
@@ -319,6 +378,18 @@ describe("diagnostics provider - value validation", () => {
     const diags = await getDiagnostics();
     const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
     expect(error).toBeDefined();
+  });
+
+  it("surfaces a fallback error when ghostty flags errors the parser cannot map", async () => {
+    const ghosttyOutput = "config failed in some unrecognized format";
+    const { getDiagnostics } = await setupDiagnostics(
+      "font-size = 14",
+      ghosttyOutput,
+    );
+    const diags = await getDiagnostics();
+    const error = diags.find((d) => d.severity === DiagnosticSeverity.Error);
+    expect(error).toBeDefined();
+    expect(error?.message).toContain("could not be mapped");
   });
 
   it("valid values produce no errors when CLI returns no output", async () => {

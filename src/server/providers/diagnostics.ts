@@ -7,6 +7,7 @@ import {
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
 import {
+  buildUnparsedErrorsDiagnostic,
   createValidationTempPath,
   parseGhosttyOutput,
   runGhosttyValidation,
@@ -62,7 +63,7 @@ async function validateDocumentAsync(
 
     const executablePath: string =
       (raw as { executablePath?: string })?.executablePath ?? "";
-    const output = await runGhosttyValidation(
+    const { output, reportedErrors } = await runGhosttyValidation(
       text,
       executablePath,
       state.tmpPath,
@@ -72,7 +73,17 @@ async function validateDocumentAsync(
 
     state.controller = null;
     const lines = text.split("\n");
-    const cliDiags = parseGhosttyOutput(output, lines).map(toLspDiagnostic);
+    const parsed = parseGhosttyOutput(output, lines);
+
+    if (reportedErrors && parsed.length === 0) {
+      connection.console.warn(
+        `Ghostty reported config errors but none could be parsed. Raw output:\n${output.trim()}`,
+      );
+      const fallback = buildUnparsedErrorsDiagnostic(output, lines);
+      if (fallback) parsed.push(fallback);
+    }
+
+    const cliDiags = parsed.map(toLspDiagnostic);
     lastCliDiags.set(uri, cliDiags);
 
     connection.sendDiagnostics({
