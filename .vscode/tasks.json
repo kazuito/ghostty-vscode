@@ -8,20 +8,18 @@
       "type": "shell",
       "command": "pnpm",
       "args": ["watch"],
-      "problemMatcher": [
-        {
-          "owner": "rolldown",
-          "pattern": {
-            "regexp": "^(?!x)x"
-          },
-          "background": {
-            "activeOnStart": true,
-            "beginsPattern": "^> ghostty@.+ watch .*$",
-            "endsPattern": "^✔ Rebuilt .*$"
-          }
-        }
-      ],
       "isBackground": true,
+      "problemMatcher": {
+        "owner": "rolldown",
+        "pattern": {
+          "regexp": "^(?!x)x"
+        },
+        "background": {
+          "activeOnStart": true,
+          "beginsPattern": "(Waiting for changes|rebuilding\\.\\.\\.)",
+          "endsPattern": "Rebuilt"
+        }
+      },
       "presentation": {
         "reveal": "never"
       },
