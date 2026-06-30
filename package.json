@@ -40,7 +40,7 @@
     "format": "biome format --write",
     "check": "pnpm biome check --write --unsafe && pnpm typecheck",
     "test": "vitest run",
-    "typecheck": "tsc --noEmit",
+    "typecheck": "tsc -b",
     "prepare": "husky"
   },
   "dependencies": {
