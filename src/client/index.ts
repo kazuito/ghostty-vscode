@@ -1,4 +1,3 @@
-import * as path from "node:path";
 import type { ExtensionContext } from "vscode";
 import * as vscode from "vscode";
 import {
@@ -7,13 +6,18 @@ import {
   type ServerOptions,
   TransportKind,
 } from "vscode-languageclient/node";
+import {
+  GHOSTTY_CONFIG_LANGUAGE_ID,
+  GHOSTTY_LSP_ID,
+  GHOSTTY_LSP_NAME,
+  SERVER_MODULE_PATH,
+} from "../lib/constants";
 
 let client: LanguageClient;
 
 export function activate(context: ExtensionContext) {
-  const serverModule = context.asAbsolutePath(
-    path.join("out", "server", "server.js"),
-  );
+  const serverModule = context.asAbsolutePath(SERVER_MODULE_PATH);
+
   const debugOptions = {
     execArgv: ["--nolazy", "--inspect=6009"],
   };
@@ -28,12 +32,12 @@ export function activate(context: ExtensionContext) {
   };
 
   const clientOptions: LanguageClientOptions = {
-    documentSelector: [{ language: "ghostty-config" }],
+    documentSelector: [{ language: GHOSTTY_CONFIG_LANGUAGE_ID }],
   };
 
   client = new LanguageClient(
-    "ghosttyLsp",
-    "Ghostty Language Server",
+    GHOSTTY_LSP_ID,
+    GHOSTTY_LSP_NAME,
     serverOptions,
     clientOptions,
   );

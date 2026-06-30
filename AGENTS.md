@@ -13,11 +13,11 @@ The extension activates for:
 - The extension ships syntax highlighting plus six language-server features:
   hover, completion, diagnostics, formatting, code actions, and document
   symbols.
-- The language server is modular. `src/server/server.ts` only wires providers
+- The language server is modular. `src/server/index.ts` only wires providers
   together; VS Code glue lives in `src/server/providers/` and Ghostty/domain
   logic lives in `src/lib/`.
-- Builds are bundled with Rolldown into `out/client/extension.js` and
-  `out/server/server.js`; there is no standalone `pnpm compile` script.
+- Builds are bundled with Rolldown into `out/client/index.js` and
+  `out/server/index.js`; there is no standalone `pnpm compile` script.
 - The server shells out to the Ghostty CLI at startup and during validation to
   load defaults, installed fonts, and CLI diagnostics. That behavior is
   configured by `ghostty.executablePath`.
@@ -36,7 +36,7 @@ The extension activates for:
 ```text
 src/
 ├── client/
-│   └── extension.ts       # VSCode entry point; starts the language server
+│   └── index.ts           # VSCode entry point; starts the language server
 ├── lib/
 │   ├── codeActions.ts     # Quick-fix suggestion generation
 │   ├── completion.ts      # Key/value completion logic
@@ -54,7 +54,7 @@ src/
 │   │   ├── documentSymbols.ts
 │   │   ├── formatter.ts
 │   │   └── hover.ts
-│   └── server.ts          # LSP bootstrap; registers providers
+│   └── index.ts           # LSP bootstrap; registers providers
 
 src/test/
 ├── document.test.ts
@@ -72,13 +72,13 @@ You generally don't need to read the entire `schema.ts` file unless necessary, a
 
 Generated output is written to `out/`. Do not hand-edit files there.
 
-### Client (`src/client/extension.ts`)
+### Client (`src/client/index.ts`)
 
-- Uses `vscode-languageclient` to launch `out/server/server.js` over IPC.
+- Uses `vscode-languageclient` to launch `out/server/index.js` over IPC.
 - Registers for documents with language ID `ghostty-config`.
-- The extension entry point in `package.json` is `./out/client/extension.js`.
+- The extension entry point in `package.json` is `./out/client/index.js`.
 
-### Server (`src/server/server.ts`)
+### Server (`src/server/index.ts`)
 
 - Uses `vscode-languageserver` with Node transport.
 - Creates the shared `Connection` and `TextDocuments<TextDocument>` instances.
@@ -211,7 +211,7 @@ Notes:
 - If you add a new LSP feature module, put pure logic in `src/lib/<feature>.ts`
   when it fits in one file, or `src/lib/<feature>/` when it has multiple
   modules. Keep the LSP adapter in `src/server/providers/`, then register it in
-  `src/server/server.ts`.
+  `src/server/index.ts`.
 - If you add or rename formatter settings, update both `package.json` and
   `README.md`.
 - When cutting a release, bump `package.json`, add a dated `CHANGELOG.md`

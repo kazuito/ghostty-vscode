@@ -28,8 +28,8 @@
     "config",
     "formatter"
   ],
-  "icon": "icon.png",
-  "main": "./out/client/extension.js",
+  "icon": "assets/icon.png",
+  "main": "./out/client/index.js",
   "scripts": {
     "vscode:prepublish": "pnpm bundle",
     "bundle": "NODE_ENV=production rolldown --config rolldown.config.ts",
