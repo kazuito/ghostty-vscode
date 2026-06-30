@@ -11,8 +11,8 @@ biome.json
 pnpm-lock.yaml
 CLAUDE.md
 AGENTS.md
-config.ghostty
+examples/**
 node_modules/**
 out/test/**
 vitest.config.ts
-demo.gif
+assets/demo.gif
