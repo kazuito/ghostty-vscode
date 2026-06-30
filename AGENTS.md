@@ -21,11 +21,17 @@ The extension activates for:
 - The server shells out to the Ghostty CLI at startup and during validation to
   load defaults, installed fonts, and CLI diagnostics. That behavior is
   configured by `ghostty.executablePath`.
-- `src/lib/schema.ts` is the source of truth for config keys, descriptions,
-  defaults, repeatable "additive" keys, and comma-separated value metadata.
-- Completion, diagnostics, and some quick-fix generation inspect Zod v4
-  internals (`schema._zod.def`), so they are sensitive to upstream Zod
-  implementation changes.
+- The config **key list and descriptions** are generated from Ghostty's
+  upstream docs into `src/lib/generated/config-keys.ts` by
+  `scripts/gen-config.ts` (run `pnpm gen:config`). The generated file is
+  committed; the build never touches the network.
+- `src/lib/schema.ts` merges that generated list with a hand-curated overlay
+  (`configMetadata`) for the metadata the docs don't expose machine-readably:
+  per-key value enums, color/font asset hints, comma-separated semantics, plus
+  the `additiveKeys` set and optional description overrides.
+- Completion, diagnostics, and quick-fix generation read this merged data
+  (`option.enum`, `option.assets`, `option.comma`); there is no longer any Zod
+  schema in the config model.
 - Formatting logic is intentionally mostly pure and split from LSP glue so it
   can be reused or extracted later.
 - Keep `README.md`, `CHANGELOG.md`, and `package.json` aligned with the actual
@@ -44,8 +50,9 @@ src/
 │   ├── document.ts        # Shared config line parsing helpers
 │   ├── documentSymbols.ts # Outline symbol generation
 │   ├── formatter/         # Pure formatter logic and formatter types
+│   ├── generated/         # Generated config keys + descriptions (do not edit)
 │   ├── hover.ts           # Hover content generation
-│   └── schema.ts          # Ghostty keys, descriptions, defaults, and Zod schemas
+│   └── schema.ts          # Merges generated keys with hand-curated metadata
 ├── server/
 │   ├── providers/
 │   │   ├── codeActions.ts
@@ -68,7 +75,8 @@ src/test/
 └── helpers.ts
 ```
 
-You generally don't need to read the entire `schema.ts` file unless necessary, as it is very large (over 1,300 lines).
+The bulk of `schema.ts` is the hand-curated `configMetadata` overlay; the key
+list and descriptions live in the generated `src/lib/generated/config-keys.ts`.
 
 Generated output is written to `out/`. Do not hand-edit files there.
 
@@ -100,28 +108,21 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Before `=`, suggests config keys from `ghosttyConfigOptions`.
 - Duplicate keys are filtered out of key completions unless the key is listed in
   `additiveKeys`.
-- After `=`, suggests schema-derived values plus named colors and installed
-  Ghostty font families for relevant keys.
+- After `=`, suggests values from each key's `enum` metadata plus named colors
+  and installed Ghostty font families for `assets`-tagged keys.
 - For comma-separated settings, value completion only replaces the segment after
   the last comma.
 - Completion item details include the config description and default value when
   one exists, based on Ghostty defaults loaded at server startup.
-- Value extraction currently relies on Zod v4 internals (`schema._zod.def`), so
-  completion code is sensitive to Zod implementation changes.
 
 ### Diagnostics (`src/server/providers/diagnostics.ts` + `src/lib/diagnostics.ts`)
 
-- Publishes a warning for unknown config keys.
+- Publishes a warning for unknown config keys (checked against `validKeys`).
 - Publishes an informational diagnostic for duplicate non-additive keys, pointing
   back to the first definition line.
-- Publishes error diagnostics for invalid values when the schema can validate
-  them, including booleans, numbers and numeric ranges, enums, literals,
-  supported unions, regex-backed strings, and comma-separated tokens.
-- Runs `ghostty +validate-config` asynchronously for additional CLI-backed
-  errors when the Ghostty executable is available.
+- Delegates value validation to `ghostty +validate-config`, run asynchronously
+  for CLI-backed errors when the Ghostty executable is available.
 - Clears diagnostics when a document closes.
-- Uses Zod internals to derive validation behavior, so schema representation
-  changes can affect diagnostics.
 
 ### Formatter (`src/server/providers/formatter.ts` + `src/lib/formatter/index.ts`)
 
@@ -151,12 +152,13 @@ Generated output is written to `out/`. Do not hand-edit files there.
 
 ### Shared Schema (`src/lib/schema.ts`)
 
-- Exports `ghosttyConfigOptions` as an `as const` array of
-  `{ key, schema, desc, default?, comma? }`.
-- Exports `additiveKeys`, which controls both diagnostics and completion
-  behavior for repeatable settings such as `keybind`.
-- Most language intelligence depends on this file, so new config support usually
-  starts here.
+- Builds `ghosttyConfigOptions: ConfigEntry[]` (`{ key, desc, enum?, assets?,
+  comma? }`) by mapping the generated `configKeys` and merging the hand-curated
+  `configMetadata` overlay. Adding a new upstream key needs no edit here unless
+  it requires `enum`/`assets`/`comma`.
+- Exports `additiveKeys`, `optionByKey`, `validKeys`, and `commaKeys`.
+- Regenerate keys/descriptions with `pnpm gen:config`; edit `configMetadata` by
+  hand for value/validation metadata.
 
 ## Syntax Highlighting And Language Registration
 
@@ -175,15 +177,19 @@ Generated output is written to `out/`. Do not hand-edit files there.
 - Bracket pairs for `[]` and `()`
 - Auto-closing and surrounding pairs for brackets and quotes
 
-Important: the TextMate grammar is not generated from `schema.ts`.
-`syntaxes/ghostty-config.tmLanguage.json` contains a hard-coded key regex and
-hard-coded token patterns. If you add, remove, or rename config keys in
-`schema.ts`, you must update the grammar file separately to keep highlighting in
-sync.
+Important: the key alternation and enum-value alternation in
+`syntaxes/ghostty-config.tmLanguage.json` are **generated** by
+`scripts/gen-config.ts` (the key list from the upstream MDX, the enum values
+from `configMetadata`). Run `pnpm gen:config` after key or enum changes rather
+than hand-editing those regexes. The surrounding token patterns (strings,
+numbers, colors, paths, etc.) are still hand-maintained in the grammar file.
+A Vitest drift check (`src/test/generated.test.ts`) asserts the grammar key set
+matches the generated key set.
 
 ## Build And Verification
 
 ```bash
+pnpm gen:config # Regenerate config keys/descriptions + grammar from upstream MDX
 pnpm bundle     # Rolldown bundle to out/
 pnpm watch      # Rolldown watch build
 pnpm vscode:prepublish # Prepublish bundle hook used by VS Code packaging
@@ -202,10 +208,14 @@ Notes:
 
 ## Working Rules For Future Changes
 
-- When adding or changing a config option, update `src/lib/schema.ts` first.
+- To pick up upstream config key/description changes, run `pnpm gen:config`
+  (fetches the upstream MDX) and commit the regenerated
+  `src/lib/generated/config-keys.ts` and grammar. Don't hand-edit the generated
+  file or the grammar's key/enum alternations.
+- For value/validation metadata (enums, color/font assets, comma semantics),
+  edit the `configMetadata` overlay in `src/lib/schema.ts`. `pnpm gen:config`
+  reads it to regenerate the grammar's enum alternation.
 - If a key is valid multiple times in one file, add it to `additiveKeys`.
-- Keep `syntaxes/ghostty-config.tmLanguage.json` in sync with any schema key
-  changes.
 - If schema changes affect completion, diagnostics, formatter behavior, or code
   actions, update the relevant Vitest coverage in `src/test/`.
 - If you add a new LSP feature module, put pure logic in `src/lib/<feature>.ts`
