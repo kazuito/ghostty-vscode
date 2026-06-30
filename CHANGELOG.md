@@ -4,6 +4,20 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.5] - 2026-06-30
+
+### Fixed
+
+- Diagnostics now map Ghostty's unlocated `+validate-config` output (the
+  `field: msg` form emitted once a theme or secondary config is loaded) back to
+  the offending line
+
+### Changed
+
+- Reorganized the language server into vertical feature slices for easier
+  maintenance
+- Refreshed the README and packaging metadata
+
 ## [1.0.4] - 2026-06-30
 
 ### Changed
