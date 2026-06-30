@@ -1,9 +1,9 @@
-# Ghostty
+![Ghostty LSP banner](https://raw.githubusercontent.com/kazuito/ghostty-vscode/main/assets/banner.png)
+
+# Ghostty LSP
 
 VS Code language support for [Ghostty](https://ghostty.org) configuration
 files, including validation, formatting, quick fixes, and outline support.
-
-![Demo](https://raw.githubusercontent.com/kazuito/ghostty-vscode/main/assets/demo.gif)
 
 ## Features
 
