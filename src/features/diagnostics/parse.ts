@@ -28,7 +28,9 @@ function buildDiagnostic(
 
   if (!isUnknownField && eqIndex >= 0) {
     const trimmedValue = line.slice(eqIndex + 1).trim();
-    start = trimmedValue ? line.indexOf(trimmedValue, eqIndex + 1) : eqIndex + 1;
+    start = trimmedValue
+      ? line.indexOf(trimmedValue, eqIndex + 1)
+      : eqIndex + 1;
     end = trimmedValue ? start + trimmedValue.length : start;
   } else {
     const keyInLine = eqIndex >= 0 ? line.slice(0, eqIndex) : line;

@@ -6,7 +6,7 @@ import {
   type TextDocuments,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import { getDocumentSymbols } from "../../lib/documentSymbols";
+import { getDocumentSymbols } from "./documentSymbols";
 
 export function registerDocumentSymbolProvider(
   connection: Connection,

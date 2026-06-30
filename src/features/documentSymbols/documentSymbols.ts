@@ -1,4 +1,4 @@
-import { parseDocument, type Range } from "./document";
+import { parseDocument, type Range } from "../../core/document";
 
 export interface SymbolDescriptor {
   name: string;

@@ -11,7 +11,7 @@ import {
   GHOSTTY_LSP_ID,
   GHOSTTY_LSP_NAME,
   SERVER_MODULE_PATH,
-} from "../lib/constants";
+} from "./core/constants";
 
 let client: LanguageClient;
 

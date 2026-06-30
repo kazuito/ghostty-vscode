@@ -13,7 +13,7 @@ import {
   runGhosttyValidation,
   type ValidationDiagnostic,
   validateInProcess,
-} from "../../lib/diagnostics";
+} from ".";
 
 const CLI_VALIDATION_DEBOUNCE_MS = 300;
 

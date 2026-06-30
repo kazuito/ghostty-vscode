@@ -1,5 +1,5 @@
-import { parseDocument } from "../document";
-import { additiveKeys, validKeys } from "../schema";
+import { parseDocument } from "../../core/document";
+import { additiveKeys, validKeys } from "../../core/schema";
 import type { ValidationDiagnostic } from "./types";
 
 export function validateInProcess(text: string): ValidationDiagnostic[] {

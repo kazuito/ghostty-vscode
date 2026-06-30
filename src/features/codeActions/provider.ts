@@ -8,10 +8,7 @@ import {
   TextEdit,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import {
-  type DiagnosticLike,
-  getCodeActionSuggestions,
-} from "../../lib/codeActions";
+import { type DiagnosticLike, getCodeActionSuggestions } from "./codeActions";
 
 function toLibSeverity(
   severity: DiagnosticSeverity | undefined,

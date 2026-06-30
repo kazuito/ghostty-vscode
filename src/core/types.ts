@@ -1,4 +1,4 @@
-import type { configKeys } from "./generated/config-keys";
+import type { configKeys } from "../generated/config-keys";
 
 export type GhosttyConfigKey = (typeof configKeys)[number]["key"];
 

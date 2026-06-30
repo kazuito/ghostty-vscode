@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { FormatterOptions } from "../lib/formatter";
+import type { FormatterOptions } from "../features/formatter";
 import {
   DEFAULT_FORMATTER_OPTIONS,
   formatBoolean,
@@ -10,7 +10,7 @@ import {
   formatPaletteValue,
   isHexColor,
   parseLine,
-} from "../lib/formatter";
+} from "../features/formatter";
 
 // Shorthand: merge overrides onto defaults
 function opts(overrides: Partial<FormatterOptions> = {}): FormatterOptions {

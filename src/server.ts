@@ -5,13 +5,13 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
-import { reloadGhosttyData } from "../lib/ghostty/reload";
-import { registerCodeActionProvider } from "./providers/codeActions";
-import { registerCompletionProvider } from "./providers/completion";
-import { registerDiagnosticsProvider } from "./providers/diagnostics";
-import { registerDocumentSymbolProvider } from "./providers/documentSymbols";
-import { registerFormatterProvider } from "./providers/formatter";
-import { registerHoverProvider } from "./providers/hover";
+import { registerCodeActionProvider } from "./features/codeActions/provider";
+import { registerCompletionProvider } from "./features/completion/provider";
+import { registerDiagnosticsProvider } from "./features/diagnostics/provider";
+import { registerDocumentSymbolProvider } from "./features/documentSymbols/provider";
+import { registerFormatterProvider } from "./features/formatter/provider";
+import { registerHoverProvider } from "./features/hover/provider";
+import { reloadGhosttyData } from "./ghostty/reload";
 
 const connection = createConnection(ProposedFeatures.all);
 const documents = new TextDocuments(TextDocument);

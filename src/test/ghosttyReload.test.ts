@@ -1,15 +1,9 @@
 import { afterEach, describe, expect, it, vi } from "vitest";
-import {
-  ghosttyActions,
-  loadGhosttyActionsAsync,
-} from "../lib/ghostty/actions";
-import {
-  ghosttyDefaults,
-  loadGhosttyDefaultsAsync,
-} from "../lib/ghostty/defaults";
-import { ghosttyFonts, loadGhosttyFontsAsync } from "../lib/ghostty/fonts";
-import type { GhosttyRunner } from "../lib/ghostty/ghostty";
-import { clearGhosttyData, reloadGhosttyData } from "../lib/ghostty/reload";
+import { ghosttyActions, loadGhosttyActionsAsync } from "../ghostty/actions";
+import { ghosttyDefaults, loadGhosttyDefaultsAsync } from "../ghostty/defaults";
+import { ghosttyFonts, loadGhosttyFontsAsync } from "../ghostty/fonts";
+import type { GhosttyRunner } from "../ghostty/ghostty";
+import { clearGhosttyData, reloadGhosttyData } from "../ghostty/reload";
 
 afterEach(() => {
   clearGhosttyData();

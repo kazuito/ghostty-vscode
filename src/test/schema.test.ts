@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { additiveKeys, commaKeys, optionByKey, validKeys } from "../lib/schema";
+import {
+  additiveKeys,
+  commaKeys,
+  optionByKey,
+  validKeys,
+} from "../core/schema";
 
 describe("schema indexes", () => {
   it("exposes fast key lookups", () => {

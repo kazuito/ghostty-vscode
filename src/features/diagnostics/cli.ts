@@ -3,7 +3,7 @@ import { randomBytes } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
-import { ghosttyBin, ghosttyEnv } from "../ghostty/ghostty";
+import { ghosttyBin, ghosttyEnv } from "../../ghostty/ghostty";
 import type { ValidationResult } from "./types";
 
 export function createValidationTempPath(): string {

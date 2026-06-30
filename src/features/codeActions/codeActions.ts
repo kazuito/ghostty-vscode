@@ -1,5 +1,5 @@
-import type { Range } from "./document";
-import { ghosttyConfigOptions, optionByKey } from "./schema";
+import type { Range } from "../../core/document";
+import { ghosttyConfigOptions, optionByKey } from "../../core/schema";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 

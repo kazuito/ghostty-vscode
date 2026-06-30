@@ -29,13 +29,13 @@
     "formatter"
   ],
   "icon": "assets/icon.png",
-  "main": "./out/client/index.js",
+  "main": "./out/extension.js",
   "scripts": {
     "vscode:prepublish": "pnpm bundle",
     "bundle": "NODE_ENV=production rolldown --config rolldown.config.ts",
     "bundle:dev": "rolldown --config rolldown.config.ts",
     "watch": "rolldown --config rolldown.config.ts --watch",
-    "gen:config": "tsx scripts/gen-config.ts && biome format --write src/lib/generated/config-keys.ts syntaxes/ghostty-config.tmLanguage.json",
+    "gen:config": "tsx scripts/gen-config.ts && biome format --write src/generated/config-keys.ts syntaxes/ghostty-config.tmLanguage.json",
     "lint": "biome lint",
     "format": "biome format --write",
     "check": "pnpm biome check --write --unsafe && pnpm typecheck",

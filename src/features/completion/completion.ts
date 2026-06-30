@@ -1,9 +1,13 @@
-import { parseDocument } from "./document";
-import { ghosttyActions } from "./ghostty/actions";
-import { ghosttyColors } from "./ghostty/colors";
-import { ghosttyDefaults } from "./ghostty/defaults";
-import { ghosttyFonts } from "./ghostty/fonts";
-import { additiveKeys, ghosttyConfigOptions, optionByKey } from "./schema";
+import { parseDocument } from "../../core/document";
+import {
+  additiveKeys,
+  ghosttyConfigOptions,
+  optionByKey,
+} from "../../core/schema";
+import { ghosttyActions } from "../../ghostty/actions";
+import { ghosttyColors } from "../../ghostty/colors";
+import { ghosttyDefaults } from "../../ghostty/defaults";
+import { ghosttyFonts } from "../../ghostty/fonts";
 
 export interface CompletionSuggestion {
   label: string;

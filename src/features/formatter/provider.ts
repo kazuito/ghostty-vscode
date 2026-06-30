@@ -9,7 +9,7 @@ import {
   DEFAULT_FORMATTER_OPTIONS,
   type FormatterOptions,
   formatDocument,
-} from "../../lib/formatter";
+} from ".";
 
 export function registerFormatterProvider(
   connection: Connection,

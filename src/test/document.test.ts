@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { parseDocument, parseDocumentLine, parseLine } from "../lib/document";
+import { parseDocument, parseDocumentLine, parseLine } from "../core/document";
 
 describe("document parser", () => {
   it("classifies blank, comment, unknown, and entry lines", () => {

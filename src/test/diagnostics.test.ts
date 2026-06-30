@@ -13,8 +13,8 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   buildUnparsedErrorsDiagnostic,
   parseGhosttyOutput,
-} from "../lib/diagnostics";
-import { registerDiagnosticsProvider } from "../server/providers/diagnostics";
+} from "../features/diagnostics";
+import { registerDiagnosticsProvider } from "../features/diagnostics/provider";
 import { createDocument, createMockConnection } from "./helpers";
 
 beforeEach(() => {

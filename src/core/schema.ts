@@ -1,4 +1,4 @@
-import { configKeys } from "./generated/config-keys";
+import { configKeys } from "../generated/config-keys";
 import type { ConfigEntry, ConfigMetadata, GhosttyConfigKey } from "./types";
 
 /**

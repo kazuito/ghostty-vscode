@@ -1,8 +1,8 @@
 # Ignore everything by default, then allow only what the extension ships.
 **
 
-!out/client/**
-!out/server/**
+!out/extension.js
+!out/server.js
 !syntaxes/**
 !language-configuration.json
 !assets/icon.png

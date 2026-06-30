@@ -6,9 +6,9 @@ const CONFIG_REFERENCE_MDX_URL =
   "https://raw.githubusercontent.com/ghostty-org/website/refs/heads/main/docs/config/reference.mdx";
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const generatedPath = path.join(root, "src/lib/generated/config-keys.ts");
+const generatedPath = path.join(root, "src/generated/config-keys.ts");
 const grammarPath = path.join(root, "syntaxes/ghostty-config.tmLanguage.json");
-const schemaPath = path.join(root, "src/lib/schema.ts");
+const schemaPath = path.join(root, "src/core/schema.ts");
 
 type Entry = { key: string; desc: string };
 
@@ -99,7 +99,7 @@ function writeConfigKeys(entries: Entry[]): void {
 async function collectEnumValues(): Promise<string[]> {
   const { ghosttyConfigOptions } = (await import(
     pathToFileURL(schemaPath).href
-  )) as typeof import("../src/lib/schema");
+  )) as typeof import("../src/core/schema");
 
   return [...new Set(ghosttyConfigOptions.flatMap((o) => o.enum ?? []))]
     .map(String)

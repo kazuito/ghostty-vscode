@@ -22,8 +22,8 @@ function bundle(
 }
 
 export default defineConfig([
-  bundle("src/client/index.ts", "out/client/index.js", {
+  bundle("src/extension.ts", "out/extension.js", {
     external: ["vscode"],
   }),
-  bundle("src/server/index.ts", "out/server/index.js"),
+  bundle("src/server.ts", "out/server.js"),
 ]);

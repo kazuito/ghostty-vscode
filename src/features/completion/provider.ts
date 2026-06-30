@@ -6,7 +6,7 @@ import {
   type TextDocuments,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import { getCompletionSuggestions } from "../../lib/completion";
+import { getCompletionSuggestions } from "./completion";
 
 export function registerCompletionProvider(
   connection: Connection,

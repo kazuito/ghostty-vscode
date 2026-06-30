@@ -5,7 +5,7 @@ import type {
   TextDocuments,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import { getHoverContent } from "../../lib/hover";
+import { getHoverContent } from "./hover";
 
 export function registerHoverProvider(
   connection: Connection,
