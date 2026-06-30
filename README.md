@@ -1,24 +1,23 @@
-![Ghostty LSP banner](https://raw.githubusercontent.com/kazuito/ghostty-vscode/main/assets/banner.png)
+![banner](https://raw.githubusercontent.com/kazuito/ghostty-vscode/main/assets/banner.png)
 
 # Ghostty LSP
 
-VS Code language support for [Ghostty](https://ghostty.org) configuration
-files, including validation, formatting, quick fixes, and outline support.
+[![Install on VSCode](https://img.shields.io/badge/Install%20on%20VSCode-000000?style=flat)](https://marketplace.visualstudio.com/items?itemName=kazuito.ghostty)
+[![GitHub Repo stars](https://img.shields.io/github/stars/kazuito/ghostty-vscode?style=flat&logo=github&labelColor=000&color=000)](https://github.com/kazuito/ghostty-vscode)
 
-## Features
 
-- **Syntax highlighting** for keys, values, strings, and comments
-- **Hover documentation** with defaults when available and links to the
-  official Ghostty reference
-- **Completions** for config keys plus schema-derived values, named colors,
-  and Ghostty font families when available
-- **Diagnostics** for unknown keys, duplicate non-repeatable keys, and invalid
-  values
-- **Quick fixes** to remove invalid lines, correct mistyped keys, and replace
-  invalid boolean/enum/literal values
-- **Document formatting** for consistent spacing, casing, and blank-line
-  handling
-- **Outline and breadcrumbs** powered by document symbols for config entries
+VSCode language support for [Ghostty](https://ghostty.org) configuration
+files.
+
+Features:
+
+- Syntax highlighting
+- Diagnostics
+- Completions
+- Formatter
+- Quick fixes 
+- Hover documentation
+- Outline and breadcrumbs
 
 ## Supported files
 
