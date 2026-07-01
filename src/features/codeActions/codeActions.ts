@@ -1,5 +1,10 @@
+import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
 import type { Range } from "../../core/document";
 import { ghosttyConfigOptions, optionByKey } from "../../core/schema";
+import {
+  DUPLICATE_KEY_MESSAGE_PREFIX,
+  UNKNOWN_FIELD_MESSAGE,
+} from "../diagnostics";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 
@@ -18,8 +23,13 @@ export interface CodeActionSuggestion {
 }
 
 const schemaKeys = ghosttyConfigOptions.map((option) => option.key);
-const UNKNOWN_FIELD_MESSAGE = "unknown field";
-const DUPLICATE_KEY_PREFIX = "Duplicate key ";
+
+/** Max Levenshtein distance for a key to be considered a "Did you mean" match. */
+const MAX_SUGGESTION_DISTANCE = 5;
+/** Max number of "Did you mean" suggestions offered for an unknown key. */
+const MAX_KEY_SUGGESTIONS = 3;
+/** Max number of "Replace with" suggestions offered for an invalid enum value. */
+const MAX_ENUM_REPLACEMENT_SUGGESTIONS = 5;
 
 function levenshtein(a: string, b: string): number {
   const m = a.length;
@@ -43,10 +53,13 @@ function levenshtein(a: string, b: string): number {
   return dp[m][n] as number;
 }
 
-export function closestKeys(input: string, maxResults = 3): string[] {
+export function closestKeys(
+  input: string,
+  maxResults = MAX_KEY_SUGGESTIONS,
+): string[] {
   return schemaKeys
     .map((key) => ({ key, dist: levenshtein(input, key) }))
-    .filter(({ dist }) => dist <= 5)
+    .filter(({ dist }) => dist <= MAX_SUGGESTION_DISTANCE)
     .sort((a, b) => a.dist - b.dist)
     .slice(0, maxResults)
     .map(({ key }) => key);
@@ -78,7 +91,7 @@ export function getCodeActionSuggestions(
       diagnostic.severity === "warning" ||
       message === UNKNOWN_FIELD_MESSAGE
     ) {
-      const eqIndex = line.indexOf("=");
+      const eqIndex = line.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
       const keyPart = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
       const key = keyPart.trim();
       if (key) {
@@ -105,7 +118,7 @@ export function getCodeActionSuggestions(
 
     if (
       diagnostic.severity === "information" ||
-      message.startsWith(DUPLICATE_KEY_PREFIX)
+      message.startsWith(DUPLICATE_KEY_MESSAGE_PREFIX)
     ) {
       suggestions.push({
         title: "Remove line",
@@ -114,7 +127,7 @@ export function getCodeActionSuggestions(
       continue;
     }
 
-    const eqIndex = line.indexOf("=");
+    const eqIndex = line.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
     if (eqIndex < 0) continue;
 
     const key = line.slice(0, eqIndex).trim();
@@ -124,7 +137,7 @@ export function getCodeActionSuggestions(
     const values = option.enum;
     if (!values) continue;
 
-    for (const value of values.slice(0, 5)) {
+    for (const value of values.slice(0, MAX_ENUM_REPLACEMENT_SUGGESTIONS)) {
       suggestions.push({
         title: `Replace with '${value}'`,
         edit: { range: diagnostic.range, newText: value.toString() },

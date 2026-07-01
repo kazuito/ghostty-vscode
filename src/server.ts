@@ -5,6 +5,7 @@ import {
   TextDocuments,
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
+import { GHOSTTY_CONFIG_SECTION, GHOSTTY_DOCS_URL } from "./core/constants";
 import { registerCodeActionProvider } from "./features/codeActions/provider";
 import { registerCompletionProvider } from "./features/completion/provider";
 import { registerDiagnosticsProvider } from "./features/diagnostics/provider";
@@ -35,7 +36,7 @@ async function promptGhosttyNotFound(): Promise<void> {
   );
   if (action?.title === "Install Ghostty") {
     connection.window.showDocument({
-      uri: "https://ghostty.org/",
+      uri: `${GHOSTTY_DOCS_URL}/`,
       external: true,
     });
   } else if (action?.title === "Configure Path") {
@@ -49,7 +50,9 @@ let reloadToken = 0;
 let lastExecutablePath: string | undefined;
 
 async function refreshGhosttyData(force = false): Promise<void> {
-  const raw = await connection.workspace.getConfiguration("ghostty");
+  const raw = await connection.workspace.getConfiguration(
+    GHOSTTY_CONFIG_SECTION,
+  );
   const executablePath: string =
     (raw as { executablePath?: string })?.executablePath ?? "";
 

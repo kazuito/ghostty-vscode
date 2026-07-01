@@ -1,3 +1,4 @@
+import { GHOSTTY_CONFIG_REFERENCE_URL } from "../../core/constants";
 import { parseLine } from "../../core/document";
 import { optionByKey } from "../../core/schema";
 import { ghosttyDefaults } from "../../ghostty/defaults";
@@ -25,6 +26,6 @@ export function getHoverContent(line: string): HoverContent | null {
 
   return {
     kind: "markdown",
-    value: `**${option.key}**\n\n${option.desc}${defaultLine}\n\n[Documentation](https://ghostty.org/docs/config/reference#${option.key})`,
+    value: `**${option.key}**\n\n${option.desc}${defaultLine}\n\n[Documentation](${GHOSTTY_CONFIG_REFERENCE_URL}${option.key})`,
   };
 }

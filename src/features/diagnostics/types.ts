@@ -2,6 +2,12 @@ import type { Range } from "../../core/document";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 
+/** Literal message ghostty's `+validate-config` emits for an unrecognized key. */
+export const UNKNOWN_FIELD_MESSAGE = "unknown field";
+
+/** Prefix of the in-process duplicate-key diagnostic message. */
+export const DUPLICATE_KEY_MESSAGE_PREFIX = "Duplicate key ";
+
 export interface ValidationDiagnostic {
   range: Range;
   message: string;

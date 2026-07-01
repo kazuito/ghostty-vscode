@@ -1,6 +1,9 @@
 import { parseDocument } from "../../core/document";
 import { additiveKeys, validKeys } from "../../core/schema";
-import type { ValidationDiagnostic } from "./types";
+import {
+  DUPLICATE_KEY_MESSAGE_PREFIX,
+  type ValidationDiagnostic,
+} from "./types";
 
 export function validateInProcess(text: string): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
@@ -35,7 +38,7 @@ export function validateInProcess(text: string): ValidationDiagnostic[] {
       if (seenKeys.has(key)) {
         diagnostics.push({
           range: keyRange,
-          message: `Duplicate key '${key}' (first defined on line ${(seenKeys.get(key) as number) + 1})`,
+          message: `${DUPLICATE_KEY_MESSAGE_PREFIX}'${key}' (first defined on line ${(seenKeys.get(key) as number) + 1})`,
           severity: "information",
         });
       } else {

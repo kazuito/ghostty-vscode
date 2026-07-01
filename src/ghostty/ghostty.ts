@@ -1,4 +1,5 @@
 import { execFile, execFileSync } from "node:child_process";
+import { GHOSTTY_CLI_TIMEOUT_MS } from "./constants";
 
 /**
  * PATH augmented with the macOS app bundle location so `ghostty` is found
@@ -30,7 +31,7 @@ export function runGhosttySync(
   try {
     return execFileSync(ghosttyBin(executablePath), args, {
       encoding: "utf8",
-      timeout: 5000,
+      timeout: GHOSTTY_CLI_TIMEOUT_MS,
       env: ghosttyEnv(executablePath),
     });
   } catch {
@@ -59,7 +60,11 @@ export const runGhosttyAsync: GhosttyRunner = (args, executablePath?) =>
     execFile(
       ghosttyBin(executablePath),
       args,
-      { encoding: "utf8", timeout: 5000, env: ghosttyEnv(executablePath) },
+      {
+        encoding: "utf8",
+        timeout: GHOSTTY_CLI_TIMEOUT_MS,
+        env: ghosttyEnv(executablePath),
+      },
       (err, stdout) => {
         resolve(err ? "" : stdout);
       },

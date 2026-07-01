@@ -1,10 +1,14 @@
-import type { ValidationDiagnostic } from "./types";
+import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
+import { UNKNOWN_FIELD_MESSAGE, type ValidationDiagnostic } from "./types";
+
+const LOCATED_OUTPUT_RE = /^.+?:(\d+):([^:]+):\s*(.+)$/;
+const UNLOCATED_OUTPUT_RE = /^([A-Za-z0-9_-]+):\s*(.+)$/;
 
 function findKeyLine(lines: string[], key: string): number {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
     if (!line) continue;
-    const eqIndex = line.indexOf("=");
+    const eqIndex = line.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
     const lineKey = (eqIndex >= 0 ? line.slice(0, eqIndex) : line).trim();
     if (lineKey === key) return i;
   }
@@ -21,8 +25,8 @@ function buildDiagnostic(
   const line = lines[lineNum];
   if (!line) return null;
 
-  const eqIndex = line.indexOf("=");
-  const isUnknownField = message === "unknown field";
+  const eqIndex = line.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
+  const isUnknownField = message === UNKNOWN_FIELD_MESSAGE;
   let start: number;
   let end: number;
 
@@ -54,11 +58,9 @@ export function parseGhosttyOutput(
   lines: string[],
 ): ValidationDiagnostic[] {
   const diagnostics: ValidationDiagnostic[] = [];
-  const locatedRegex = /^.+?:(\d+):([^:]+):\s*(.+)$/;
-  const unlocatedRegex = /^([A-Za-z0-9_-]+):\s*(.+)$/;
 
   for (const rawLine of output.split("\n")) {
-    const located = rawLine.match(locatedRegex);
+    const located = rawLine.match(LOCATED_OUTPUT_RE);
     if (located) {
       const diagnostic = buildDiagnostic(
         lines,
@@ -70,7 +72,7 @@ export function parseGhosttyOutput(
       continue;
     }
 
-    const unlocated = rawLine.match(unlocatedRegex);
+    const unlocated = rawLine.match(UNLOCATED_OUTPUT_RE);
     if (unlocated) {
       const field = unlocated[1].trim();
       const diagnostic = buildDiagnostic(

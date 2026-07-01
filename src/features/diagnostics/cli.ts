@@ -3,6 +3,11 @@ import { randomBytes } from "node:crypto";
 import { unlink, writeFile } from "node:fs/promises";
 import { tmpdir } from "node:os";
 import { join } from "node:path";
+import {
+  GHOSTTY_CLI_FLAGS,
+  GHOSTTY_CLI_TIMEOUT_MS,
+  GHOSTTY_CONFIG_FILE_FLAG_PREFIX,
+} from "../../ghostty/constants";
 import { ghosttyBin, ghosttyEnv } from "../../ghostty/ghostty";
 import type { ValidationResult } from "./types";
 
@@ -26,8 +31,11 @@ export async function runGhosttyValidation(
     return await new Promise<ValidationResult>((resolve) => {
       execFile(
         bin,
-        ["+validate-config", `--config-file=${validationTmpPath}`],
-        { timeout: 5000, env, signal },
+        [
+          GHOSTTY_CLI_FLAGS.VALIDATE_CONFIG,
+          `${GHOSTTY_CONFIG_FILE_FLAG_PREFIX}${validationTmpPath}`,
+        ],
+        { timeout: GHOSTTY_CLI_TIMEOUT_MS, env, signal },
         (err, stdout, stderr) => {
           const reportedErrors =
             err != null && typeof (err as { code?: unknown }).code === "number";

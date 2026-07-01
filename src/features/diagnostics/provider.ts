@@ -6,6 +6,7 @@ import {
   type TextDocuments,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
+import { GHOSTTY_CONFIG_SECTION } from "../../core/constants";
 import {
   buildUnparsedErrorsDiagnostic,
   createValidationTempPath,
@@ -57,7 +58,7 @@ async function validateDocumentAsync(
   try {
     const raw = await connection.workspace.getConfiguration({
       scopeUri: uri,
-      section: "ghostty",
+      section: GHOSTTY_CONFIG_SECTION,
     });
     if (state.controller !== controller) return;
 

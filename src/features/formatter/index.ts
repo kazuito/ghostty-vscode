@@ -5,6 +5,7 @@
  * be extractable into a standalone package in the future.
  */
 
+import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
 import { type ParsedLine, parseLine } from "../../core/document";
 import { commaKeys, validKeys } from "../../core/schema";
 import { DEFAULT_FORMATTER_OPTIONS, type FormatterOptions } from "./types";
@@ -92,7 +93,7 @@ export function formatPaletteValue(
   value: string,
   opts: FormatterOptions,
 ): string {
-  const innerEq = value.indexOf("=");
+  const innerEq = value.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
   if (innerEq < 0) return value;
   const prefix = value.slice(0, innerEq + 1);
   const color = value.slice(innerEq + 1);

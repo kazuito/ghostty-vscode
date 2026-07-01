@@ -1,3 +1,5 @@
+import { CONFIG_COMMENT_PREFIX, CONFIG_KEY_VALUE_SEPARATOR } from "./constants";
+
 export interface Position {
   line: number;
   character: number;
@@ -55,9 +57,10 @@ export type ParsedDocumentLine =
 export function parseLine(raw: string): ParsedLine {
   const trimmed = raw.trimStart();
   if (trimmed === "") return { type: "blank" };
-  if (trimmed.startsWith("#")) return { type: "comment", raw };
+  if (trimmed.startsWith(CONFIG_COMMENT_PREFIX))
+    return { type: "comment", raw };
 
-  const eqIndex = raw.indexOf("=");
+  const eqIndex = raw.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
   if (eqIndex < 0) return { type: "unknown", raw };
 
   const key = raw.slice(0, eqIndex).trim();

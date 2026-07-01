@@ -1,3 +1,7 @@
+import {
+  CONFIG_COMMENT_PREFIX,
+  CONFIG_KEY_VALUE_SEPARATOR,
+} from "../../core/constants";
 import { parseDocument } from "../../core/document";
 import {
   additiveKeys,
@@ -23,9 +27,9 @@ export function getCompletionSuggestions(
   lineUpToCursor: string,
   cursorCharacter: number,
 ): CompletionSuggestion[] | null {
-  if (lineUpToCursor.trimStart().startsWith("#")) return null;
+  if (lineUpToCursor.trimStart().startsWith(CONFIG_COMMENT_PREFIX)) return null;
 
-  const eqIndex = lineUpToCursor.indexOf("=");
+  const eqIndex = lineUpToCursor.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
 
   if (eqIndex >= 0) {
     const key = lineUpToCursor.slice(0, eqIndex).trim();
@@ -39,7 +43,7 @@ export function getCompletionSuggestions(
 
     // keybind: suggest action names after the second `=` (key_combo=action)
     if (key === "keybind" && ghosttyActions.length > 0) {
-      const secondEqIndex = afterEq.indexOf("=");
+      const secondEqIndex = afterEq.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
       if (secondEqIndex >= 0) {
         const actionPrefix = afterEq.slice(secondEqIndex + 1).trimStart();
         const replacementStart = cursorCharacter - actionPrefix.length;
