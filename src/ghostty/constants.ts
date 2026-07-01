@@ -12,3 +12,28 @@ export const GHOSTTY_CLI_FLAGS = {
 } as const;
 
 export const GHOSTTY_CONFIG_FILE_FLAG_PREFIX = "--config-file=" as const;
+
+/**
+ * Extra directories to search for `ghostty`, per platform, appended to
+ * PATH. Covers common install locations that a GUI-launched extension
+ * host may not inherit from the user's shell PATH. Entries starting with
+ * `~/` are expanded against the home directory.
+ */
+export const GHOSTTY_EXTRA_PATH_DIRS: Readonly<
+  Partial<Record<NodeJS.Platform, readonly string[]>>
+> = {
+  darwin: [
+    "/Applications/Ghostty.app/Contents/MacOS",
+    "~/.nix-profile/bin",
+    "/run/current-system/sw/bin",
+  ],
+  linux: [
+    "/usr/local/bin",
+    "/usr/bin",
+    "/home/linuxbrew/.linuxbrew/bin",
+    "/snap/bin",
+    "~/.nix-profile/bin",
+    "/run/current-system/sw/bin",
+    "~/.local/bin",
+  ],
+} as const;

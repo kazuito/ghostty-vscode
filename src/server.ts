@@ -6,6 +6,7 @@ import {
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { GHOSTTY_CONFIG_SECTION, GHOSTTY_DOCS_URL } from "./core/constants";
+import { GHOSTTY_EXTRA_PATH_DIRS } from "./ghostty/constants";
 import { registerCodeActionProvider } from "./features/codeActions/provider";
 import { registerCompletionProvider } from "./features/completion/provider";
 import { registerDiagnosticsProvider } from "./features/diagnostics/provider";
@@ -29,8 +30,11 @@ connection.onInitialize(() => ({
 }));
 
 async function promptGhosttyNotFound(): Promise<void> {
+  const extras =
+    GHOSTTY_EXTRA_PATH_DIRS[process.platform as NodeJS.Platform] ?? [];
+  const hint = extras.length ? ` Also checked: ${extras.join(", ")}.` : "";
   const action = await connection.window.showWarningMessage(
-    "Ghostty CLI not found. Install Ghostty or set `ghostty.executablePath`.",
+    `Ghostty CLI not found. Install Ghostty or set \`ghostty.executablePath\`.${hint}`,
     { title: "Install Ghostty" },
     { title: "Configure Path" },
   );

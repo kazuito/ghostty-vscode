@@ -1,14 +1,29 @@
 import { execFile } from "node:child_process";
-import { GHOSTTY_CLI_TIMEOUT_MS } from "./constants";
+import { homedir } from "node:os";
+import { delimiter } from "node:path";
+import { GHOSTTY_CLI_TIMEOUT_MS, GHOSTTY_EXTRA_PATH_DIRS } from "./constants";
+
+function expandHome(dir: string, home: string): string {
+  return dir.startsWith("~/") ? home + dir.slice(1) : dir;
+}
 
 /**
- * PATH augmented with the macOS app bundle location so `ghostty` is found
- * even when the extension host doesn't inherit the user's shell PATH.
+ * Builds PATH augmented with per-platform fallback directories so `ghostty`
+ * is found even when the extension host doesn't inherit the user's shell
+ * PATH (common for GUI-launched app bundles and desktop sessions).
  */
-export const ghosttyPathEnv =
-  process.platform === "darwin"
-    ? `${process.env.PATH ?? ""}:/Applications/Ghostty.app/Contents/MacOS`
-    : process.env.PATH;
+export function buildGhosttyPathEnv(
+  basePath: string | undefined = process.env.PATH,
+  platform: NodeJS.Platform = process.platform,
+  home: string = homedir(),
+): string {
+  const extras = (GHOSTTY_EXTRA_PATH_DIRS[platform] ?? []).map((dir) =>
+    expandHome(dir, home),
+  );
+  return [basePath, ...extras].filter(Boolean).join(delimiter);
+}
+
+export const ghosttyPathEnv = buildGhosttyPathEnv();
 
 export function ghosttyBin(executablePath?: string): string {
   return executablePath || "ghostty";

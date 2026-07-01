@@ -96,7 +96,7 @@
         "ghostty.executablePath": {
           "type": "string",
           "default": "",
-          "markdownDescription": "Path to the `ghostty` executable. When empty, the extension searches the system `PATH` (and `/Applications/Ghostty.app/Contents/MacOS` on macOS). Set this if Ghostty is installed in a non-standard location."
+          "markdownDescription": "Path to the `ghostty` executable. When empty, the extension searches the system `PATH` plus common per-platform install locations (e.g. `/Applications/Ghostty.app/Contents/MacOS` and Nix paths on macOS; `/usr/local/bin`, `/usr/bin`, Homebrew-on-Linux, Snap, and Nix paths on Linux). Not auto-detected under Flatpak — see README. Set this if Ghostty is installed elsewhere."
         },
         "ghostty.format.equalSpacing": {
           "type": "string",

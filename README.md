@@ -52,9 +52,18 @@ The extension uses the Ghostty CLI when it is available to:
 - load Ghostty default values so completion details can mark defaults
 - load installed font family names for font-related value completion
 
-By default the extension searches the system `PATH` and, on macOS,
-`/Applications/Ghostty.app/Contents/MacOS`. If Ghostty is installed elsewhere,
-set `ghostty.executablePath` in your VS Code settings.
+By default the extension searches the system `PATH` plus common per-platform
+install locations: on macOS, `/Applications/Ghostty.app/Contents/MacOS` and
+Nix paths; on Linux, `/usr/local/bin`, `/usr/bin`, Homebrew-on-Linux, Snap,
+and Nix paths. This covers cases where a GUI-launched VS Code doesn't
+inherit the user's shell PATH. If Ghostty is installed elsewhere, set
+`ghostty.executablePath` in your VS Code settings.
+
+Flatpak installs aren't auto-detected: Flatpak exports a binstub named after
+the app id (`com.mitchellh.ghostty`), not `ghostty`, so PATH search can't
+find it, and the sandboxed CLI may not see the extension's temp validation
+files. Workaround: point `ghostty.executablePath` at a small wrapper script
+that runs `flatpak run com.mitchellh.ghostty "$@"`.
 
 ## Formatting
 
