@@ -36,7 +36,9 @@ export function registerFormatterProvider(
     } catch (err) {
       const message = err instanceof Error ? err.message : String(err);
       connection.console.error(`ghostty formatter failed: ${message}`);
-      connection.window.showErrorMessage(`Ghostty formatter failed: ${message}`);
+      connection.window.showErrorMessage(
+        `Ghostty formatter failed: ${message}`,
+      );
       return null;
     }
 
