@@ -25,6 +25,9 @@ export function createMockConnection() {
       error: vi.fn(),
       warn: vi.fn(),
     },
+    window: {
+      showErrorMessage: vi.fn(),
+    },
   };
 }
 

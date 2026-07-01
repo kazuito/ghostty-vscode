@@ -7,37 +7,8 @@
 
 import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
 import { type ParsedLine, parseLine } from "../../core/document";
-import { commaKeys, validKeys } from "../../core/schema";
+import { commaKeys, optionByKey, validKeys } from "../../core/schema";
 import { DEFAULT_FORMATTER_OPTIONS, type FormatterOptions } from "./types";
-
-// ── Color key sets ───────────────────────────────────────────────────────────
-
-/**
- * Keys whose entire value is a single hex/named color.
- * The `isHexColor` guard means non-hex values pass through untouched.
- */
-const SCALAR_COLOR_KEYS = new Set([
-  "background",
-  "foreground",
-  "selection-foreground",
-  "selection-background",
-  "cursor-color",
-  "cursor-text",
-  "unfocused-split-fill",
-  "split-divider-color",
-  "search-foreground",
-  "search-background",
-  "search-selected-foreground",
-  "search-selected-background",
-  "window-titlebar-background",
-  "window-titlebar-foreground",
-  "window-padding-color",
-  "macos-icon-ghost-color",
-  "bold-color",
-]);
-
-/** Keys whose comma-separated tokens are each a hex/named color. */
-const COMMA_COLOR_KEYS = new Set(["macos-icon-screen-color"]);
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
 
@@ -114,12 +85,11 @@ export function formatValue(
 
   if (key === "palette") return formatPaletteValue(value, opts);
 
-  if (COMMA_COLOR_KEYS.has(key)) {
-    return formatCommaSeparated(value, opts, (t) => formatColor(t, opts));
-  }
-
-  if (SCALAR_COLOR_KEYS.has(key)) {
-    return formatColor(value, opts);
+  const isColorKey = optionByKey.get(key)?.assets?.includes("color") ?? false;
+  if (isColorKey) {
+    return commaKeys.has(key)
+      ? formatCommaSeparated(value, opts, (t) => formatColor(t, opts))
+      : formatColor(value, opts);
   }
 
   if (commaKeys.has(key)) {
@@ -154,9 +124,20 @@ export function formatLine(parsed: ParsedLine, opts: FormatterOptions): string {
   return value === "" ? `${key} =` : `${key} = ${value}`;
 }
 
+/**
+ * Detects the document's line-ending style from its first line break
+ * (mirrors Prettier's `endOfLine: "auto"`), so mixed-EOL input is normalized
+ * to one consistent style instead of leaking `\r` into parsed line content.
+ */
+function detectEol(text: string): "\n" | "\r\n" {
+  const index = text.indexOf("\n");
+  return index > 0 && text[index - 1] === "\r" ? "\r\n" : "\n";
+}
+
 export function formatDocument(text: string, opts: FormatterOptions): string {
-  const hadTrailingNewline = text.endsWith("\n");
-  const lines = text.split("\n");
+  const eol = detectEol(text);
+  const hadTrailingNewline = /\r?\n$/.test(text);
+  const lines = text.split(/\r\n|\n/);
 
   if (hadTrailingNewline && lines[lines.length - 1] === "") {
     lines.pop();
@@ -180,6 +161,6 @@ export function formatDocument(text: string, opts: FormatterOptions): string {
     }
   }
 
-  const result = out.join("\n");
-  return hadTrailingNewline ? `${result}\n` : result;
+  const result = out.join(eol);
+  return hadTrailingNewline ? `${result}${eol}` : result;
 }

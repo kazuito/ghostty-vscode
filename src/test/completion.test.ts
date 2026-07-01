@@ -135,6 +135,16 @@ describe("completion provider - value completions", () => {
     expect((item?.textEdit as { newText: string }).newText).toBe("native");
   });
 
+  // Regression test for the schema/formatter color-key drift: cursor-color
+  // must be tagged `assets: ["color"]` in schema.ts for completion to offer
+  // named-color suggestions here, the same tag the formatter now relies on.
+  it("returns named color suggestions for cursor-color", () => {
+    const complete = setupCompletion("cursor-color = re");
+    const result = complete(0, 17);
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).toContain("red");
+  });
+
   it("surfaces the corrected Ghostty value sets for affected keys", () => {
     const cases = [
       {

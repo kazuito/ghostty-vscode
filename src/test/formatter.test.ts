@@ -1,4 +1,8 @@
-import { describe, expect, it } from "vitest";
+import { describe, expect, it, vi } from "vitest";
+import type {
+  DocumentFormattingParams,
+  TextEdit,
+} from "vscode-languageserver/node";
 import type { FormatterOptions } from "../features/formatter";
 import {
   DEFAULT_FORMATTER_OPTIONS,
@@ -11,10 +15,46 @@ import {
   isHexColor,
   parseLine,
 } from "../features/formatter";
+import { registerFormatterProvider } from "../features/formatter/provider";
+import {
+  createDocument,
+  createMockConnection,
+  createMockDocuments,
+} from "./helpers";
+
+// Spy on formatDocument, forwarding to the real implementation by default, so
+// the provider's catch branch can be exercised with a one-time thrown error
+// without touching the many formatDocument(...) assertions above.
+vi.mock("../features/formatter", async (importOriginal) => {
+  const actual = await importOriginal<typeof import("../features/formatter")>();
+  return { ...actual, formatDocument: vi.fn(actual.formatDocument) };
+});
 
 // Shorthand: merge overrides onto defaults
 function opts(overrides: Partial<FormatterOptions> = {}): FormatterOptions {
   return { ...DEFAULT_FORMATTER_OPTIONS, ...overrides };
+}
+
+function setupFormatter(content: string) {
+  const doc = createDocument(content);
+  const connection = createMockConnection();
+  const documents = createMockDocuments(doc);
+
+  registerFormatterProvider(connection as never, documents as never);
+
+  const handler = connection.onDocumentFormatting.mock.calls[0][0] as (
+    params: DocumentFormattingParams,
+  ) => Promise<TextEdit[] | null>;
+
+  return {
+    connection,
+    documents,
+    format: (uri = "file:///test.ghostty") =>
+      handler({
+        textDocument: { uri },
+        options: { tabSize: 2, insertSpaces: true },
+      }),
+  };
 }
 
 // ── isHexColor ────────────────────────────────────────────────────────────────
@@ -370,6 +410,21 @@ describe("formatDocument", () => {
     ).toBe("palette = 0=#AABBCC\n");
   });
 
+  it.each([
+    "cursor-color",
+    "selection-foreground",
+    "selection-background",
+    "window-padding-color",
+  ])("normalizes hex color values for %s (schema-driven assets)", (key) => {
+    const input = `${key} = aabbcc\n`;
+    expect(
+      formatDocument(
+        input,
+        opts({ colorCase: "uppercase", colorAddPrefix: true }),
+      ),
+    ).toBe(`${key} = #AABBCC\n`);
+  });
+
   it("handles comma-separated color key (macos-icon-screen-color)", () => {
     const input = "macos-icon-screen-color = aabbcc,112233\n";
     expect(
@@ -411,6 +466,79 @@ describe("formatDocument", () => {
   it("handles document with only blank lines", () => {
     expect(formatDocument("\n\n\n", opts({ blankLines: "collapse" }))).toBe(
       "\n",
+    );
+  });
+
+  it("preserves CRLF line endings across entry, comment, and blank lines", () => {
+    const input = "font-size = 14\r\n# comment\r\nfont-thicken=TRUE\r\n";
+    const result = formatDocument(input, opts());
+    expect(result).toBe(
+      "font-size = 14\r\n# comment\r\nfont-thicken = true\r\n",
+    );
+    expect(result).not.toMatch(/[^\r]\n/);
+  });
+
+  it("normalizes mixed LF/CRLF input to whichever ending appears first", () => {
+    const input = "a = 1\nb = 2\r\nc = 3\n";
+    expect(formatDocument(input, opts())).toBe("a = 1\nb = 2\nc = 3\n");
+  });
+
+  it("keeps CRLF with no trailing newline", () => {
+    const input = "font-size = 14\r\nfont-thicken=TRUE";
+    expect(formatDocument(input, opts())).toBe(
+      "font-size = 14\r\nfont-thicken = true",
+    );
+  });
+
+  it("is idempotent when re-formatting its own CRLF output", () => {
+    const input = "font-size = 14\r\n# comment\r\nfont-thicken=TRUE\r\n";
+    const once = formatDocument(input, opts());
+    expect(formatDocument(once, opts())).toBe(once);
+  });
+});
+
+// ── registerFormatterProvider ────────────────────────────────────────────────
+
+describe("registerFormatterProvider", () => {
+  it("returns a single TextEdit covering the whole document when it changes", async () => {
+    const { format } = setupFormatter("font-thicken=TRUE\n");
+    const edits = await format();
+    expect(edits).toEqual([
+      {
+        range: {
+          start: { line: 0, character: 0 },
+          end: { line: 1, character: 0 },
+        },
+        newText: "font-thicken = true\n",
+      },
+    ]);
+  });
+
+  it("returns an empty array when the document is already formatted", async () => {
+    const { format } = setupFormatter("font-thicken = true\n");
+    expect(await format()).toEqual([]);
+  });
+
+  it("returns null for an unknown document URI", async () => {
+    const { documents, format } = setupFormatter("font-thicken = true\n");
+    documents.get.mockReturnValueOnce(undefined);
+    expect(await format("file:///missing.ghostty")).toBeNull();
+  });
+
+  it("logs and surfaces an error, returning null, when formatting throws", async () => {
+    const { connection, format } = setupFormatter("font-thicken=TRUE\n");
+    vi.mocked(formatDocument).mockImplementationOnce(() => {
+      throw new Error("boom");
+    });
+
+    const result = await format();
+
+    expect(result).toBeNull();
+    expect(connection.console.error).toHaveBeenCalledWith(
+      expect.stringContaining("boom"),
+    );
+    expect(connection.window.showErrorMessage).toHaveBeenCalledWith(
+      expect.stringContaining("boom"),
     );
   });
 });

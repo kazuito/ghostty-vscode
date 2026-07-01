@@ -34,9 +34,9 @@ export function registerFormatterProvider(
     try {
       formatted = formatDocument(original, opts);
     } catch (err) {
-      connection.console.error(
-        `ghostty formatter failed: ${err instanceof Error ? err.message : String(err)}`,
-      );
+      const message = err instanceof Error ? err.message : String(err);
+      connection.console.error(`ghostty formatter failed: ${message}`);
+      connection.window.showErrorMessage(`Ghostty formatter failed: ${message}`);
       return null;
     }
 
