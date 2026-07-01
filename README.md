@@ -73,7 +73,7 @@ Search **Ghostty** in the VS Code Extensions view, or install it from the CLI:
 code --install-extension kazuito.ghostty
 ```
 
-This extension requires VS Code `1.100.0` or newer.
+This extension requires VS Code `1.91.0` or newer.
 
 ## Contributing
 
