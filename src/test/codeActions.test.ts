@@ -47,6 +47,7 @@ function makeWarning(line: number, message = "Unknown key"): Diagnostic {
     range: { start: { line, character: 0 }, end: { line, character: 5 } },
     message,
     severity: DiagnosticSeverity.Warning,
+    code: "unknown-key",
   };
 }
 
@@ -58,6 +59,7 @@ function makeUnknownFieldError(line: number, key: string): Diagnostic {
     },
     message: "unknown field",
     severity: DiagnosticSeverity.Error,
+    code: "unknown-key",
   };
 }
 
@@ -66,6 +68,7 @@ function makeInfo(line: number, message = "Duplicate key"): Diagnostic {
     range: { start: { line, character: 0 }, end: { line, character: 5 } },
     message,
     severity: DiagnosticSeverity.Information,
+    code: "duplicate-key",
   };
 }
 
@@ -102,13 +105,6 @@ describe("code actions - empty diagnostics", () => {
 });
 
 describe("code actions - unknown key", () => {
-  it("offers 'Remove line' for legacy warning diagnostics", () => {
-    const { getActions } = setupCodeActions("not-a-real-key = value");
-    const actions = getActions(0, [makeWarning(0)]);
-    const titles = actions.map((a) => a.title);
-    expect(titles).toContain("Remove line");
-  });
-
   it("offers 'Remove line' for current unknown field error diagnostics", () => {
     const { getActions } = setupCodeActions("not-a-real-key = value");
     const actions = getActions(0, [makeUnknownFieldError(0, "not-a-real-key")]);

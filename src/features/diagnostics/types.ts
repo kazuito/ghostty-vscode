@@ -8,10 +8,23 @@ export const UNKNOWN_FIELD_MESSAGE = "unknown field";
 /** Prefix of the in-process duplicate-key diagnostic message. */
 export const DUPLICATE_KEY_MESSAGE_PREFIX = "Duplicate key ";
 
+/**
+ * Stable identifier for what kind of problem a diagnostic represents,
+ * independent of its human-readable message. Code actions dispatch on this
+ * instead of parsing message text, so wording changes can't silently break
+ * quick fixes.
+ */
+export type ValidationDiagnosticCode =
+  | "unknown-key"
+  | "duplicate-key"
+  | "invalid-value"
+  | "unparsed";
+
 export interface ValidationDiagnostic {
   range: Range;
   message: string;
   severity: DiagnosticSeverity;
+  code: ValidationDiagnosticCode;
 }
 
 export interface ValidationResult {

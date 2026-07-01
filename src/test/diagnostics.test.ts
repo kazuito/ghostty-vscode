@@ -92,6 +92,7 @@ describe("parseGhosttyOutput", () => {
     const diags = parseGhosttyOutput(output, lines);
     expect(diags).toHaveLength(1);
     expect(diags[0]?.severity).toBe("error");
+    expect(diags[0]?.code).toBe("invalid-value");
     expect(diags[0]?.message).toContain("notabool");
     expect(diags[0]?.range.start.line).toBe(0);
   });
@@ -109,6 +110,7 @@ describe("parseGhosttyOutput", () => {
     const diags = parseGhosttyOutput(output, ["badkey = foo"]);
     expect(diags).toHaveLength(1);
     expect(diags[0]?.message).toContain("unknown field");
+    expect(diags[0]?.code).toBe("unknown-key");
   });
 
   it("handles macOS /private/tmp path prefix", () => {
@@ -193,6 +195,7 @@ describe("buildUnparsedErrorsDiagnostic", () => {
       ["font-size = 14"],
     );
     expect(diag?.severity).toBe("error");
+    expect(diag?.code).toBe("unparsed");
     expect(diag?.message).toContain("some unrecognized ghostty error");
     expect(diag?.range.start.line).toBe(0);
     expect(diag?.range.end.character).toBe("font-size = 14".length);
@@ -267,6 +270,7 @@ describe("diagnostics provider - duplicate key", () => {
       (d) => d.severity === DiagnosticSeverity.Information,
     );
     expect(info).toBeDefined();
+    expect(info?.code).toBe("duplicate-key");
   });
 
   it("duplicate message includes key name and first-seen line number", async () => {

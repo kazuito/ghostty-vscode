@@ -41,6 +41,7 @@ function toLspDiagnostic(diagnostic: ValidationDiagnostic): Diagnostic {
     diagnostic.range,
     diagnostic.message,
     toLspSeverity(diagnostic.severity),
+    diagnostic.code,
   );
 }
 

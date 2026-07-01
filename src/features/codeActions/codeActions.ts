@@ -1,10 +1,6 @@
 import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
 import type { Range } from "../../core/document";
 import { ghosttyConfigOptions, optionByKey } from "../../core/schema";
-import {
-  DUPLICATE_KEY_MESSAGE_PREFIX,
-  UNKNOWN_FIELD_MESSAGE,
-} from "../diagnostics";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 
@@ -12,6 +8,8 @@ export interface DiagnosticLike {
   range: Range;
   message: string;
   severity: DiagnosticSeverity;
+  /** Stable diagnostic identifier used to pick which quick fixes apply. */
+  code?: string;
 }
 
 export interface CodeActionSuggestion {
@@ -75,7 +73,6 @@ export function getCodeActionSuggestions(
   for (const diagnostic of diagnostics) {
     const lineIndex = diagnostic.range.start.line;
     const line = lines[lineIndex] ?? "";
-    const message = diagnostic.message.trim();
     const deleteRange =
       lineIndex + 1 < lines.length
         ? {
@@ -87,10 +84,7 @@ export function getCodeActionSuggestions(
             end: { line: lineIndex, character: line.length },
           };
 
-    if (
-      diagnostic.severity === "warning" ||
-      message === UNKNOWN_FIELD_MESSAGE
-    ) {
+    if (diagnostic.code === "unknown-key") {
       const eqIndex = line.indexOf(CONFIG_KEY_VALUE_SEPARATOR);
       const keyPart = eqIndex >= 0 ? line.slice(0, eqIndex) : line;
       const key = keyPart.trim();
@@ -116,10 +110,7 @@ export function getCodeActionSuggestions(
       continue;
     }
 
-    if (
-      diagnostic.severity === "information" ||
-      message.startsWith(DUPLICATE_KEY_MESSAGE_PREFIX)
-    ) {
+    if (diagnostic.code === "duplicate-key") {
       suggestions.push({
         title: "Remove line",
         edit: { range: deleteRange, newText: "" },

@@ -44,6 +44,10 @@ export function registerCodeActionProvider(
                   ? diagnostic.message
                   : diagnostic.message.value,
               severity,
+              code:
+                typeof diagnostic.code === "string"
+                  ? diagnostic.code
+                  : undefined,
             },
           ]
         : [];

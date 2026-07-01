@@ -50,6 +50,7 @@ function buildDiagnostic(
     },
     message,
     severity: "error",
+    code: isUnknownField ? "unknown-key" : "invalid-value",
   };
 }
 
@@ -109,5 +110,6 @@ export function buildUnparsedErrorsDiagnostic(
     },
     message: `Ghostty reported configuration errors that could not be mapped to a line:\n${detail}`,
     severity: "error",
+    code: "unparsed",
   };
 }

@@ -40,6 +40,7 @@ export function validateInProcess(text: string): ValidationDiagnostic[] {
           range: keyRange,
           message: `${DUPLICATE_KEY_MESSAGE_PREFIX}'${key}' (first defined on line ${(seenKeys.get(key) as number) + 1})`,
           severity: "information",
+          code: "duplicate-key",
         });
       } else {
         seenKeys.set(key, line.line);
