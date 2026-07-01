@@ -6,13 +6,13 @@ import {
 } from "vscode-languageserver/node";
 import { TextDocument } from "vscode-languageserver-textdocument";
 import { GHOSTTY_CONFIG_SECTION, GHOSTTY_DOCS_URL } from "./core/constants";
-import { GHOSTTY_EXTRA_PATH_DIRS } from "./ghostty/constants";
 import { registerCodeActionProvider } from "./features/codeActions/provider";
 import { registerCompletionProvider } from "./features/completion/provider";
 import { registerDiagnosticsProvider } from "./features/diagnostics/provider";
 import { registerDocumentSymbolProvider } from "./features/documentSymbols/provider";
 import { registerFormatterProvider } from "./features/formatter/provider";
 import { registerHoverProvider } from "./features/hover/provider";
+import { GHOSTTY_EXTRA_PATH_DIRS } from "./ghostty/constants";
 import { reloadGhosttyData } from "./ghostty/reload";
 
 const connection = createConnection(ProposedFeatures.all);
