@@ -1,5 +1,5 @@
 import { GHOSTTY_CLI_FLAGS } from "./constants";
-import { type GhosttyRunner, runGhosttyAsync, runGhosttySync } from "./ghostty";
+import { type GhosttyRunner, runGhosttyAsync } from "./ghostty";
 
 export const ghosttyDefaults: Map<string, string> = new Map();
 
@@ -31,10 +31,6 @@ const SHOW_DEFAULT_CONFIG_ARGS = [
   GHOSTTY_CLI_FLAGS.SHOW_CONFIG,
   GHOSTTY_CLI_FLAGS.DEFAULT,
 ];
-
-export function loadGhosttyDefaults(executablePath?: string): void {
-  applyDefaults(runGhosttySync(SHOW_DEFAULT_CONFIG_ARGS, executablePath));
-}
 
 export async function loadGhosttyDefaultsAsync(
   executablePath?: string,

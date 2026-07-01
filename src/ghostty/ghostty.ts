@@ -1,4 +1,4 @@
-import { execFile, execFileSync } from "node:child_process";
+import { execFile } from "node:child_process";
 import { GHOSTTY_CLI_TIMEOUT_MS } from "./constants";
 
 /**
@@ -18,32 +18,6 @@ export function ghosttyEnv(executablePath?: string): NodeJS.ProcessEnv {
   return executablePath
     ? { ...process.env }
     : { ...process.env, PATH: ghosttyPathEnv };
-}
-
-/**
- * Run a ghostty command synchronously and return stdout.
- * Returns an empty string if ghostty is not found or the command fails.
- */
-export function runGhosttySync(
-  args: string[],
-  executablePath?: string,
-): string {
-  try {
-    return execFileSync(ghosttyBin(executablePath), args, {
-      encoding: "utf8",
-      timeout: GHOSTTY_CLI_TIMEOUT_MS,
-      env: ghosttyEnv(executablePath),
-    });
-  } catch {
-    return "";
-  }
-}
-
-/**
- * Returns true if the ghostty binary is reachable and exits successfully.
- */
-export function isGhosttyAvailable(executablePath?: string): boolean {
-  return runGhosttySync(["--version"], executablePath) !== "";
 }
 
 export type GhosttyRunner = (
