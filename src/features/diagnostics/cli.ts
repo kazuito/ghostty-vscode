@@ -27,7 +27,10 @@ export async function runGhosttyValidation(
   const shouldDeleteTempFile = tmpPath == null;
 
   try {
-    await writeFile(validationTmpPath, content, "utf8");
+    await writeFile(validationTmpPath, content, {
+      encoding: "utf8",
+      mode: 0o600,
+    });
     return await new Promise<ValidationResult>((resolve) => {
       execFile(
         bin,

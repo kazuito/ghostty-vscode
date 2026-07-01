@@ -17,6 +17,14 @@
   "engines": {
     "vscode": "^1.91.0"
   },
+  "capabilities": {
+    "untrustedWorkspaces": {
+      "supported": "limited",
+      "restrictedConfigurations": [
+        "ghostty.executablePath"
+      ]
+    }
+  },
   "categories": [
     "Programming Languages",
     "Linters",
