@@ -2,7 +2,7 @@
 
 # Language and theme
 language = en-US
-theme = dark:tokyonight,light:papercolor
+# theme = dark:tokyonight,light:papercolor
 background = #101418
 foreground = ivory
 background-image = /Users/ghost/Pictures/ghostty-grid.png
@@ -103,8 +103,8 @@ title = Ghostty Extension Debug Profile
 class = com.mitchellh.ghostty.debug
 x11-instance-name = ghostty-debug
 working-directory = /Users/ghost/dev/ghostty
-window-padding-x = 12,24
-window-padding-y = 8,16
+window-padding-x = 12, 24
+window-padding-y = 8, 16
 window-padding-balance = true
 window-padding-color = extend-always
 window-vsync = true
@@ -175,8 +175,8 @@ right-click-action = copy-or-paste
 click-repeat-interval = 350
 
 # Config chaining and lifecycle
-config-file = /Users/ghost/.config/ghostty/base
-config-file = /Users/ghost/.config/ghostty/work
+# config-file = /Users/ghost/.config/ghostty/base
+# config-file = /Users/ghost/.config/ghostty/work
 config-default-files = true
 confirm-close-surface = always
 quit-after-last-window-closed = false
