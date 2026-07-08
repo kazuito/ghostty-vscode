@@ -4,6 +4,35 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.6] - 2026-07-08
+
+### Added
+
+- When `ghostty.executablePath` is unset, the extension now searches common
+  per-platform install locations in addition to the system `PATH` (macOS app
+  bundle and Nix paths; `/usr/local/bin`, `/usr/bin`, Homebrew-on-Linux, Snap,
+  Nix, and `~/.local/bin` on Linux), so a GUI-launched VS Code finds the CLI
+  without extra configuration
+- The "Ghostty CLI not found" warning now lists the directories that were
+  searched
+
+### Changed
+
+- Lowered the minimum supported VS Code version to 1.91.0
+- `ghostty.executablePath` now requires a trusted workspace, since it controls
+  which binary the extension executes; the validation temp file is created
+  with owner-only permissions
+
+### Fixed
+
+- Formatting a file with CRLF line endings no longer produces mixed line
+  endings — the formatter detects and preserves the document's EOL style
+- Color keys such as `cursor-color` and `selection-foreground`/`-background`
+  now get color completions consistently; the formatter and completion share
+  one source of color-key metadata
+- Formatter failures now surface as an error notification instead of being
+  logged silently
+
 ## [1.0.5] - 2026-06-30
 
 ### Fixed
