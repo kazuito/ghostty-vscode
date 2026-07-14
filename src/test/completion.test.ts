@@ -77,9 +77,8 @@ describe("completion provider - key completions", () => {
     const result = complete(0, 9);
     const item = result?.items.find((i) => i.label === "font-size");
     expect(item).toBeDefined();
-    expect((item?.textEdit as { newText: string }).newText).toBe(
-      "font-size = ",
-    );
+    const edit = item?.textEdit as { newText: string };
+    expect(edit.newText).toBe("font-size = ");
   });
 
   it("key completion uses Property kind", () => {
@@ -158,7 +157,8 @@ describe("completion provider - value completions", () => {
     const result = complete(0, 20);
     const item = result?.items.find((i) => i.label === "native");
     expect(item).toBeDefined();
-    expect((item?.textEdit as { newText: string }).newText).toBe("native");
+    const edit = item?.textEdit as { newText: string };
+    expect(edit.newText).toBe("native");
   });
 
   // Regression test for the schema/formatter color-key drift: cursor-color

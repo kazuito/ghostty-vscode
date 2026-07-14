@@ -67,15 +67,15 @@ describe("hover provider", () => {
   it("hover content includes the key name", () => {
     const hover = setupHover("font-thicken = true");
     const result = hover(0, 0);
-    const value = (result?.contents as { value: string }).value;
-    expect(value).toContain("font-thicken");
+    const contents = result?.contents as { value: string };
+    expect(contents.value).toContain("font-thicken");
   });
 
   it("hover content includes documentation link", () => {
     const hover = setupHover("font-thicken = true");
     const result = hover(0, 0);
-    const value = (result?.contents as { value: string }).value;
-    expect(value).toContain(
+    const contents = result?.contents as { value: string };
+    expect(contents.value).toContain(
       "https://ghostty.org/docs/config/reference#font-thicken",
     );
   });
@@ -83,16 +83,16 @@ describe("hover provider", () => {
   it("hover content uses markdown kind", () => {
     const hover = setupHover("alpha-blending = native");
     const result = hover(0, 0);
-    expect((result?.contents as { kind: string }).kind).toBe("markdown");
+    const contents = result?.contents as { kind: string };
+    expect(contents.kind).toBe("markdown");
   });
 
   it("returns hover for correct line in multiline document", () => {
     const hover = setupHover("# comment\nfont-size = 14\nfont-thicken = true");
     const result = hover(1, 0);
     expect(result).not.toBeNull();
-    expect((result?.contents as { value: string }).value).toContain(
-      "font-size",
-    );
+    const contents = result?.contents as { value: string };
+    expect(contents.value).toContain("font-size");
   });
 
   it("returns null when hovering a different line (comment)", () => {
