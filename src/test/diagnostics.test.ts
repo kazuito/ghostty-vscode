@@ -15,7 +15,11 @@ import {
   parseGhosttyOutput,
 } from "../features/diagnostics";
 import { registerDiagnosticsProvider } from "../features/diagnostics/provider";
-import { createDocument, createMockConnection } from "./helpers";
+import {
+  createDocument,
+  createMockConnection,
+  createMockDocuments,
+} from "./helpers";
 
 beforeEach(() => {
   vi.clearAllMocks();
@@ -489,6 +493,43 @@ describe("diagnostics provider - validation lifecycle", () => {
     expect(unlink).toHaveBeenCalledTimes(1);
     expect(unlink).toHaveBeenCalledWith(
       vi.mocked(writeFile).mock.calls[0]?.[0],
+    );
+  });
+
+  it("revalidateOpenDocuments re-runs validation for all open documents", async () => {
+    vi.useFakeTimers();
+    vi.mocked(execFile).mockImplementation(
+      (_cmd: unknown, _args: unknown, _opts: unknown, callback: unknown) => {
+        const cb = callback as (
+          err: Error | null,
+          stdout: string,
+          stderr: string,
+        ) => void;
+        cb(null, "", "");
+        return {} as ReturnType<typeof execFile>;
+      },
+    );
+
+    const connection = createMockConnection();
+    const doc = createDocument("font-size = 12");
+    const mockDocuments = {
+      ...createMockDocuments(doc),
+      all: vi.fn(() => [doc]),
+    };
+
+    const { revalidateOpenDocuments } = registerDiagnosticsProvider(
+      connection as never,
+      mockDocuments as never,
+    );
+
+    expect(connection.sendDiagnostics).not.toHaveBeenCalled();
+
+    revalidateOpenDocuments();
+    await vi.runAllTimersAsync();
+
+    expect(execFile).toHaveBeenCalledTimes(1);
+    expect(connection.sendDiagnostics).toHaveBeenCalledWith(
+      expect.objectContaining({ uri: doc.uri }),
     );
   });
 

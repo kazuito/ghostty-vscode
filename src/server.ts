@@ -1,5 +1,6 @@
 import {
   createConnection,
+  DidChangeConfigurationNotification,
   ProposedFeatures,
   TextDocumentSyncKind,
   TextDocuments,
@@ -22,12 +23,22 @@ connection.onInitialize(() => ({
   capabilities: {
     textDocumentSync: TextDocumentSyncKind.Incremental,
     hoverProvider: true,
-    completionProvider: { triggerCharacters: [] },
+    completionProvider: { triggerCharacters: ["=", ",", " "] },
     documentFormattingProvider: true,
     codeActionProvider: true,
     documentSymbolProvider: true,
   },
 }));
+
+registerHoverProvider(connection, documents);
+registerCompletionProvider(connection, documents);
+const { revalidateOpenDocuments } = registerDiagnosticsProvider(
+  connection,
+  documents,
+);
+registerFormatterProvider(connection, documents);
+registerCodeActionProvider(connection, documents);
+registerDocumentSymbolProvider(connection, documents);
 
 async function promptGhosttyNotFound(): Promise<void> {
   const extras =
@@ -67,6 +78,7 @@ async function refreshGhosttyData(force = false): Promise<void> {
   try {
     const available = await reloadGhosttyData(executablePath || undefined);
     if (token !== reloadToken) return;
+    if (!force) revalidateOpenDocuments();
     if (!available) await promptGhosttyNotFound();
   } catch (error) {
     connection.console.error(
@@ -78,19 +90,23 @@ async function refreshGhosttyData(force = false): Promise<void> {
 }
 
 connection.onInitialized(() => {
+  connection.client
+    .register(DidChangeConfigurationNotification.type, {
+      section: GHOSTTY_CONFIG_SECTION,
+    })
+    .catch((error) => {
+      connection.console.error(
+        `Failed to register for configuration changes: ${
+          error instanceof Error ? error.message : String(error)
+        }`,
+      );
+    });
   void refreshGhosttyData(true);
 });
 
 connection.onDidChangeConfiguration(() => {
   void refreshGhosttyData();
 });
-
-registerHoverProvider(connection, documents);
-registerCompletionProvider(connection, documents);
-registerDiagnosticsProvider(connection, documents);
-registerFormatterProvider(connection, documents);
-registerCodeActionProvider(connection, documents);
-registerDocumentSymbolProvider(connection, documents);
 
 documents.listen(connection);
 connection.listen();

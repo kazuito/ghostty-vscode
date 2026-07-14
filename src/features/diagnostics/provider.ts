@@ -107,7 +107,7 @@ async function validateDocumentAsync(
 export function registerDiagnosticsProvider(
   connection: Connection,
   documents: TextDocuments<TextDocument>,
-): void {
+): { revalidateOpenDocuments: () => void } {
   const debounceTimers = new Map<string, ReturnType<typeof setTimeout>>();
   const validationStates = new Map<string, ValidationState>();
   const lastCliDiags = new Map<string, Diagnostic[]>();
@@ -177,4 +177,12 @@ export function registerDiagnosticsProvider(
     }
     connection.sendDiagnostics({ uri, diagnostics: [] });
   });
+
+  return {
+    revalidateOpenDocuments: () => {
+      for (const doc of documents.all()) {
+        scheduleValidation(doc);
+      }
+    },
+  };
 }

@@ -61,7 +61,7 @@ export function getCompletionSuggestions(
     }
 
     const valuePrefix = option.comma
-      ? (afterEq.slice(afterEq.lastIndexOf(",") + 1) || afterEq).trimStart()
+      ? afterEq.slice(afterEq.lastIndexOf(",") + 1).trimStart()
       : afterEq.trimStart();
     const replacementStart = cursorCharacter - valuePrefix.length;
 
@@ -113,7 +113,7 @@ export function getCompletionSuggestions(
     }),
   );
 
-  const prefix = lineUpToCursor.trim();
+  const prefix = lineUpToCursor.trimStart();
   const replacementStart = lineUpToCursor.length - prefix.length;
 
   return ghosttyConfigOptions

@@ -88,6 +88,24 @@ describe("completion provider - key completions", () => {
     // CompletionItemKind.Property = 10
     expect(result?.items.every((i) => i.kind === 10)).toBe(true);
   });
+
+  it("replacement range starts after leading whitespace", () => {
+    const complete = setupCompletion("  font-");
+    const result = complete(0, 7);
+    const item = result?.items.find((i) => i.label === "font-family");
+    expect(item).toBeDefined();
+    const edit = item?.textEdit as {
+      range: { start: { character: number }; end: { character: number } };
+    };
+    expect(edit.range.start.character).toBe(2);
+    expect(edit.range.end.character).toBe(7);
+  });
+
+  it("offers no key completions when the cursor follows trailing whitespace", () => {
+    const complete = setupCompletion(" font ");
+    const result = complete(0, 6);
+    expect(result?.items ?? []).toHaveLength(0);
+  });
 });
 
 describe("completion provider - value completions", () => {
@@ -106,6 +124,14 @@ describe("completion provider - value completions", () => {
     expect(labels).toContain("native");
     expect(labels).toContain("linear");
     expect(labels).toContain("linear-corrected");
+  });
+
+  it("suggests all values immediately after a comma in a comma-separated value", () => {
+    const complete = setupCompletion("font-shaping-break = cursor,");
+    const result = complete(0, 28);
+    const labels = result?.items.map((i) => i.label) ?? [];
+    expect(labels).toContain("cursor");
+    expect(labels).toContain("no-cursor");
   });
 
   it("filters value completions by typed prefix", () => {
