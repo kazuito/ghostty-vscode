@@ -1,4 +1,4 @@
-import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
+import { CONFIG_KEY_VALUE_SEPARATOR } from "@/core/constants";
 import { UNKNOWN_FIELD_MESSAGE, type ValidationDiagnostic } from "./types";
 
 const LOCATED_OUTPUT_RE = /^.+?:(\d+):([^:]+):\s*(.+)$/;

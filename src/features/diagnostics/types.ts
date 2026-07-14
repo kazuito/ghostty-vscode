@@ -1,4 +1,4 @@
-import type { Range } from "../../core/document";
+import type { Range } from "@/core/document";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 

@@ -1,6 +1,6 @@
-import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
-import type { Range } from "../../core/document";
-import { ghosttyConfigOptions, optionByKey } from "../../core/schema";
+import { CONFIG_KEY_VALUE_SEPARATOR } from "@/core/constants";
+import type { Range } from "@/core/document";
+import { ghosttyConfigOptions, optionByKey } from "@/core/schema";
 
 export type DiagnosticSeverity = "warning" | "information" | "error";
 

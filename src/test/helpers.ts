@@ -1,4 +1,4 @@
-import { vi } from "vitest";
+import { type Mock, vi } from "vitest";
 import { TextDocument } from "vscode-languageserver-textdocument";
 
 export function createDocument(content: string): TextDocument {
@@ -10,7 +10,17 @@ export function createDocument(content: string): TextDocument {
   );
 }
 
-export function createMockConnection() {
+export function createMockConnection(): {
+  onHover: Mock;
+  onCompletion: Mock;
+  onCodeAction: Mock;
+  onDocumentSymbol: Mock;
+  onDocumentFormatting: Mock;
+  sendDiagnostics: Mock;
+  workspace: { getConfiguration: Mock };
+  console: { error: Mock; warn: Mock };
+  window: { showErrorMessage: Mock };
+} {
   return {
     onHover: vi.fn(),
     onCompletion: vi.fn(),
@@ -31,9 +41,14 @@ export function createMockConnection() {
   };
 }
 
-export function createMockDocuments(doc: TextDocument) {
+export function createMockDocuments(doc: TextDocument): {
+  get: Mock<(uri: string) => TextDocument | undefined>;
+  onDidOpen: Mock;
+  onDidChangeContent: Mock;
+  onDidClose: Mock;
+} {
   return {
-    get: vi.fn(() => doc),
+    get: vi.fn((_uri: string): TextDocument | undefined => doc),
     onDidOpen: vi.fn(),
     onDidChangeContent: vi.fn(),
     onDidClose: vi.fn(),

@@ -5,7 +5,7 @@ import {
   TextEdit,
 } from "vscode-languageserver/node";
 import type { TextDocument } from "vscode-languageserver-textdocument";
-import { GHOSTTY_FORMAT_CONFIG_SECTION } from "../../core/constants";
+import { GHOSTTY_FORMAT_CONFIG_SECTION } from "@/core/constants";
 import {
   DEFAULT_FORMATTER_OPTIONS,
   type FormatterOptions,

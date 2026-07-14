@@ -1,7 +1,7 @@
-import { GHOSTTY_CONFIG_REFERENCE_URL } from "../../core/constants";
-import { parseLine } from "../../core/document";
-import { optionByKey } from "../../core/schema";
-import { ghosttyDefaults } from "../../ghostty/defaults";
+import { GHOSTTY_CONFIG_REFERENCE_URL } from "@/core/constants";
+import { parseLine } from "@/core/document";
+import { optionByKey } from "@/core/schema";
+import { ghosttyDefaults } from "@/ghostty/defaults";
 
 export interface HoverContent {
   kind: "markdown";

@@ -1,17 +1,13 @@
 import {
   CONFIG_COMMENT_PREFIX,
   CONFIG_KEY_VALUE_SEPARATOR,
-} from "../../core/constants";
-import { parseDocument } from "../../core/document";
-import {
-  additiveKeys,
-  ghosttyConfigOptions,
-  optionByKey,
-} from "../../core/schema";
-import { ghosttyActions } from "../../ghostty/actions";
-import { ghosttyColors } from "../../ghostty/colors";
-import { ghosttyDefaults } from "../../ghostty/defaults";
-import { ghosttyFonts } from "../../ghostty/fonts";
+} from "@/core/constants";
+import { parseDocument } from "@/core/document";
+import { additiveKeys, ghosttyConfigOptions, optionByKey } from "@/core/schema";
+import { ghosttyActions } from "@/ghostty/actions";
+import { ghosttyColors } from "@/ghostty/colors";
+import { ghosttyDefaults } from "@/ghostty/defaults";
+import { ghosttyFonts } from "@/ghostty/fonts";
 
 export interface CompletionSuggestion {
   label: string;

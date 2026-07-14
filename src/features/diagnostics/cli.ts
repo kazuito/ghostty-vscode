@@ -7,8 +7,8 @@ import {
   GHOSTTY_CLI_FLAGS,
   GHOSTTY_CLI_TIMEOUT_MS,
   GHOSTTY_CONFIG_FILE_FLAG_PREFIX,
-} from "../../ghostty/constants";
-import { ghosttyBin, ghosttyEnv } from "../../ghostty/ghostty";
+} from "@/ghostty/constants";
+import { ghosttyBin, ghosttyEnv } from "@/ghostty/ghostty";
 import type { ValidationResult } from "./types";
 
 export function createValidationTempPath(): string {

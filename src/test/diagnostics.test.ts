@@ -13,8 +13,8 @@ import { TextDocument } from "vscode-languageserver-textdocument";
 import {
   buildUnparsedErrorsDiagnostic,
   parseGhosttyOutput,
-} from "../features/diagnostics";
-import { registerDiagnosticsProvider } from "../features/diagnostics/provider";
+} from "@/features/diagnostics";
+import { registerDiagnosticsProvider } from "@/features/diagnostics/provider";
 import {
   createDocument,
   createMockConnection,
@@ -672,7 +672,11 @@ describe("diagnostics provider - validation lifecycle", () => {
     const openDiags = (openCalls[openCalls.length - 1]?.[0]?.diagnostics ??
       []) as Diagnostic[];
     expect(
-      openDiags.some((d) => d.message.includes('invalid value "bad"')),
+      openDiags.some(
+        (d) =>
+          typeof d.message === "string" &&
+          d.message.includes('invalid value "bad"'),
+      ),
     ).toBe(true);
 
     handlers.onDidChangeContent?.({ document: doc2 });
@@ -681,7 +685,11 @@ describe("diagnostics provider - validation lifecycle", () => {
     const changeDiags = (changeCalls[changeCalls.length - 1]?.[0]
       ?.diagnostics ?? []) as Diagnostic[];
     expect(
-      changeDiags.some((d) => d.message.includes('invalid value "bad"')),
+      changeDiags.some(
+        (d) =>
+          typeof d.message === "string" &&
+          d.message.includes('invalid value "bad"'),
+      ),
     ).toBe(true);
   });
 });

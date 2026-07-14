@@ -3,8 +3,8 @@ import type {
   CompletionList,
   TextDocumentPositionParams,
 } from "vscode-languageserver/node";
-import { registerCompletionProvider } from "../features/completion/provider";
-import { ghosttyActions } from "../ghostty/actions";
+import { registerCompletionProvider } from "@/features/completion/provider";
+import { ghosttyActions } from "@/ghostty/actions";
 import {
   createDocument,
   createMockConnection,

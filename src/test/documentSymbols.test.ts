@@ -1,6 +1,6 @@
 import { describe, expect, it, vi } from "vitest";
 import { type DocumentSymbol, SymbolKind } from "vscode-languageserver/node";
-import { registerDocumentSymbolProvider } from "../features/documentSymbols/provider";
+import { registerDocumentSymbolProvider } from "@/features/documentSymbols/provider";
 import { createDocument, createMockConnection } from "./helpers";
 
 function setupSymbols(content: string) {

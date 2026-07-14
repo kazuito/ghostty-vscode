@@ -1,8 +1,8 @@
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { describe, expect, it } from "vitest";
-import { additiveKeys, configMetadata, validKeys } from "../core/schema";
-import { configKeys } from "../generated/config-keys";
+import { additiveKeys, configMetadata, validKeys } from "@/core/schema";
+import { configKeys } from "@/generated/config-keys";
 
 const grammar = JSON.parse(
   readFileSync(
@@ -30,7 +30,7 @@ describe("generated config keys vs grammar", () => {
 
 describe("hand-curated overlay stays in sync with generated keys", () => {
   it("every overlay key exists in the generated key set", () => {
-    const keys = new Set(configKeys.map((k) => k.key));
+    const keys = new Set<string>(configKeys.map((k) => k.key));
     for (const key of Object.keys(configMetadata)) {
       expect(keys.has(key)).toBe(true);
     }

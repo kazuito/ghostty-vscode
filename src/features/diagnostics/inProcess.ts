@@ -1,5 +1,5 @@
-import { parseDocument } from "../../core/document";
-import { additiveKeys, validKeys } from "../../core/schema";
+import { parseDocument } from "@/core/document";
+import { additiveKeys, validKeys } from "@/core/schema";
 import {
   DUPLICATE_KEY_MESSAGE_PREFIX,
   type ValidationDiagnostic,

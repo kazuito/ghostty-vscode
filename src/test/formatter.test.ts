@@ -3,7 +3,7 @@ import type {
   DocumentFormattingParams,
   TextEdit,
 } from "vscode-languageserver/node";
-import type { FormatterOptions } from "../features/formatter";
+import type { FormatterOptions } from "@/features/formatter";
 import {
   DEFAULT_FORMATTER_OPTIONS,
   formatBoolean,
@@ -14,8 +14,8 @@ import {
   formatPaletteValue,
   isHexColor,
   parseLine,
-} from "../features/formatter";
-import { registerFormatterProvider } from "../features/formatter/provider";
+} from "@/features/formatter";
+import { registerFormatterProvider } from "@/features/formatter/provider";
 import {
   createDocument,
   createMockConnection,

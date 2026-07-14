@@ -4,7 +4,7 @@ import {
   type Diagnostic,
   DiagnosticSeverity,
 } from "vscode-languageserver/node";
-import { registerCodeActionProvider } from "../features/codeActions/provider";
+import { registerCodeActionProvider } from "@/features/codeActions/provider";
 import { createDocument, createMockConnection } from "./helpers";
 
 function setupCodeActions(content: string) {

@@ -1,3 +1,4 @@
+import path from "node:path";
 import { defineConfig, type RolldownOptions } from "rolldown";
 
 const isProd = process.env.NODE_ENV === "production";
@@ -10,6 +11,9 @@ function bundle(
   return {
     input,
     platform: "node",
+    resolve: {
+      alias: { "@": path.resolve(import.meta.dirname, "src") },
+    },
     ...(isProd && { treeshake: true }),
     ...overrides,
     output: {

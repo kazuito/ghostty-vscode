@@ -5,9 +5,9 @@
  * be extractable into a standalone package in the future.
  */
 
-import { CONFIG_KEY_VALUE_SEPARATOR } from "../../core/constants";
-import { type ParsedLine, parseLine } from "../../core/document";
-import { commaKeys, optionByKey, validKeys } from "../../core/schema";
+import { CONFIG_KEY_VALUE_SEPARATOR } from "@/core/constants";
+import { type ParsedLine, parseLine } from "@/core/document";
+import { commaKeys, optionByKey, validKeys } from "@/core/schema";
 import { DEFAULT_FORMATTER_OPTIONS, type FormatterOptions } from "./types";
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
