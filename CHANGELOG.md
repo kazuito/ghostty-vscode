@@ -4,6 +4,23 @@ All notable changes to the "ghostty" extension will be documented in this file.
 
 Check [Keep a Changelog](http://keepachangelog.com/) for recommendations on how to structure this file.
 
+## [1.0.7] - 2026-07-14
+
+### Changed
+
+- Renamed the extension to "Ghostty IntelliSense"; the repository moved to
+  `kazuito/ghostty-intellisense` (extension ID unchanged)
+
+### Fixed
+
+- Changing `ghostty.executablePath` now takes effect immediately: CLI data
+  reloads and open documents are revalidated without a window reload
+- Value completions now trigger automatically after `=`, `,`, and space;
+  completions right after a comma in comma-separated values no longer come
+  up empty
+- Key completions no longer produce a corrupted replacement range when the
+  cursor follows trailing whitespace
+
 ## [1.0.6] - 2026-07-08
 
 ### Added
