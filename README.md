@@ -1,12 +1,12 @@
-![banner](https://raw.githubusercontent.com/kazuito/ghostty-vscode/main/assets/banner.png)
+![banner](https://raw.githubusercontent.com/kazuito/ghostty-intellisense/main/assets/banner.png)
 
-# Ghostty LSP
+# Ghostty IntelliSense
 
-[![Install on VSCode](https://img.shields.io/badge/Install%20on%20VSCode-000000?style=flat)](https://marketplace.visualstudio.com/items?itemName=kazuito.ghostty)
-[![GitHub Repo stars](https://img.shields.io/github/stars/kazuito/ghostty-vscode?style=flat&logo=github&labelColor=000&color=000)](https://github.com/kazuito/ghostty-vscode)
+[![Install on VS Code](https://img.shields.io/badge/Install%20on%20VS%20Code-000000?style=flat)](https://marketplace.visualstudio.com/items?itemName=kazuito.ghostty)
+[![GitHub Repo stars](https://img.shields.io/github/stars/kazuito/ghostty-intellisense?style=flat&logo=github&labelColor=000&color=000)](https://github.com/kazuito/ghostty-intellisense)
 
 
-VSCode language support for [Ghostty](https://ghostty.org) configuration
+VS Code language support for [Ghostty](https://ghostty.org) configuration
 files.
 
 Features:
@@ -87,9 +87,9 @@ This extension requires VS Code `1.91.0` or newer.
 ## Contributing
 
 Contributions are welcome! Feel free to open an
-[issue](https://github.com/kazuito/ghostty-vscode/issues) for bugs or feature
+[issue](https://github.com/kazuito/ghostty-intellisense/issues) for bugs or feature
 requests, or send a
-[pull request](https://github.com/kazuito/ghostty-vscode/pulls).
+[pull request](https://github.com/kazuito/ghostty-intellisense/pulls).
 
 ## License
 

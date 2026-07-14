@@ -1,17 +1,17 @@
 {
   "name": "ghostty",
-  "displayName": "Ghostty",
+  "displayName": "Ghostty IntelliSense",
   "description": "Language support, validation, formatting, quick fixes, and outlines for Ghostty config files.",
   "version": "1.0.6",
   "publisher": "kazuito",
   "license": "MIT",
   "repository": {
     "type": "git",
-    "url": "https://github.com/kazuito/ghostty-vscode.git"
+    "url": "https://github.com/kazuito/ghostty-intellisense.git"
   },
-  "homepage": "https://github.com/kazuito/ghostty-vscode",
+  "homepage": "https://github.com/kazuito/ghostty-intellisense",
   "bugs": {
-    "url": "https://github.com/kazuito/ghostty-vscode/issues"
+    "url": "https://github.com/kazuito/ghostty-intellisense/issues"
   },
   "packageManager": "pnpm@10.32.1",
   "engines": {
@@ -91,7 +91,7 @@
       }
     ],
     "configuration": {
-      "title": "Ghostty",
+      "title": "Ghostty IntelliSense",
       "properties": {
         "ghostty.executablePath": {
           "type": "string",
